@@ -39,7 +39,7 @@ function ngc(done) {
 
 let rollUpBundle;
 let rollupApp = gulp.series(
-    function cleanGlobalJs() {return del('dist/app*.js')},
+    function cleanRollupJs() {return del('dist/app*.js')},
     function buildRollupApp() {
         let devPlugins = [
             nodeResolve({jsnext: true, module: true}),
@@ -67,6 +67,9 @@ let rollupApp = gulp.series(
                     format: 'iife',
                     dest: `dist/app-${Date.now().toString(36)}.js`
                 });
+            })
+            .catch((err) => {
+                console.error(err);
             });
     }
 );
@@ -78,7 +81,8 @@ let globalJs = gulp.series(
         return gulp.src([
             'node_modules/core-js/client/shim.min.js',
             'node_modules/zone.js/dist/zone.min.js',
-            'node_modules/hammerjs/hammer.js'
+            'node_modules/hammerjs/hammer.js',
+            'lib/jsmediatags/jsmediatags.min.js'
         ])
             .pipe(concat('global.js'))
             .pipe(rev())
@@ -120,13 +124,13 @@ gulp.task('index', index);
 
 let appJs = gulp.series(componentStyles, ngc, rollupApp);
 let build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass), index);
+gulp.task('build', build);
 
 gulp.task('default', gulp.series(build, function watch() {
     let componentStylePaths = ['src/**/*.scss', '!src/globalSass/**'];
     let componentTemplatePaths = ['src/**/*.html', '!src/index.html'];
 
-    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], gulp.series(ngc, rollupApp, index));
-    gulp.watch(componentStylePaths, gulp.series(componentStyles, index));
+    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], gulp.series(componentStyles, ngc, rollupApp, index));
     gulp.watch('src/globalSass/**/*.scss', gulp.series(globalSass, index));
     gulp.watch('src/index.html', index);
 }));

@@ -1,0 +1,15 @@
+<div id="library">
+    <div fileDrop
+         [ngClass]="{'file-is-over-drop': fileIsOverDrop && !uploadingFile}" class="file-drop-section"
+         (fileOver)="onFileOverDrop($event)"
+         (onFileDrop)="uploadFile($event)">
+        drop files here
+        <spinner *ngIf="uploadingFile"></spinner>
+    </div>
+    <div class="file-list">
+        <div *ngFor="let songDetails of allSongDetails | async">
+            {{songDetails.title}}
+            <img [src]="'data:' + songDetails.picFormat + ';base64,' + songDetails.base64Pic" alt="Album Cover" height="64px">
+        </div>
+    </div>
+</div>

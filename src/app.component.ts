@@ -2,7 +2,6 @@ import {Component} from '@angular/core';
 import moment from 'moment';
 
 @Component({
-    moduleId: module.id,
     selector: 'my-app',
     templateUrl: 'app.component.html',
     styles: [`
@@ -10,7 +9,7 @@ import moment from 'moment';
             color: red;
         }
     `],
-    styleUrls: ['app.css']
+    styleUrls: ['app.component.css']
 })
 export class AppComponent {
     showHeading = true;

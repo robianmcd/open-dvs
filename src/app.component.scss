@@ -1,0 +1,37 @@
+.main-content {
+  padding: 0 3px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.row {
+  margin-bottom: 3px;
+}
+
+.deck-section {
+  height: 450px;
+  display: flex;
+}
+
+.deck-section-item {
+
+}
+
+.deck {
+  width: 28.6%
+}
+
+.center-controls {
+  width: 42.8%;
+}
+
+.library-section {
+  flex-grow: 1;
+  display: flex;
+}
+
+library {
+  display: flex;
+  flex-grow: 1;
+}

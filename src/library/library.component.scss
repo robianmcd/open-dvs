@@ -1,0 +1,26 @@
+#library {
+  flex-grow: 1;
+  display: flex;
+  margin: 3px;
+  padding: 3px;
+  border: 1px solid grey;
+}
+
+.file-drop-section {
+  position: relative;
+  align-self: center;
+  width: 200px;
+  height: 200px;
+  border: 4px dashed grey;
+  display: inline-block;
+}
+
+.file-is-over-drop {
+  background-color: rgba(255,255,255,.1);
+}
+
+.file-list {
+  flex-grow: 1;
+  margin-left: 3px;
+  overflow: auto;
+}

@@ -1,41 +1,44 @@
 <md-sidenav-container>
-    <md-toolbar>
-        Toolbar
-    </md-toolbar>
+    <div  class="main-content">
+        <md-toolbar>
+            <toolbar></toolbar>
+        </md-toolbar>
+        <!--<button (click)="toggleHeading()">Toggle Heading</button>-->
+        <!--<h1 *ngIf="showHeading">Hello Angular</h1>-->
 
-    <!--<button (click)="toggleHeading()">Toggle Heading</button>-->
-    <!--<h1 *ngIf="showHeading">Hello Angular</h1>-->
-
-    <!--<h3>List of Heroes</h3>-->
-    <!--<div *ngFor="let hero of heroes">{{hero}}</div>-->
+        <!--<h3>List of Heroes</h3>-->
+        <!--<div *ngFor="let hero of heroes">{{hero}}</div>-->
 
 
-    <!--<div>-->
+        <!--<div>-->
         <!--<button md-raised-button color="primary">Primary Button</button>-->
         <!--<button md-raised-button color="accent">Accent Button</button>-->
-    <!--</div>-->
+        <!--</div>-->
 
-    <!--<div class="deck1">-->
+        <!--<div class="deck1">-->
         <!--<button md-raised-button color="primary">Primary Button</button>-->
         <!--<button md-raised-button color="accent">Accent Button</button>-->
-    <!--</div>-->
+        <!--</div>-->
 
-    <!--<div class="deck2">-->
+        <!--<div class="deck2">-->
         <!--<button md-raised-button color="primary">Primary Button</button>-->
         <!--<button md-raised-button color="accent">Accent Button</button>-->
-    <!--</div>-->
+        <!--</div>-->
 
-    <!--<md-slider min="-1" max="1" step="0.015625" value="0"></md-slider>-->
-
-    <md-grid-list cols="7" gutterSize="3" rowHeight="300">
-        <md-grid-tile colspan="2" class="deck1" style="background-color: red">
-            a
-        </md-grid-tile>
-        <md-grid-tile colspan="3" style="background-color: blue">
-b
-        </md-grid-tile>
-        <md-grid-tile colspan="2" class="deck2" style="background-color: green">
-c
-        </md-grid-tile>
-    </md-grid-list>
+        <!--<md-slider min="-1" max="1" step="0.015625" value="0"></md-slider>-->
+        <div class="deck-section">
+            <div class="deck1 deck" style="background-color: red;">
+                a
+            </div>
+            <div class="center-controls" style="background-color: blue;">
+                b
+            </div>
+            <div class="deck2 deck" style="background-color: green;">
+                c
+            </div>
+        </div>
+        <div class="library-section">
+            <library></library>
+        </div>
+    </div>
 </md-sidenav-container>

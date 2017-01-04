@@ -68,3 +68,8 @@ $deck2-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-blue));
 [md-raised-button], [md-raised-button]:active {
   box-shadow: none;
 }
+
+md-grid-tile figure {
+  align-items: stretch;
+  justify-content: flex-start;
+}
