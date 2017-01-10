@@ -6,7 +6,7 @@ export class Db {
     dbInitialized: Promise<IDBDatabase>;
     db: IDBDatabase;
 
-    private metadata$ = new BehaviorSubject<SongDetails[]>([]);
+    private allSongDetails$ = new BehaviorSubject<SongDetails[]>([]);
 
     constructor() {
         this.dbInitialized = new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ export class Db {
                 let db = e.target['result'];
 
                 if (!db.objectStoreNames.contains('songMetadata')) {
-                    db.createObjectStore('songMetadata', {autoIncrement: true});
+                    db.createObjectStore('songMetadata', {autoIncrement: true, keyPath: 'id'});
                 }
 
                 if (!db.objectStoreNames.contains('songBuffer')) {
@@ -39,8 +39,8 @@ export class Db {
                     }
                 };
 
-                getMetadataTransaction.oncomplete = (e) => {
-                    this.metadata$.next(allMetadata);
+                getMetadataTransaction.oncomplete = () => {
+                    this.allSongDetails$.next(allMetadata);
                 };
 
                 resolve(this.db);
@@ -51,37 +51,37 @@ export class Db {
     }
 
     getAllSongDetails(): Observable<SongDetails[]> {
-        return this.metadata$.asObservable();
+        return this.allSongDetails$.asObservable();
     }
 
     addSong(arrayBuffer: ArrayBuffer, tags, fileName: string, lengthSeconds: number) {
-        let metadata: SongDetails = {title: undefined, lengthSeconds};
+        let songDetails: SongDetails = {title: undefined, id: undefined, lengthSeconds};
 
         if (tags) {
             let parsedTrack = parseInt(tags.track);
             let parsedYear = parseInt(tags.year);
 
-            metadata.title = tags.title;
-            metadata.album = tags.album;
-            metadata.artist = tags.artist;
-            metadata.genre = tags.genre;
-            !isNaN(parsedTrack) && (metadata.track = parsedTrack);
-            !isNaN(parsedYear) && (metadata.year = parsedYear);
+            songDetails.title = tags.title;
+            songDetails.album = tags.album;
+            songDetails.artist = tags.artist;
+            songDetails.genre = tags.genre;
+            !isNaN(parsedTrack) && (songDetails.track = parsedTrack);
+            !isNaN(parsedYear) && (songDetails.year = parsedYear);
 
             if (tags.picture) {
-                metadata.picFormat = tags.picture.format;
-                metadata.base64Pic = btoa(String.fromCharCode(...(<any> new Uint8Array(tags.picture.data))));
+                songDetails.picFormat = tags.picture.format;
+                songDetails.base64Pic = btoa(String.fromCharCode(...(<any> new Uint8Array(tags.picture.data))));
             }
         }
 
-        if (!metadata.title) {
-            metadata.title = fileName;
+        if (!songDetails.title) {
+            songDetails.title = fileName;
         }
 
         let addTransaction = this.db.transaction(['songMetadata', 'songBuffer'], 'readwrite');
 
         return new Promise<number>((resolve, reject) => {
-            let addMetadataRequest = addTransaction.objectStore('songMetadata').add(metadata);
+            let addMetadataRequest = addTransaction.objectStore('songMetadata').add(songDetails);
 
             addMetadataRequest.onsuccess = (e) => {
                 //Resolve with the ID of the newly created record
@@ -99,6 +99,14 @@ export class Db {
                     addBufferRequest.onsuccess = resolve;
                     addBufferRequest.onerror = reject;
                 });
+            })
+            .then(() => {
+                this.allSongDetails$.next([...this.allSongDetails$.getValue(), songDetails]);
             });
+    }
+
+    deleteSong(songDetails: SongDetails) {
+        //let deleteTransaction = this.db.transaction(['songMetadata', 'songBuffer'], 'readwrite');
+        console.log(songDetails);
     }
 }

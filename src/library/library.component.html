@@ -7,9 +7,31 @@
         <spinner *ngIf="uploadingFile"></spinner>
     </div>
     <div class="file-list">
-        <div *ngFor="let songDetails of allSongDetails | async">
-            {{songDetails.title}}
-            <img [src]="'data:' + songDetails.picFormat + ';base64,' + songDetails.base64Pic" alt="Album Cover" height="64px">
-        </div>
+        <table>
+            <tr>
+                <th>Cover</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr *ngFor="let songDetails of allSongDetails | async">
+                <td><img [src]="'data:' + songDetails.picFormat + ';base64,' + songDetails.base64Pic" alt="Album Cover" height="64px"></td>
+                <td>{{songDetails.title}}</td>
+                <td>{{songDetails.artist}}</td>
+                <td>{{songDetails.album}}</td>
+                <td class="deck1">
+                    <button md-raised-button color="accent">Left</button>
+                </td>
+                <td class="deck2">
+                    <button md-raised-button color="accent">Right</button>
+                </td>
+                <td>
+                    <button (click)="deleteSong(songDetails)" md-raised-button color="primary">Delete</button>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>

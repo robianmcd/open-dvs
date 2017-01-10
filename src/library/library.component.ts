@@ -30,7 +30,7 @@ export class LibraryComponent {
         let readAsArrayBufferPromise = new Promise<ArrayBuffer>((resolve, reject) => {
             let reader = new FileReader();
             reader.readAsArrayBuffer(file);
-            reader.onload = (e) => {
+            reader.onload = () => {
                 arrayBuffer = reader.result;
                 resolve(reader.result);
             };
@@ -56,5 +56,9 @@ export class LibraryComponent {
                 console.error(error);
                 this.uploadingFile = false;
             });
+    }
+
+    deleteSong(songDetails: SongDetails) {
+        this.db.deleteSong(songDetails);
     }
 }

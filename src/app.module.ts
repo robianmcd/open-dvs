@@ -8,9 +8,10 @@ import {ToolbarComponent} from "./toolbar/toolbar.component";
 import {AudioUtil} from "./services/audioUtil";
 import {Db} from "./services/db";
 import {SpinnerComponent} from "./spinner/spinner.component";
+//import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
-    imports: [BrowserModule, MaterialModule.forRoot()],
+    imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, Db]

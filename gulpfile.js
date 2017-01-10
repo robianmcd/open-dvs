@@ -3,6 +3,8 @@ let rollup = require('rollup').rollup;
 let nodeResolve = require('rollup-plugin-node-resolve');
 let commonjs = require('rollup-plugin-commonjs');
 let uglify = require('rollup-plugin-uglify');
+let rollupAngular = require('rollup-plugin-angular');
+let rollupTypescript = require('rollup-plugin-typescript');
 let sass = require('gulp-sass');
 let concat = require('gulp-concat');
 let rev = require('gulp-rev');
@@ -10,6 +12,7 @@ let inject = require('gulp-inject');
 let exec = require('child_process').exec;
 let argv = require('yargs').argv;
 let del = require('del');
+let typescript = require('typescript');
 
 let prodMode = argv.prod;
 
@@ -30,7 +33,7 @@ function componentStyles() {
 }
 
 function ngc(done) {
-    exec('"node_modules/.bin/ngc" -p "tsconfig.json"', function(error, stdout, stderr) {
+    exec('"node_modules/.bin/ngc" -p "tsconfig.prod.json"', function(error, stdout, stderr) {
         stdout && console.log(stdout);
         stderr && console.error(stderr);
         done();
@@ -41,21 +44,27 @@ let rollUpBundle;
 let rollupApp = gulp.series(
     function cleanRollupJs() {return del('dist/app*.js')},
     function buildRollupApp() {
-        let devPlugins = [
+        let sharedPlugins = [
             nodeResolve({jsnext: true, module: true}),
             commonjs({include: 'node_modules/rxjs/**'})
         ];
 
-        let prodPlugins = [...devPlugins, uglify()];
+        let devPlugins = [
+            rollupAngular(),
+            rollupTypescript({typescript: typescript}),
+            ...sharedPlugins
+        ];
+
+        let prodPlugins = [...sharedPlugins, uglify()];
 
         let rollupConfig = {
-            entry: 'src/main.js',
-            cache: rollUpBundle,
+            entry: prodMode ? 'src/main.prod.js': 'src/main.dev.ts',
+            //cache: rollUpBundle,
             plugins: prodMode ? prodPlugins : devPlugins,
             onwarn: function (msg) {
-                if (!msg.includes("The 'this' keyword is equivalent to 'undefined' at the top level of an ES module, and has been rewritten")) {
-                    console.error(msg);
-                }
+                // if (!msg.includes("The 'this' keyword is equivalent to 'undefined' at the top level of an ES module, and has been rewritten")) {
+                //     console.error(msg);
+                // }
             }
         };
 
@@ -65,7 +74,9 @@ let rollupApp = gulp.series(
 
                 return bundle.write({
                     format: 'iife',
-                    dest: `dist/app-${Date.now().toString(36)}.js`
+                    dest: `dist/app-${Date.now().toString(36)}.js`,
+                    //TODO look into speeding up the build by not generating source maps for third party dependencies
+                    sourceMap: !prodMode
                 });
             })
             .catch((err) => {
@@ -122,7 +133,13 @@ gulp.task('globalJs', globalJs);
 gulp.task('globalSass', globalSass);
 gulp.task('index', index);
 
-let appJs = gulp.series(componentStyles, ngc, rollupApp);
+let appJs;
+if(prodMode) {
+    appJs = gulp.series(componentStyles, ngc, rollupApp);
+} else {
+    appJs = gulp.series(componentStyles, rollupApp);
+}
+
 let build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass), index);
 gulp.task('build', build);
 
@@ -130,7 +147,8 @@ gulp.task('default', gulp.series(build, function watch() {
     let componentStylePaths = ['src/**/*.scss', '!src/globalSass/**'];
     let componentTemplatePaths = ['src/**/*.html', '!src/index.html'];
 
-    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], gulp.series(componentStyles, ngc, rollupApp, index));
-    gulp.watch('src/globalSass/**/*.scss', gulp.series(globalSass, index));
+    //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
+    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], {usePolling: true}, gulp.series(appJs, index));
+    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index));
     gulp.watch('src/index.html', index);
 }));
