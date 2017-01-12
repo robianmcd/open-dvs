@@ -1,5 +1,8 @@
-export interface SongDetails {
-    id: string,
+export interface SongDetails extends SongDetailsDraft{
+    id: number,
+}
+
+export interface SongDetailsDraft {
     title: string,
     album?: string,
     artist?: string,
