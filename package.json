@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^6.0.46",
+    "browser-sync": "^2.18.6",
     "concurrently": "^3.1.0",
     "del": "^2.2.2",
     "gulp": "github:gulpjs/gulp#4.0",

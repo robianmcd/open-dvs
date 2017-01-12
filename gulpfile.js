@@ -13,6 +13,7 @@ let exec = require('child_process').exec;
 let argv = require('yargs').argv;
 let del = require('del');
 let typescript = require('typescript');
+let browserSync = require('browser-sync').create();
 
 let prodMode = argv.prod;
 
@@ -45,7 +46,7 @@ let rollupApp = gulp.series(
     function cleanRollupJs() {return del('dist/app*.js')},
     function buildRollupApp() {
         let sharedPlugins = [
-            nodeResolve({jsnext: true, module: true}),
+            nodeResolve({jsnext: true}),
             commonjs({include: 'node_modules/rxjs/**'})
         ];
 
@@ -126,6 +127,11 @@ function clean() {
     return del('dist');
 }
 
+function reloadBrowser(done) {
+    browserSync.reload();
+    done();
+}
+
 gulp.task('componentStyles', componentStyles);
 gulp.task('ngc', ngc);
 gulp.task('rollupApp', rollupApp);
@@ -148,7 +154,11 @@ gulp.task('default', gulp.series(build, function watch() {
     let componentTemplatePaths = ['src/**/*.html', '!src/index.html'];
 
     //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
-    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], {usePolling: true}, gulp.series(appJs, index));
-    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index));
-    gulp.watch('src/index.html', index);
+    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], {usePolling: true}, gulp.series(appJs, index, reloadBrowser));
+    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index, reloadBrowser));
+    gulp.watch('src/index.html', index, reloadBrowser);
+
+    browserSync.init(null, {
+        proxy: 'localhost:5000'
+    });
 }));
