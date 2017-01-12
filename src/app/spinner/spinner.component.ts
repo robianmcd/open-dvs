@@ -49,7 +49,7 @@ import {Component} from "@angular/core";
   border-radius: 50%;
   border-width: 4px;
   border-style: solid;
-  animation: uil-ripple 2s ease-out infinite;
+  animation: uil-ripple 2s linear infinite;
 }
 .uil-ripple-css div:nth-of-type(1) {
   border-color: #165eaa;

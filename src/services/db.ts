@@ -1,6 +1,7 @@
 import {SongDetails, SongDetailsDraft} from "../models/songDetails";
 import {BehaviorSubject} from "rxjs/BehaviorSubject"
 import {Observable} from "rxjs/Observable";
+import {Song} from "../models/song";
 
 export class Db {
     dbInitialized: Promise<IDBDatabase>;
@@ -113,6 +114,17 @@ export class Db {
                 let currentDetails = this.allSongDetails$.getValue();
                 let filteredDetails = currentDetails.filter(d => d.id !== songDetails.id);
                 this.allSongDetails$.next(filteredDetails);
+            });
+    }
+
+    getSong(songDetails: SongDetails): Promise<Song> {
+        return this.reqToPromise(
+            this.db.transaction(['songBuffer'], 'readonly')
+                .objectStore('songBuffer')
+                .get(songDetails.id)
+        )
+            .then((bufferEvent: Event) => {
+                return new Song({details: songDetails, buffer: bufferEvent.target['result']});
             });
 
     }

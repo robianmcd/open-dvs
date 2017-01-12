@@ -43,7 +43,7 @@ function ngc(done) {
 
 let rollUpBundle;
 let rollupApp = gulp.series(
-    function cleanRollupJs() {return del('dist/app*.js')},
+    function cleanRollupJs() {return del(['dist/app*.js', 'dist/app*.js.map'])},
     function buildRollupApp() {
         let sharedPlugins = [
             nodeResolve({jsnext: true}),
@@ -62,10 +62,11 @@ let rollupApp = gulp.series(
             entry: prodMode ? 'src/main.prod.js': 'src/main.dev.ts',
             //cache: rollUpBundle,
             plugins: prodMode ? prodPlugins : devPlugins,
-            onwarn: function (msg) {
-                // if (!msg.includes("The 'this' keyword is equivalent to 'undefined' at the top level of an ES module, and has been rewritten")) {
-                //     console.error(msg);
-                // }
+            onwarn: function (warning) {
+                if(warning.code === 'THIS_IS_UNDEFINED') {
+                    return;
+                }
+                console.warn(warning.message);
             }
         };
 

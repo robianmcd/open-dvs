@@ -1,8 +1,9 @@
-import {Component} from "@angular/core";
-import {AudioUtil} from "../services/audioUtil";
-import {Db} from "../services/db";
-import {SongDetails} from "../models/songDetails";
+import {Component, EventEmitter, Output} from "@angular/core";
+import {AudioUtil} from "../../services/audioUtil";
+import {Db} from "../../services/db";
+import {SongDetails} from "../../models/songDetails";
 import {Observable} from "rxjs/Observable";
+import {Song} from "../../models/song";
 
 declare let jsmediatags;
 
@@ -15,6 +16,8 @@ export class LibraryComponent {
     fileIsOverDrop = false;
     uploadingFile = false;
     allSongDetails: Observable<SongDetails[]>;
+
+    @Output() onLoadSong = new EventEmitter();
 
     constructor(private audioUtil: AudioUtil, private db: Db) {
         this.allSongDetails = this.db.getAllSongDetails();
@@ -60,5 +63,12 @@ export class LibraryComponent {
 
     deleteSong(songDetails: SongDetails) {
         this.db.deleteSong(songDetails);
+    }
+
+    loadSong(songDetails, deckNum) {
+        this.db.getSong(songDetails)
+            .then((song: Song) => {
+                this.onLoadSong.emit({song, deckNum});
+            });
     }
 }

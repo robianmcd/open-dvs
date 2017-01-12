@@ -11,7 +11,6 @@
 
 .deck-section {
   height: 450px;
-  display: flex;
 }
 
 .deck-section-item {
@@ -24,14 +23,4 @@
 
 .center-controls {
   width: 42.8%;
-}
-
-.library-section {
-  flex-grow: 1;
-  display: flex;
-}
-
-library {
-  display: flex;
-  flex-grow: 1;
 }
