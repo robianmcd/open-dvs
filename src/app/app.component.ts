@@ -1,7 +1,7 @@
 import {Component, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
 import moment from 'moment';
 import {DeckComponent} from "./deck/deck.component";
-import {Song} from "../models/song";
+import {LoadSongEvent} from "./library/library.component";
 
 @Component({
     selector: 'my-app',
@@ -21,9 +21,10 @@ export class AppComponent implements AfterViewInit {
         [this.deck1, this.deck2] = this.decksQuery.toArray()
     }
 
-    //TODO: use an enum instead of a number
-    onLoadSong({song, deckNum}: {song:Song, deckNum:number}) {
-        let deck: DeckComponent = this[`deck${deckNum}`];
+    onLoadSong({song, deckId}: LoadSongEvent) {
+        let deck: DeckComponent = this[`deck${deckId}`];
         deck.loadSong(song);
     }
 }
+
+export enum DECK_ID {LEFT=1, RIGHT=2}

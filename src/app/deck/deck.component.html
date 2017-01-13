@@ -1,3 +1,7 @@
 <div id="deck">
-    deck
+    <div>
+        <button (click)="playPause()" [disabled]="!buffer" md-raised-button [color]="isPlaying ? 'accent' : 'primary'">
+            Play/Pause
+        </button>
+    </div>
 </div>

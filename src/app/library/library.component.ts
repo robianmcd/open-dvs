@@ -4,6 +4,7 @@ import {Db} from "../../services/db";
 import {SongDetails} from "../../models/songDetails";
 import {Observable} from "rxjs/Observable";
 import {Song} from "../../models/song";
+import {DECK_ID} from '../app.component';
 
 declare let jsmediatags;
 
@@ -16,8 +17,9 @@ export class LibraryComponent {
     fileIsOverDrop = false;
     uploadingFile = false;
     allSongDetails: Observable<SongDetails[]>;
+    DECK_ID = DECK_ID;
 
-    @Output() onLoadSong = new EventEmitter();
+    @Output() onLoadSong = new EventEmitter<LoadSongEvent>();
 
     constructor(private audioUtil: AudioUtil, private db: Db) {
         this.allSongDetails = this.db.getAllSongDetails();
@@ -65,10 +67,12 @@ export class LibraryComponent {
         this.db.deleteSong(songDetails);
     }
 
-    loadSong(songDetails, deckNum) {
+    loadSong(songDetails, deckId) {
         this.db.getSong(songDetails)
             .then((song: Song) => {
-                this.onLoadSong.emit({song, deckNum});
+                this.onLoadSong.emit({song, deckId});
             });
     }
 }
+
+export interface LoadSongEvent {song:Song, deckId:DECK_ID}

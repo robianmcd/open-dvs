@@ -27,19 +27,19 @@ $deck1-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-purple));
 $deck2-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-blue));
 
 @mixin button-pseudo-selectors($hover, $active) {
-  [md-raised-button].md-primary:hover {
+  [md-raised-button].md-primary:hover:not([disabled]) {
     background-color: map_get($dvs-grey, 400);
   }
 
-  [md-raised-button].md-primary:active {
+  [md-raised-button].md-primary:active:not([disabled]) {
     background-color: map_get($dvs-grey, 600);
   }
 
-  [md-raised-button].md-accent:hover {
+  [md-raised-button].md-accent:hover:not([disabled]) {
     background-color: $hover;
   }
 
-  [md-raised-button].md-accent:active {
+  [md-raised-button].md-accent:active:not([disabled]) {
     background-color: $active;
   }
 }
