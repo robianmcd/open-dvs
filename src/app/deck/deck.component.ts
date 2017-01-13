@@ -1,5 +1,6 @@
 import {AudioUtil} from "../../services/audioUtil";
 import {Song} from "../../models/song";
+import {Component} from "@angular/core";
 
 @Component({
     selector: 'deck',
