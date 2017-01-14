@@ -9,11 +9,12 @@ import {AudioUtil} from "../services/audioUtil";
 import {Db} from "../services/db";
 import {SpinnerComponent} from "./spinner/spinner.component";
 import {DeckComponent} from "./deck/deck.component";
+import {CenterControlsComponent} from "./centerControls/centerControls.component";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
-    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent],
+    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent, CenterControlsComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, Db]
 })

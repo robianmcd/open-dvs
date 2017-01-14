@@ -71,8 +71,8 @@ export class Db {
             !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
 
             if (tags.picture) {
+                songDetailsDraft.base64Pic = this._arrayBufferToBase64(tags.picture.data);
                 songDetailsDraft.picFormat = tags.picture.format;
-                songDetailsDraft.base64Pic = btoa(String.fromCharCode(...(<any> new Uint8Array(tags.picture.data))));
             }
         }
 
@@ -135,4 +135,14 @@ export class Db {
             req.onerror = reject;
         });
     }
+
+    _arrayBufferToBase64( buffer ) {
+    let binary = '';
+    let bytes = new Uint8Array( buffer );
+    let len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return btoa( binary );
+}
 }
