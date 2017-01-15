@@ -48,7 +48,7 @@ export class LibraryComponent {
         let readMediaTagsPromise = new Promise((resolve, reject) => {
             jsmediatags.read(file, {
                 onSuccess: (result) => resolve(result.tags),
-                onError: (error) => reject(null)
+                onError: (error) => reject(error)
             });
         });
 

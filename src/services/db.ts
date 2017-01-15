@@ -111,10 +111,15 @@ export class Db {
                 return id;
             })
             .then((id) => {
+                let songBuffer: SongBuffer = {
+                    buffer: arrayBuffer,
+                    waveformCompressed100X: waveformData.compress100X
+                };
+
                 return this.reqToPromise(
                     addTransaction
                         .objectStore('songBuffer')
-                        .add(arrayBuffer, id)
+                        .add(songBuffer, id)
                 );
             })
             .then(() => {
@@ -142,7 +147,12 @@ export class Db {
                 .get(songDetails.id)
         )
             .then((bufferEvent: Event) => {
-                return new Song({details: songDetails, buffer: bufferEvent.target['result']});
+                let songBuffer: SongBuffer = bufferEvent.target['result'];
+                return new Song({
+                    details: songDetails,
+                    buffer: songBuffer.buffer,
+                    waveformCompressed100X: songBuffer.waveformCompressed100X
+                });
             });
 
     }

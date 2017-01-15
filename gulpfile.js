@@ -163,7 +163,7 @@ gulp.task('default', gulp.series(build, function watch() {
     //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
     gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], {usePolling: true}, gulp.series(appJs, index, reloadBrowser));
     gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index, reloadBrowser));
-    gulp.watch('src/index.html', index, reloadBrowser);
+    gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
 
     browserSync.init(null, {
         proxy: 'localhost:5000'

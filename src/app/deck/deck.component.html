@@ -1,10 +1,10 @@
 <div id="deck">
     <div>
         <div>
-            <canvas height="150px" width="1" class="waveform" style="height: 150px; width: 100%"></canvas>
+            <canvas height="100px" width="1" class="waveform" style="height: 100px; width: 100%"></canvas>
         </div>
         <div>
-            <button (click)="playPause()" [disabled]="!buffer" md-raised-button [color]="isPlaying ? 'accent' : 'primary'">
+            <button (click)="playPause()" [disabled]="!activeSong.isLoaded" md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
                 Play/Pause
             </button>
         </div>
