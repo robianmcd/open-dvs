@@ -1,6 +1,9 @@
 import {AudioUtil} from "../../services/audioUtil";
 import {Song} from "../../models/song";
-import {Component} from "@angular/core";
+import {SongDetails} from "../../models/songDetails";
+import {Component, ChangeDetectorRef, ElementRef, Input} from "@angular/core";
+import {WaveformUtil} from "../../services/waveformUtil";
+import {ThemeId} from "../app.component";
 
 @Component({
     selector: 'deck',
@@ -8,6 +11,7 @@ import {Component} from "@angular/core";
     styleUrls: ['deck.component.css']
 })
 export class DeckComponent {
+    @Input() themeId: ThemeId;
 
     source: AudioBufferSourceNode;
     buffer: AudioBuffer;
@@ -17,7 +21,12 @@ export class DeckComponent {
 
     playbackRate = 1;
 
-    constructor(private audioUtil: AudioUtil) {
+    constructor(
+        private audioUtil: AudioUtil,
+        private waveformUtil: WaveformUtil,
+        private changeDetector: ChangeDetectorRef,
+        private elementRef: ElementRef)
+    {
 
     }
 
@@ -26,8 +35,6 @@ export class DeckComponent {
     }
 
     loadSong(song: Song) {
-        //TODO: for some reason changes aren't being detected even if I manually call detectChanges
-
         let context = this.audioUtil.context;
 
         context.decodeAudioData(song.buffer, (audioBuffer) => {
@@ -35,12 +42,15 @@ export class DeckComponent {
             this.songOffset = 0;
 
             this.playBuffer();
+            this.drawWaveform(song.details);
+
+            this.changeDetector.detectChanges();
         });
     }
 
     playPause() {
-        if(this.buffer) {
-            if(this.playbackRate) {
+        if (this.buffer) {
+            if (this.playbackRate) {
                 this.pauseBuffer();
             } else {
                 this.playBuffer();
@@ -49,10 +59,10 @@ export class DeckComponent {
     }
 
     playBuffer() {
-        if(this.buffer) {
+        if (this.buffer) {
             let context = this.audioUtil.context;
 
-            if(this.source) {
+            if (this.source) {
                 this.source.stop();
             }
 
@@ -68,12 +78,20 @@ export class DeckComponent {
     }
 
     pauseBuffer() {
-        if(this.buffer) {
+        if (this.buffer) {
             let songOffsetSinceLastRecording = (this.audioUtil.context.currentTime - this.songOffsetRecordedTime) * this.playbackRate;
             this.songOffset = this.songOffset + songOffsetSinceLastRecording;
             this.playbackRate = 0;
             this.source.stop();
             this.source = undefined;
         }
+    }
+
+    drawWaveform(songDetails: SongDetails) {
+        let deckElem = <HTMLElement>this.elementRef.nativeElement;
+        let waveformElem = <HTMLCanvasElement>deckElem.querySelector('.waveform');
+        waveformElem.width = deckElem.clientWidth;
+
+        this.waveformUtil.drawWaveform(waveformElem, songDetails, this.themeId);
     }
 }

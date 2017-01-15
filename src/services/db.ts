@@ -1,15 +1,19 @@
-import {SongDetails, SongDetailsDraft} from "../models/songDetails";
+import { Injectable } from '@angular/core';
 import {BehaviorSubject} from "rxjs/BehaviorSubject"
 import {Observable} from "rxjs/Observable";
 import {Song} from "../models/song";
+import {SongDetails, SongDetailsDraft} from "../models/songDetails";
+import {WaveformUtil} from "./waveformUtil";
+import {ThemeId} from "../app/app.component";
 
+@Injectable()
 export class Db {
     dbInitialized: Promise<IDBDatabase>;
     db: IDBDatabase;
 
     private allSongDetails$ = new BehaviorSubject<SongDetails[]>([]);
 
-    constructor() {
+    constructor(private waveformUtil: WaveformUtil) {
         this.dbInitialized = new Promise((resolve, reject) => {
             let openRequest = indexedDB.open('dvs', 1);
 
@@ -55,9 +59,23 @@ export class Db {
         return this.allSongDetails$.asObservable();
     }
 
-    addSong(arrayBuffer: ArrayBuffer, tags, fileName: string, lengthSeconds: number) {
-        let songDetailsDraft: SongDetailsDraft = {title: undefined, lengthSeconds};
+    addSong(arrayBuffer: ArrayBuffer, audioBuffer: AudioBuffer, tags, fileName: string) {
         let songDetails: SongDetails;
+        let songDetailsDraft: SongDetailsDraft = {
+            title: undefined,
+            lengthSeconds: audioBuffer.duration,
+            positiveWaveformPreview: undefined,
+            negativeWaveformPreview: undefined,
+            waveformPreviewSize: undefined,
+            waveformDataUrl: undefined
+        };
+
+        let waveformData = this.waveformUtil.getWaveformData(audioBuffer);
+        songDetailsDraft.positiveWaveformPreview = waveformData.positivePreview;
+        songDetailsDraft.negativeWaveformPreview = waveformData.negativePreview;
+        songDetailsDraft.waveformPreviewSize = waveformData.previewSzie;
+
+        songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(songDetailsDraft, 150, 50, ThemeId.DEFAULT);
 
         if (tags) {
             let parsedTrack = parseInt(tags.track);

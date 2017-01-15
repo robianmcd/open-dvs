@@ -9,6 +9,7 @@ import {LoadSongEvent} from "./library/library.component";
     styleUrls: ['app.component.css']
 })
 export class AppComponent implements AfterViewInit {
+    ThemeId = ThemeId;
     @ViewChildren(DeckComponent) decksQuery: QueryList<DeckComponent>;
     deck1: DeckComponent;
     deck2: DeckComponent;
@@ -27,4 +28,5 @@ export class AppComponent implements AfterViewInit {
     }
 }
 
-export enum DECK_ID {LEFT=1, RIGHT=2}
+export enum DeckId {LEFT=1, RIGHT=2}
+export enum ThemeId {DEFAULT=0, DECK1=1, DECK2=2}

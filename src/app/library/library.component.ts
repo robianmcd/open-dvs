@@ -4,7 +4,7 @@ import {Db} from "../../services/db";
 import {SongDetails} from "../../models/songDetails";
 import {Observable} from "rxjs/Observable";
 import {Song} from "../../models/song";
-import {DECK_ID} from '../app.component';
+import {DeckId} from "../app.component";
 
 declare let jsmediatags;
 
@@ -17,7 +17,7 @@ export class LibraryComponent {
     fileIsOverDrop = false;
     uploadingFile = false;
     allSongDetails: Observable<SongDetails[]>;
-    DECK_ID = DECK_ID;
+    DeckId = DeckId;
 
     @Output() onLoadSong = new EventEmitter<LoadSongEvent>();
 
@@ -53,8 +53,8 @@ export class LibraryComponent {
         });
 
         Promise.all([readAsAudioBufferPromise, readMediaTagsPromise])
-            .then(([audioBuffer, tags]: [AudioBuffer,any]) => {
-                this.db.addSong(arrayBuffer, tags, file.name, audioBuffer.duration);
+            .then(([audioBuffer, tags]: [AudioBuffer, any]) => {
+                this.db.addSong(arrayBuffer, audioBuffer, tags, file.name);
                 this.uploadingFile = false;
             })
             .catch((error) => {
@@ -75,4 +75,5 @@ export class LibraryComponent {
     }
 }
 
-export interface LoadSongEvent {song:Song, deckId:DECK_ID}
+export interface LoadSongEvent {song: Song, deckId: DeckId
+}

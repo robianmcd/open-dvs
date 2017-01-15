@@ -1,7 +1,12 @@
 <div id="deck">
     <div>
-        <button (click)="playPause()" [disabled]="!buffer" md-raised-button [color]="isPlaying ? 'accent' : 'primary'">
-            Play/Pause
-        </button>
+        <div>
+            <canvas height="150px" width="1" class="waveform" style="height: 150px; width: 100%"></canvas>
+        </div>
+        <div>
+            <button (click)="playPause()" [disabled]="!buffer" md-raised-button [color]="isPlaying ? 'accent' : 'primary'">
+                Play/Pause
+            </button>
+        </div>
     </div>
 </div>

@@ -1,8 +1,8 @@
-export interface SongDetails extends SongDetailsDraft{
+export interface SongDetails extends SongDetailsDraft {
     id: number,
 }
 
-export interface SongDetailsDraft {
+export interface SongDetailsDraft extends WaveformDetails {
     title: string,
     album?: string,
     artist?: string,
@@ -11,5 +11,12 @@ export interface SongDetailsDraft {
     genre?: string,
     base64Pic?: string,
     picFormat?: string,
-    lengthSeconds: number
+    lengthSeconds: number,
+    waveformDataUrl: string
+}
+
+export interface WaveformDetails {
+    positiveWaveformPreview: number[],
+    negativeWaveformPreview: number[],
+    waveformPreviewSize: number
 }
