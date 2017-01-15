@@ -115,6 +115,12 @@ let globalSass = gulp.series(
     }
 );
 
+//Add anything that just needs to be copied into the dist folder here
+let resources = function () {
+    return gulp.src(['src/**/*.ico'])
+        .pipe(gulp.dest('dist'));
+};
+
 
 function index() {
     let srcStream = gulp.src(['dist/global*.js', 'dist/app*.js', 'dist/global*.css'], {read: false});
@@ -147,7 +153,7 @@ if(prodMode) {
     appJs = gulp.series(componentStyles, rollupApp);
 }
 
-let build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass), index);
+let build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass, resources), index);
 gulp.task('build', build);
 
 gulp.task('default', gulp.series(build, function watch() {
