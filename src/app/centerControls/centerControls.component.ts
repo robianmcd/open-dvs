@@ -47,31 +47,43 @@ export class CenterControlsComponent implements AfterViewInit {
     drawSong(deckId: DeckId, song: Song) {
         let waveformCanvas;
         let waveformDetails: WaveformDetails;
+        let waveformName;
+        let activeSong;
 
         switch (deckId) {
             case DeckId.LEFT: {
                 waveformCanvas = this.deck1Canvas;
-                let offset = this.deck1ActiveSong.currentSongOffset;
-                let firstSample = Math.floor(Math.max(0, offset - 3) * this.audioUtil.context.sampleRate / 100);
-                waveformDetails = {
-                    negativeWaveformPreview: song.waveformCompressed100x.slice(firstSample, firstSample + 2646),
-                    positiveWaveformPreview: undefined,
-                    waveformPreviewSize: 2646
-                };
+                waveformName = 'negativeWaveformPreview';
+                activeSong = this.deck1ActiveSong;
                 break;
             }
             case DeckId.RIGHT: {
                 waveformCanvas = this.deck2Canvas;
-                let offset = this.deck2ActiveSong.currentSongOffset;
-                let firstSample = Math.floor(Math.max(0, offset - 3) * this.audioUtil.context.sampleRate / 100);
-                waveformDetails = {
-                    negativeWaveformPreview: undefined,
-                    positiveWaveformPreview: song.waveformCompressed100x.slice(firstSample, firstSample + 2646),
-                    waveformPreviewSize: 2646
-                };
-                break;
+                waveformName = 'positiveWaveformPreview';
+                activeSong = this.deck2ActiveSong;
             }
         }
+
+        //TODO: when tempo slider is set multiple this by it
+        let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
+        let numSamples = Math.round(compressedSampleRate * 6);
+        let firstSample = Math.round(activeSong.currentSongOffset * compressedSampleRate - numSamples / 2);
+
+        waveformDetails = {
+            negativeWaveformPreview: undefined,
+            positiveWaveformPreview: undefined,
+            waveformPreviewSize: numSamples
+        };
+
+        if (firstSample < 0) {
+            let numEmptySamples = firstSample * -1;
+            let emptySamples = new Array(numEmptySamples).fill(0);
+            let samplesFromSong = song.waveformCompressed100x.slice(0, numSamples - numEmptySamples);
+            waveformDetails[waveformName] = [...emptySamples, ...samplesFromSong];
+        } else {
+            waveformDetails[waveformName] = song.waveformCompressed100x.slice(firstSample, firstSample + numSamples);
+        }
+
 
         this.waveformUtil.drawWaveform(waveformCanvas, waveformDetails, ThemeId.fromDeckId(deckId));
 
