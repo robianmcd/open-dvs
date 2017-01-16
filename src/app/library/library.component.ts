@@ -45,10 +45,10 @@ export class LibraryComponent {
         let readAsAudioBufferPromise: Promise<AudioBuffer> = readAsArrayBufferPromise
             .then((arrayBuffer) => this.audioUtil.context.decodeAudioData(arrayBuffer));
 
-        let readMediaTagsPromise = new Promise((resolve, reject) => {
+        let readMediaTagsPromise = new Promise((resolve) => {
             jsmediatags.read(file, {
                 onSuccess: (result) => resolve(result.tags),
-                onError: (error) => reject(error)
+                onError: (error) => resolve(null)
             });
         });
 

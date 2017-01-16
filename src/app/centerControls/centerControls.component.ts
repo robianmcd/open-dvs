@@ -68,6 +68,7 @@ export class CenterControlsComponent implements AfterViewInit {
         let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
         let numSamples = Math.round(compressedSampleRate * 6);
         let firstSample = Math.round(activeSong.currentSongOffset * compressedSampleRate - numSamples / 2);
+        let lastSample = firstSample + numSamples;
 
         waveformDetails = {
             negativeWaveformPreview: undefined,
@@ -75,15 +76,24 @@ export class CenterControlsComponent implements AfterViewInit {
             waveformPreviewSize: numSamples
         };
 
+        let waveform = song.waveformCompressed100x.slice(
+            Math.max(0, firstSample),
+            Math.min(song.waveformCompressed100x.length, lastSample)
+        );
+
         if (firstSample < 0) {
             let numEmptySamples = firstSample * -1;
             let emptySamples = new Array(numEmptySamples).fill(0);
-            let samplesFromSong = song.waveformCompressed100x.slice(0, numSamples - numEmptySamples);
-            waveformDetails[waveformName] = [...emptySamples, ...samplesFromSong];
-        } else {
-            waveformDetails[waveformName] = song.waveformCompressed100x.slice(firstSample, firstSample + numSamples);
+            waveform = [...emptySamples, ...waveform];
         }
 
+        if(lastSample > song.waveformCompressed100x.length) {
+            let numEmptySamples = lastSample - song.waveformCompressed100x.length;
+            let emptySamples = new Array(numEmptySamples).fill(0);
+            waveform = [...waveform, ...emptySamples];
+        }
+
+        waveformDetails[waveformName] = waveform;
 
         this.waveformUtil.drawWaveform(waveformCanvas, waveformDetails, ThemeId.fromDeckId(deckId));
 
