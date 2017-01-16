@@ -1,17 +1,17 @@
-import {WaveformUtil} from "./waveformUtil";
 import {Song} from "../models/song";
 import {AudioUtil} from "./audioUtil";
 import {DeckId} from "../app/app.component";
+import {ReplaySubject} from "rxjs";
 
 export class ActiveSong {
-    song: Song;
+    private song$ = new ReplaySubject<Song>();
     private source: AudioBufferSourceNode;
     private buffer: AudioBuffer;
 
     private songOffsetRecordedTime: number;
     private songOffset: number;
 
-    private playbackRate = 1;
+    private playbackRate = 0;
 
     constructor(
         private deckId: DeckId,
@@ -28,16 +28,30 @@ export class ActiveSong {
         return !!this.buffer;
     }
 
+    get songObservable() {
+        return this.song$.asObservable();
+    }
+
+    get currentSongOffset() {
+        let songOffsetSinceLastRecording = (this.audioUtil.context.currentTime - this.songOffsetRecordedTime) * this.playbackRate;
+        return this.songOffset + songOffsetSinceLastRecording;
+    }
+
+    private updateSongOffset() {
+        this.songOffset = this.currentSongOffset;
+        this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+    }
+
     loadSong(song: Song) {
-        this.song = song;
         let context = this.audioUtil.context;
 
         return context.decodeAudioData(song.buffer)
             .then((audioBuffer) => {
                 this.buffer = audioBuffer;
                 this.songOffset = 0;
-
-                this.playBuffer();
+                this.songOffsetRecordedTime = context.currentTime;
+                this.playbackRate = 0;
+                this.song$.next(song);
             });
     }
 
@@ -49,9 +63,9 @@ export class ActiveSong {
                 this.source.stop();
             }
 
+            this.updateSongOffset();
             //todo: replace 1 with value of the temo slider
             this.playbackRate = 1;
-            this.songOffsetRecordedTime = context.currentTime;
             this.source = context.createBufferSource();
             this.source.playbackRate.value = this.playbackRate;
             this.source.buffer = this.buffer;
@@ -62,8 +76,7 @@ export class ActiveSong {
 
     pauseBuffer() {
         if (this.buffer) {
-            let songOffsetSinceLastRecording = (this.audioUtil.context.currentTime - this.songOffsetRecordedTime) * this.playbackRate;
-            this.songOffset = this.songOffset + songOffsetSinceLastRecording;
+            this.updateSongOffset();
             this.playbackRate = 0;
             this.source.stop();
             this.source = undefined;

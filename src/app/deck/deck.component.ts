@@ -43,6 +43,7 @@ export class DeckComponent implements OnInit {
     drawWaveform(songDetails: SongDetails) {
         let deckElem = <HTMLElement>this.elementRef.nativeElement;
         let waveformElem = <HTMLCanvasElement>deckElem.querySelector('.waveform');
+        //Note: setting the width clears the canvas but that's ok because drawWaveform is going to clear it anyway
         waveformElem.width = deckElem.clientWidth;
 
         this.waveformUtil.drawWaveform(waveformElem, songDetails, ThemeId.fromDeckId(this.deckId));

@@ -29,7 +29,7 @@ export class WaveformUtil {
         };
     }
 
-    drawWaveform(canvas: HTMLCanvasElement, waveformDetails: WaveformDetails, themeId) {
+    drawWaveform(canvas: HTMLCanvasElement, waveformDetails: WaveformDetails, themeId: ThemeId) {
         let mainColor;
         let highlightColor;
         switch (themeId) {
@@ -46,14 +46,18 @@ export class WaveformUtil {
                 highlightColor = '#a6a6a6';
                 break;
         }
+        let showPositive = !!waveformDetails.positiveWaveformPreview;
+        let showNegative = !!waveformDetails.negativeWaveformPreview;
+        let showBoth = showPositive && showNegative;
 
-        let waveformPreviewSize = waveformDetails.waveformPreviewSize;
-        let positiveWaveformPreview = waveformDetails.positiveWaveformPreview;
-        let negativeWaveformPreview = waveformDetails.negativeWaveformPreview;
+        let waveformSize = waveformDetails.waveformPreviewSize;
+        let positiveWaveform = waveformDetails.positiveWaveformPreview;
+        let negativeWaveform = waveformDetails.negativeWaveformPreview;
 
         let canvasCtx = canvas.getContext('2d');
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let previewSamplesPerPixel = waveformPreviewSize / canvas.width;
+        let previewSamplesPerPixel = waveformSize / canvas.width;
 
         for (let col = 0; col < canvas.width; col++) {
             let firstSampleI = Math.floor(col * previewSamplesPerPixel);
@@ -62,40 +66,68 @@ export class WaveformUtil {
             let positiveSum = 0;
             let negativeSum = 0;
             for (let sampleI = firstSampleI; sampleI < lastSampleI; sampleI++) {
-                positiveSum += positiveWaveformPreview[sampleI];
-                negativeSum += negativeWaveformPreview[sampleI];
+                showPositive && (positiveSum += positiveWaveform[sampleI]);
+                showNegative && (negativeSum += negativeWaveform[sampleI]);
             }
 
-            let positiveMean = positiveSum / (lastSampleI - firstSampleI);
-            let negativeMean = negativeSum / (lastSampleI - firstSampleI);
-            //Give the waveform a bit of a boost to make up for what gets lost from taking averages.
-            positiveMean = Math.min(1, positiveMean * 1.4);
-            negativeMean = Math.min(1, negativeMean * 1.4);
+            let positiveMean;
+            if(showPositive) {
+                positiveMean = positiveSum / (lastSampleI - firstSampleI);
+                //Give the waveform a bit of a boost to make up for what gets lost from taking averages.
+                positiveMean = Math.min(1, positiveMean * 1.4);
+            }
 
-            let topY = (1 - positiveMean) / 2 * canvas.height;
-            let bottomY = (1 - negativeMean) / 2 * canvas.height;
+            let negativeMean;
+            if(showNegative) {
+                negativeMean = negativeSum / (lastSampleI - firstSampleI);
+                negativeMean = Math.min(1, negativeMean * 1.4);
+            }
 
-            let centerY = canvas.height / 2;
+            let topY;
+            let bottomY;
+            let startY;
+            let halfWaveformHeight;
+            if(showBoth) {
+                topY = (1 - positiveMean) / 2 * canvas.height;
+                bottomY = (1 - negativeMean) / 2 * canvas.height;
+                startY = canvas.height / 2;
+                halfWaveformHeight = canvas.height / 2;
+            } else if(showPositive) {
+                topY = (1 - positiveMean) * canvas.height;
+                startY = canvas.height;
+                halfWaveformHeight = canvas.height;
+            } else {
+                //This is a bit of a hack. Right now if showNegative is true all the values are actually positive.
+                //This is why the equation isn't (1 - negativeMean) * canvas.height
+                //Should find a better way of handling this
+                bottomY = negativeMean * canvas.height;
+                startY = 0;
+                halfWaveformHeight = canvas.height;
+            }
 
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(col, centerY);
-            canvasCtx.lineTo(col, topY);
+            if(showPositive) {
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(col, startY);
+                canvasCtx.lineTo(col, topY);
 
-            let gradient = canvasCtx.createLinearGradient(col, topY + centerY, col, topY + (centerY-topY)/3);
-            gradient.addColorStop(0, highlightColor);
-            gradient.addColorStop(1, mainColor);
-            canvasCtx.strokeStyle = gradient;
-            canvasCtx.stroke();
+                let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight-topY)/3);
+                gradient.addColorStop(0, highlightColor);
+                gradient.addColorStop(1, mainColor);
+                canvasCtx.strokeStyle = gradient;
+                canvasCtx.stroke();
+            }
 
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(col, centerY);
-            canvasCtx.lineTo(col, bottomY);
+            if(showNegative) {
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(col, startY);
+                canvasCtx.lineTo(col, bottomY);
 
-            gradient = canvasCtx.createLinearGradient(col, bottomY - centerY, col, bottomY - (bottomY-centerY)/3);
-            gradient.addColorStop(0, highlightColor);
-            gradient.addColorStop(1, mainColor);
-            canvasCtx.strokeStyle = gradient;
-            canvasCtx.stroke();
+                let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY-halfWaveformHeight)/3);
+                gradient.addColorStop(0, highlightColor);
+                gradient.addColorStop(1, mainColor);
+                canvasCtx.strokeStyle = gradient;
+                canvasCtx.stroke();
+            }
         }
     }
 
@@ -124,9 +156,9 @@ export class WaveformUtil {
           |     XX                       X                 +-+  XX           XX
           +-+ +XX------------------------XX--------------------XX-------------XX--+
                                           XXX                XXX               XX
-               +                         +  XX              XX  +            + XX
-               +-------------+-----------+   XX          XXXX   +-----+------+  XX
-                             |                XXX      XXX            |          XX
+               +                         +  XX              XX  +            +  XX
+               +-------------+-----------+   XX          XXXX   +-----+------+   XX
+                             |                XXX      XXX            |
                              +                  XXXXXXX               +
                              W1                                       W2
      */
@@ -182,11 +214,17 @@ export class WaveformUtil {
                     cycleExtreme = 0;
                     cycleSize = 0;
                 }
-
             }
 
-            let positiveMean = positiveSum / positiveCount;
-            let negativeMean = negativeSum / negativeCount;
+            let positiveMean = 0;
+            if(positiveCount > 0) {
+                positiveMean = positiveSum / positiveCount;
+            }
+
+            let negativeMean = 0;
+            if(negativeCount > 0) {
+                negativeMean = negativeSum / negativeCount;
+            }
 
             positivePeakAvgs.push(positiveMean);
             negativePeakAvgs.push(negativeMean);
