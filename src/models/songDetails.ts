@@ -16,7 +16,7 @@ export interface SongDetailsDraft extends WaveformDetails {
 }
 
 export interface WaveformDetails {
-    positiveWaveformPreview: number[],
-    negativeWaveformPreview: number[],
-    waveformPreviewSize: number
+    positiveSamples: number[],
+    negativeSamples: number[],
+    numSamples: number
 }

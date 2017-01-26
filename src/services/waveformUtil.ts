@@ -7,11 +7,11 @@ export class WaveformUtil {
 
 
     getWaveformData(buffer: AudioBuffer) {
-        const waveformPreviewSize = 2000;
+        const numSamplesInPreview = 2000;
         let samples = buffer.getChannelData(0);
 
         //TODO: run these calls in web workers
-        let previewPeakAvgs = this.getWeightedPeakAvgs({samples, numBuckets: waveformPreviewSize});
+        let previewPeakAvgs = this.getWeightedPeakAvgs({samples, numBuckets: numSamplesInPreview});
         let detailedPeakAvgs = this.getWeightedPeakAvgs({samples, samplesPerBucket: 100});
 
         let compress100X = [];
@@ -22,9 +22,9 @@ export class WaveformUtil {
         }
 
         return {
-            positivePreview: previewPeakAvgs.positivePeakAvgs,
-            negativePreview: previewPeakAvgs.negativePeakAvgs,
-            previewSzie: waveformPreviewSize,
+            positiveSamples: previewPeakAvgs.positivePeakAvgs,
+            negativeSamples: previewPeakAvgs.negativePeakAvgs,
+            previewSzie: numSamplesInPreview,
             compress100X
         };
     }
@@ -46,22 +46,22 @@ export class WaveformUtil {
                 highlightColor = '#a6a6a6';
                 break;
         }
-        let showPositive = !!waveformDetails.positiveWaveformPreview;
-        let showNegative = !!waveformDetails.negativeWaveformPreview;
+        let showPositive = !!waveformDetails.positiveSamples;
+        let showNegative = !!waveformDetails.negativeSamples;
         let showBoth = showPositive && showNegative;
 
-        let waveformSize = waveformDetails.waveformPreviewSize;
-        let positiveWaveform = waveformDetails.positiveWaveformPreview;
-        let negativeWaveform = waveformDetails.negativeWaveformPreview;
+        let waveformSize = waveformDetails.numSamples;
+        let positiveWaveform = waveformDetails.positiveSamples;
+        let negativeWaveform = waveformDetails.negativeSamples;
 
         let canvasCtx = canvas.getContext('2d');
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let previewSamplesPerPixel = waveformSize / canvas.width;
+        let previewSamplesPerPixel = Math.round(waveformSize / canvas.width);
 
         for (let col = 0; col < canvas.width; col++) {
-            let firstSampleI = Math.floor(col * previewSamplesPerPixel);
-            let lastSampleI = Math.floor(firstSampleI + previewSamplesPerPixel);
+            let firstSampleI = col * previewSamplesPerPixel;
+            let lastSampleI = Math.min(firstSampleI + previewSamplesPerPixel, waveformDetails.numSamples);
 
             let positiveSum = 0;
             let negativeSum = 0;

@@ -64,16 +64,16 @@ export class Db {
         let songDetailsDraft: SongDetailsDraft = {
             title: undefined,
             lengthSeconds: audioBuffer.duration,
-            positiveWaveformPreview: undefined,
-            negativeWaveformPreview: undefined,
-            waveformPreviewSize: undefined,
+            positiveSamples: undefined,
+            negativeSamples: undefined,
+            numSamples: undefined,
             waveformDataUrl: undefined
         };
 
         let waveformData = this.waveformUtil.getWaveformData(audioBuffer);
-        songDetailsDraft.positiveWaveformPreview = waveformData.positivePreview;
-        songDetailsDraft.negativeWaveformPreview = waveformData.negativePreview;
-        songDetailsDraft.waveformPreviewSize = waveformData.previewSzie;
+        songDetailsDraft.positiveSamples = waveformData.positiveSamples;
+        songDetailsDraft.negativeSamples = waveformData.negativeSamples;
+        songDetailsDraft.numSamples = waveformData.previewSzie;
 
         songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(songDetailsDraft, 150, 50, ThemeId.DEFAULT);
 

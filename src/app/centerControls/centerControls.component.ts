@@ -53,27 +53,34 @@ export class CenterControlsComponent implements AfterViewInit {
         switch (deckId) {
             case DeckId.LEFT: {
                 waveformCanvas = this.deck1Canvas;
-                waveformName = 'negativeWaveformPreview';
+                waveformName = 'negativeSamples';
                 activeSong = this.deck1ActiveSong;
                 break;
             }
             case DeckId.RIGHT: {
                 waveformCanvas = this.deck2Canvas;
-                waveformName = 'positiveWaveformPreview';
+                waveformName = 'positiveSamples';
                 activeSong = this.deck2ActiveSong;
             }
         }
 
+
         //TODO: when tempo slider is set multiple this by it
         let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
         let numSamples = Math.round(compressedSampleRate * 6);
+        let samplesPerPixel = Math.round(numSamples / waveformCanvas.width);
         let firstSample = Math.round(activeSong.currentSongOffset * compressedSampleRate - numSamples / 2);
+        //This will make sure the first sample is a multiple of the number of samples per pixel. This ensures that if a
+        //group of samples is rendered together as a single pixel it will always be rendered as a single pixel.
+        //Without this the waveform will jitter.
+        firstSample = firstSample - (firstSample % samplesPerPixel);
         let lastSample = firstSample + numSamples;
 
+
         waveformDetails = {
-            negativeWaveformPreview: undefined,
-            positiveWaveformPreview: undefined,
-            waveformPreviewSize: numSamples
+            negativeSamples: undefined,
+            positiveSamples: undefined,
+            numSamples: numSamples
         };
 
         let waveform = song.waveformCompressed100x.slice(
