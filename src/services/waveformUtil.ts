@@ -57,7 +57,7 @@ export class WaveformUtil {
         let canvasCtx = canvas.getContext('2d');
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let previewSamplesPerPixel = Math.round(waveformSize / canvas.width);
+        let previewSamplesPerPixel = Math.floor(waveformSize / canvas.width);
 
         for (let col = 0; col < canvas.width; col++) {
             let firstSampleI = col * previewSamplesPerPixel;
