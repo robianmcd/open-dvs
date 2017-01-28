@@ -14,6 +14,8 @@ let argv = require('yargs').argv;
 let del = require('del');
 let typescript = require('typescript');
 let browserSync = require('browser-sync').create();
+let jasmineBrowser = require('gulp-jasmine-browser');
+let gutil = require('gulp-util');
 
 let prodMode = argv.prod;
 
@@ -139,12 +141,59 @@ function reloadBrowser(done) {
     done();
 }
 
+function watchTest() {
+    gulp.watch(['test/**/*.spec.js'], test);
+}
+
+function test() {
+    return gulp.src(['test/utils/moduleMocks.js', 'dist-test/**'])
+        .pipe(jasmineBrowser.specRunner({console: true}))
+        .pipe(jasmineBrowser.headless())
+        //jasmineBrowser.headless() returns a lazy pipe which doesn't work with gulp 4 unless there is another pipe after it.
+        //http://stackoverflow.com/a/40101404/373655
+        .pipe(gutil.noop());
+}
+
+let testRollUpBundle;
+let rollupTestApp = gulp.series(
+    function buildRollupApp() {
+        let rollupConfig = {
+            entry: 'test/main.ts',
+            cache: testRollUpBundle,
+            plugins: [
+                rollupTypescript({typescript: typescript}),
+                nodeResolve({jsnext: true}),
+                commonjs({include: 'node_modules/rxjs/**'})
+            ],
+            external: (id) => {
+                return id.startsWith('@angular');
+            }
+        };
+
+        return rollup(rollupConfig)
+            .then((bundle) => {
+                testRollUpBundle = bundle;
+
+                return bundle.write({
+                    format: 'iife',
+                    dest: `dist-test/app-test.js`,
+                    sourceMap: true
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
+);
+
 gulp.task('componentStyles', componentStyles);
 gulp.task('ngc', ngc);
 gulp.task('rollupApp', rollupApp);
 gulp.task('globalJs', globalJs);
 gulp.task('globalSass', globalSass);
 gulp.task('index', index);
+gulp.task('test', gulp.series(rollupTestApp, test));
+gulp.task('watchTest', watchTest);
 
 let appJs;
 if(prodMode) {

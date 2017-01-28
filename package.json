@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@angular/language-service": "2.4.1",
+    "@types/jasmine": "^2.5.41",
     "@types/node": "^6.0.46",
     "browser-sync": "^2.18.6",
     "concurrently": "^3.1.0",
@@ -38,8 +39,10 @@
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-concat": "^2.6.1",
     "gulp-inject": "^4.2.0",
+    "gulp-jasmine-browser": "^1.7.1",
     "gulp-rev": "^7.1.2",
     "gulp-sass": "^3.0.0",
+    "phantomjs": "^2.1.7",
     "rollup": "^0.40.0",
     "rollup-plugin-angular": "^0.4.3",
     "rollup-plugin-commonjs": "^7.0.0",
