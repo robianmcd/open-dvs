@@ -1,10 +1,4 @@
 let gulp = require('gulp');
-let rollup = require('rollup').rollup;
-let nodeResolve = require('rollup-plugin-node-resolve');
-let commonjs = require('rollup-plugin-commonjs');
-let uglify = require('rollup-plugin-uglify');
-let rollupAngular = require('rollup-plugin-angular');
-let rollupTypescript = require('rollup-plugin-typescript');
 let sass = require('gulp-sass');
 let concat = require('gulp-concat');
 let rev = require('gulp-rev');
@@ -12,11 +6,11 @@ let inject = require('gulp-inject');
 let exec = require('child_process').exec;
 let argv = require('yargs').argv;
 let del = require('del');
-let typescript = require('typescript');
 let browserSync = require('browser-sync').create();
 let jasmineBrowser = require('gulp-jasmine-browser');
 let gutil = require('gulp-util');
 let vendorUtils = require('./gulp/vendorBuildUtils');
+let {rollupApp, rollupVendor, rollupTest} = require('./gulp/rollupTasks');
 
 let prodMode = argv.prod;
 
@@ -43,85 +37,6 @@ function ngc(done) {
         done();
     });
 }
-
-let vendorRollUpBundle;
-let rollupVendor = gulp.series(
-    function cleanVendor() {
-        return del(['dist/vendor*.js', 'dist/vendor*.js.map'])
-    },
-    function buildVendor() {
-        let rollupConfig = {
-            entry: 'src/vendor.ts',
-            cache: vendorRollUpBundle,
-            plugins: [
-                rollupTypescript({typescript: typescript}),
-                nodeResolve({jsnext: true}),
-                commonjs({include: 'node_modules/rxjs/**'})
-            ],
-            onwarn: function (warning) {
-                if (warning.code === 'THIS_IS_UNDEFINED') {
-                    return;
-                }
-                console.warn('rollupwarn', warning.message);
-            }
-        };
-
-        return rollup(rollupConfig)
-            .then((bundle) => {
-                vendorRollUpBundle = bundle;
-
-                return bundle.write({
-                    format: 'iife',
-                    moduleName: 'vendor',
-                    dest: `dist/vendor-${Date.now().toString(36)}.js`,
-                    sourceMap: true
-                });
-            });
-    }
-);
-
-let rollupApp = gulp.series(
-    function cleanRollupJs() {
-        return del(['dist/app*.js', 'dist/app*.js.map'])
-    },
-    function buildRollupApp() {
-        let devPlugins = [
-            rollupAngular(),
-            rollupTypescript({typescript: typescript}),
-        ];
-
-        let prodPlugins = [
-            nodeResolve({jsnext: true}),
-            commonjs({include: 'node_modules/rxjs/**'}),
-            uglify()
-        ];
-
-        let rollupConfig = {
-            entry: prodMode ? 'src/main.prod.js' : 'src/main.dev.ts',
-            plugins: prodMode ? prodPlugins : devPlugins,
-            external: prodMode ? [] : vendorUtils.getModules(),
-            onwarn: function (warning) {
-                if (warning.code === 'THIS_IS_UNDEFINED') {
-                    return;
-                }
-                console.warn(warning.message);
-            }
-        };
-
-        return rollup(rollupConfig)
-            .then((bundle) => {
-                return bundle.write({
-                    format: 'iife',
-                    dest: `dist/app-${Date.now().toString(36)}.js`,
-                    sourceMap: !prodMode,
-                    globals: prodMode ? {} : vendorUtils.getModuleToGlobalMap()
-                });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
-);
 
 let globalJs = gulp.series(
     function cleanGlobalJs() {
@@ -180,50 +95,14 @@ function reloadBrowser(done) {
     done();
 }
 
-function watchTest() {
-    gulp.watch(['test/**/*.spec.js'], test);
-}
-
-function test() {
-    return gulp.src(['test/utils/moduleMocks.js', 'dist-test/**'])
+function jasmineTest() {
+    return gulp.src(['dist/global-*.js', 'dist/vendor-*.js', 'dist-test/**'])
         .pipe(jasmineBrowser.specRunner({console: true}))
         .pipe(jasmineBrowser.headless())
         //jasmineBrowser.headless() returns a lazy pipe which doesn't work with gulp 4 unless there is another pipe after it.
         //http://stackoverflow.com/a/40101404/373655
         .pipe(gutil.noop());
 }
-
-let testRollUpBundle;
-let rollupTestApp = gulp.series(
-    function buildRollupApp() {
-        let rollupConfig = {
-            entry: 'test/main.ts',
-            cache: testRollUpBundle,
-            plugins: [
-                rollupTypescript({typescript: typescript}),
-                nodeResolve({jsnext: true}),
-                commonjs({include: 'node_modules/rxjs/**'})
-            ],
-            external: (id) => {
-                return id.startsWith('@angular');
-            }
-        };
-
-        return rollup(rollupConfig)
-            .then((bundle) => {
-                testRollUpBundle = bundle;
-
-                return bundle.write({
-                    format: 'iife',
-                    dest: `dist-test/app-test.js`,
-                    sourceMap: true
-                });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
-);
 
 gulp.task('componentStyles', componentStyles);
 gulp.task('ngc', ngc);
@@ -232,12 +111,11 @@ gulp.task('rollupApp', rollupApp);
 gulp.task('globalJs', globalJs);
 gulp.task('globalSass', globalSass);
 gulp.task('index', index);
-gulp.task('test', gulp.series(rollupTestApp, test));
-gulp.task('watchTest', watchTest);
 
 let appJs;
 let build;
 if (prodMode) {
+    //TODO: setup unit testing build for prod
     appJs = gulp.series(componentStyles, ngc, rollupApp);
     build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass, resources), index);
 } else {
@@ -245,8 +123,8 @@ if (prodMode) {
     build = gulp.series(
         clean,
         vendorUtils.generateVendorEntryPoint,
-        gulp.parallel(appJs, globalJs, globalSass, rollupVendor, resources),
-        index
+        gulp.parallel(appJs, globalJs, globalSass, rollupVendor, rollupTest, resources),
+        gulp.parallel(jasmineTest, index)
     );
 }
 
@@ -257,12 +135,21 @@ gulp.task('default', gulp.series(build, function watch() {
     let componentTemplatePaths = ['src/**/*.html', '!src/index.html'];
 
     //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
-    gulp.watch(['src/**/*.ts', ...componentStylePaths, ...componentTemplatePaths], {usePolling: true}, gulp.series(appJs, index, reloadBrowser));
+    gulp.watch(
+        ['src/**/*.ts', '!src/vendor.ts', ...componentStylePaths, ...componentTemplatePaths],
+        {usePolling: true},
+        gulp.series(
+            gulp.parallel(appJs, rollupTest),
+            gulp.parallel(jasmineTest, gulp.series(index, reloadBrowser))
+        )
+    );
     gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index, reloadBrowser));
     gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
 
+    gulp.watch('test/specs/**/*.spec.ts', gulp.series(rollupTest, jasmineTest));
+
     if(!prodMode) {
-        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, index, reloadBrowser));
+        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, index, reloadBrowser, jasmineTest));
     }
 
     browserSync.init(null, {
