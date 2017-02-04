@@ -11,6 +11,7 @@ let jasmineBrowser = require('gulp-jasmine-browser');
 let gutil = require('gulp-util');
 let vendorUtils = require('./gulp/vendorBuildUtils');
 let {rollupApp, rollupVendor, rollupTest} = require('./gulp/rollupTasks');
+let plumber = require('gulp-plumber');
 
 let prodMode = argv.prod;
 
@@ -95,12 +96,27 @@ function reloadBrowser(done) {
     done();
 }
 
-function jasmineTest() {
+function runTests() {
+    let headless = jasmineBrowser.headless();
+    headless.on('error',function(){
+        headless.end();
+    });
+
     return gulp.src(['dist/global-*.js', 'dist/vendor-*.js', 'dist-test/**'])
+        .pipe(plumber())
+        //Uncomment the next two lines if you want to debug tests in a browser
+        //.pipe(jasmineBrowser.specRunner())
+        //.pipe(jasmineBrowser.server({port: 8888}))
         .pipe(jasmineBrowser.specRunner({console: true}))
-        .pipe(jasmineBrowser.headless())
+        .pipe(headless)
         //jasmineBrowser.headless() returns a lazy pipe which doesn't work with gulp 4 unless there is another pipe after it.
         //http://stackoverflow.com/a/40101404/373655
+        .pipe(gutil.noop());
+}
+
+function runTestsInBrowser() {
+    return gulp.src(['dist/global-*.js', 'dist/vendor-*.js', 'dist-test/**'])
+
         .pipe(gutil.noop());
 }
 
@@ -111,6 +127,7 @@ gulp.task('rollupApp', rollupApp);
 gulp.task('globalJs', globalJs);
 gulp.task('globalSass', globalSass);
 gulp.task('index', index);
+gulp.task('test', runTestsInBrowser);
 
 let appJs;
 let build;
@@ -124,7 +141,7 @@ if (prodMode) {
         clean,
         vendorUtils.generateVendorEntryPoint,
         gulp.parallel(appJs, globalJs, globalSass, rollupVendor, rollupTest, resources),
-        gulp.parallel(jasmineTest, index)
+        gulp.parallel(runTests, index)
     );
 }
 
@@ -140,16 +157,16 @@ gulp.task('default', gulp.series(build, function watch() {
         {usePolling: true},
         gulp.series(
             gulp.parallel(appJs, rollupTest),
-            gulp.parallel(jasmineTest, gulp.series(index, reloadBrowser))
+            gulp.parallel(runTests, gulp.series(index, reloadBrowser))
         )
     );
     gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index, reloadBrowser));
     gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
 
-    gulp.watch('test/specs/**/*.spec.ts', gulp.series(rollupTest, jasmineTest));
+    gulp.watch('test/**/*.spec.ts', gulp.series(rollupTest, runTests));
 
     if(!prodMode) {
-        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, index, reloadBrowser, jasmineTest));
+        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, index, reloadBrowser, runTests));
     }
 
     browserSync.init(null, {

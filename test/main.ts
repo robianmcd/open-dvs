@@ -1,1 +1,1 @@
-import './specs/test.spec';
+import './specs/waveformUtils.spec';

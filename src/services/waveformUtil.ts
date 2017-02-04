@@ -5,6 +5,8 @@ export class WaveformUtil {
 
     }
 
+    //Give the waveform a bit of a boost to make up for what gets lost from taking averages.
+    WAVEFORM_BOOST = 1.4;
 
     getWaveformData(buffer: AudioBuffer) {
         const numSamplesInPreview = 2000;
@@ -24,9 +26,59 @@ export class WaveformUtil {
         return {
             positiveSamples: previewPeakAvgs.positivePeakAvgs,
             negativeSamples: previewPeakAvgs.negativePeakAvgs,
-            previewSzie: numSamplesInPreview,
+            numSamples: numSamplesInPreview,
             compress100X
         };
+    }
+
+    projectWaveform(samples: number[], sampleRate: number, outputSize: number, startTime: number = undefined, endTime: number = undefined) {
+        let outputSamples = [];
+
+        if (startTime === undefined) {
+            startTime = 0;
+        }
+
+        if (endTime === undefined) {
+            endTime = samples.length / sampleRate;
+        }
+
+        //Tiny variations in the output length caused by the limitations of floading point percision cause the waveform
+        //to jitter so desiredOutputLength is rounded to 5 decimal places.
+        let desiredOutputLength = Math.round((endTime - startTime) * 100000) / 100000;
+        let samplesPerPixel = (desiredOutputLength * sampleRate) / outputSize;
+        let timePerPixel = samplesPerPixel / sampleRate;
+
+        let pixelOffset = Math.round(startTime / timePerPixel);
+
+        for (let col = 0; col < outputSize; col++) {
+            if(pixelOffset < 0 && col + pixelOffset < 0) {
+                outputSamples.push(0);
+                continue;
+            }
+
+            let firstSampleInBucketIndex = Math.floor((pixelOffset + col) * samplesPerPixel);
+            let lastSampleInBucketIndex = Math.floor((pixelOffset + col + 1) * samplesPerPixel);
+
+            //Make sure the samples for the current column are not outside of the samples array
+            firstSampleInBucketIndex = Math.min(firstSampleInBucketIndex, samples.length);
+            lastSampleInBucketIndex = Math.min(lastSampleInBucketIndex, samples.length);
+
+            let sum = 0;
+            for (let sampleI = firstSampleInBucketIndex; sampleI < lastSampleInBucketIndex; sampleI++) {
+                sum += samples[sampleI];
+            }
+
+            let mean: number;
+            if(lastSampleInBucketIndex - firstSampleInBucketIndex === 0) {
+                mean = 0;
+            } else {
+                mean = sum / (lastSampleInBucketIndex - firstSampleInBucketIndex);
+            }
+            mean = Math.min(1, mean * this.WAVEFORM_BOOST);
+            outputSamples.push(mean);
+        }
+
+        return outputSamples;
     }
 
     drawWaveform(canvas: HTMLCanvasElement, waveformDetails: WaveformDetails, themeId: ThemeId) {
@@ -50,79 +102,53 @@ export class WaveformUtil {
         let showNegative = !!waveformDetails.negativeSamples;
         let showBoth = showPositive && showNegative;
 
-        let waveformSize = waveformDetails.numSamples;
         let positiveWaveform = waveformDetails.positiveSamples;
         let negativeWaveform = waveformDetails.negativeSamples;
 
         let canvasCtx = canvas.getContext('2d');
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let previewSamplesPerPixel = Math.floor(waveformSize / canvas.width);
-
         for (let col = 0; col < canvas.width; col++) {
-            let firstSampleI = col * previewSamplesPerPixel;
-            let lastSampleI = Math.min(firstSampleI + previewSamplesPerPixel, waveformDetails.numSamples);
-
-            let positiveSum = 0;
-            let negativeSum = 0;
-            for (let sampleI = firstSampleI; sampleI < lastSampleI; sampleI++) {
-                showPositive && (positiveSum += positiveWaveform[sampleI]);
-                showNegative && (negativeSum += negativeWaveform[sampleI]);
-            }
-
-            let positiveMean;
-            if(showPositive) {
-                positiveMean = positiveSum / (lastSampleI - firstSampleI);
-                //Give the waveform a bit of a boost to make up for what gets lost from taking averages.
-                positiveMean = Math.min(1, positiveMean * 1.4);
-            }
-
-            let negativeMean;
-            if(showNegative) {
-                negativeMean = negativeSum / (lastSampleI - firstSampleI);
-                negativeMean = Math.min(1, negativeMean * 1.4);
-            }
-
             let topY;
             let bottomY;
             let startY;
             let halfWaveformHeight;
-            if(showBoth) {
-                topY = (1 - positiveMean) / 2 * canvas.height;
-                bottomY = (1 - negativeMean) / 2 * canvas.height;
+            if (showBoth) {
+                topY = (1 - positiveWaveform[col]) / 2 * canvas.height;
+                bottomY = (1 - negativeWaveform[col]) / 2 * canvas.height;
                 startY = canvas.height / 2;
                 halfWaveformHeight = canvas.height / 2;
-            } else if(showPositive) {
-                topY = (1 - positiveMean) * canvas.height;
+            } else if (showPositive) {
+                topY = (1 - positiveWaveform[col]) * canvas.height;
                 startY = canvas.height;
                 halfWaveformHeight = canvas.height;
             } else {
                 //This is a bit of a hack. Right now if showNegative is true all the values are actually positive.
                 //This is why the equation isn't (1 - negativeMean) * canvas.height
                 //Should find a better way of handling this
-                bottomY = negativeMean * canvas.height;
+                bottomY = negativeWaveform[col] * canvas.height;
                 startY = 0;
                 halfWaveformHeight = canvas.height;
             }
 
-            if(showPositive) {
+            if (showPositive) {
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, topY);
 
-                let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight-topY)/3);
+                let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
                 gradient.addColorStop(0, highlightColor);
                 gradient.addColorStop(1, mainColor);
                 canvasCtx.strokeStyle = gradient;
                 canvasCtx.stroke();
             }
 
-            if(showNegative) {
+            if (showNegative) {
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, bottomY);
 
-                let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY-halfWaveformHeight)/3);
+                let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
                 gradient.addColorStop(0, highlightColor);
                 gradient.addColorStop(1, mainColor);
                 canvasCtx.strokeStyle = gradient;
@@ -217,12 +243,12 @@ export class WaveformUtil {
             }
 
             let positiveMean = 0;
-            if(positiveCount > 0) {
+            if (positiveCount > 0) {
                 positiveMean = positiveSum / positiveCount;
             }
 
             let negativeMean = 0;
-            if(negativeCount > 0) {
+            if (negativeCount > 0) {
                 negativeMean = negativeSum / negativeCount;
             }
 

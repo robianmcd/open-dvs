@@ -73,7 +73,7 @@ export class Db {
         let waveformData = this.waveformUtil.getWaveformData(audioBuffer);
         songDetailsDraft.positiveSamples = waveformData.positiveSamples;
         songDetailsDraft.negativeSamples = waveformData.negativeSamples;
-        songDetailsDraft.numSamples = waveformData.previewSzie;
+        songDetailsDraft.numSamples = waveformData.numSamples;
 
         songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(songDetailsDraft, 150, 50, ThemeId.DEFAULT);
 

@@ -1,4 +1,4 @@
-import {Component, ViewChild, AfterViewInit, ElementRef} from "@angular/core";
+import {Component, ViewChild, AfterViewInit, ElementRef, NgZone} from "@angular/core";
 import {ActiveSongs} from "../../services/activeSongs";
 import {ActiveSong} from "../../services/activeSong";
 import {DeckId, ThemeId} from "../app.component";
@@ -27,7 +27,12 @@ export class CenterControlsComponent implements AfterViewInit {
         return this.deck2ElementRef.nativeElement;
     }
 
-    constructor(private activeSongs: ActiveSongs, private waveformUtil: WaveformUtil, private audioUtil: AudioUtil) {
+    constructor(
+        private activeSongs: ActiveSongs,
+        private waveformUtil: WaveformUtil,
+        private audioUtil: AudioUtil,
+        private ngZone: NgZone
+    ) {
         this.deck1ActiveSong = activeSongs.getActiveSong(DeckId.LEFT);
         this.deck2ActiveSong = activeSongs.getActiveSong(DeckId.RIGHT);
 
@@ -41,14 +46,16 @@ export class CenterControlsComponent implements AfterViewInit {
     }
 
     onSongChange(deckId: DeckId, song: Song) {
-        requestAnimationFrame(this.drawSong.bind(this, deckId, song));
+        this.ngZone.runOutsideAngular(() => {
+            requestAnimationFrame(this.drawSong.bind(this, deckId, song));
+        });
     }
 
     drawSong(deckId: DeckId, song: Song) {
         let waveformCanvas;
         let waveformDetails: WaveformDetails;
         let waveformName;
-        let activeSong;
+        let activeSong: ActiveSong;
 
         switch (deckId) {
             case DeckId.LEFT: {
@@ -67,41 +74,18 @@ export class CenterControlsComponent implements AfterViewInit {
 
         //TODO: when tempo slider is set multiple this by it
         let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
-        let numSamples = Math.round(compressedSampleRate * 6);
-        let samplesPerPixel = Math.floor(numSamples / waveformCanvas.width);
-        let firstSample = Math.round(activeSong.currentSongOffset * compressedSampleRate - numSamples / 2);
-        //This will make sure the first sample is a multiple of the number of samples per pixel. This ensures that if a
-        //group of samples is rendered together as a single pixel it will always be rendered as a single pixel.
-        //Without this the waveform will jitter.
-        firstSample = firstSample - (firstSample % samplesPerPixel);
-        let lastSample = firstSample + numSamples;
+        let startTime = activeSong.currentSongOffset - 3;
+        let endTime = activeSong.currentSongOffset + 3;
 
 
         waveformDetails = {
             negativeSamples: undefined,
             positiveSamples: undefined,
-            numSamples: numSamples
+            //TODO remove this as it is not used.
+            numSamples: 0
         };
 
-        let waveform = song.waveformCompressed100x.slice(
-            Math.max(0, firstSample),
-            Math.min(song.waveformCompressed100x.length, lastSample)
-        );
-
-        if (firstSample < 0) {
-            let numEmptySamples = firstSample * -1;
-            let emptySamples = new Array(numEmptySamples).fill(0);
-            waveform = [...emptySamples, ...waveform];
-        }
-
-        if(lastSample > song.waveformCompressed100x.length) {
-            let numEmptySamples = lastSample - song.waveformCompressed100x.length;
-            let emptySamples = new Array(numEmptySamples).fill(0);
-            waveform = [...waveform, ...emptySamples];
-        }
-
-        waveformDetails[waveformName] = waveform;
-
+        waveformDetails[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
         this.waveformUtil.drawWaveform(waveformCanvas, waveformDetails, ThemeId.fromDeckId(deckId));
 
         requestAnimationFrame(this.drawSong.bind(this, deckId, song));
