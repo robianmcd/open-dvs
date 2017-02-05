@@ -75,7 +75,13 @@ export class Db {
         songDetailsDraft.negativeSamples = waveformData.negativeSamples;
         songDetailsDraft.numSamples = waveformData.numSamples;
 
-        songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(songDetailsDraft, 150, 50, ThemeId.DEFAULT);
+        songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
+            waveformData.positiveSamples,
+            waveformData.negativeSamples,
+            150,
+            50,
+            ThemeId.DEFAULT
+        );
 
         if (tags) {
             let parsedTrack = parseInt(tags.track);
