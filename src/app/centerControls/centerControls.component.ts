@@ -1,4 +1,4 @@
-import {Component, ViewChild, AfterViewInit, ElementRef, NgZone} from "@angular/core";
+import {Component, ViewChild, AfterViewInit, ElementRef} from "@angular/core";
 import {ActiveSongs} from "../../services/activeSongs";
 import {ActiveSong} from "../../services/activeSong";
 import {DeckId, ThemeId} from "../app.component";
@@ -6,6 +6,7 @@ import {Song} from "../../models/song";
 import {WaveformUtil} from "../../services/waveformUtil";
 import {WaveformDetails} from "../../models/songDetails";
 import {AudioUtil} from "../../services/audioUtil";
+import {AnimationFrames} from "../../services/animationFrames.service";
 
 @Component({
     selector: 'center-controls',
@@ -31,13 +32,15 @@ export class CenterControlsComponent implements AfterViewInit {
         private activeSongs: ActiveSongs,
         private waveformUtil: WaveformUtil,
         private audioUtil: AudioUtil,
-        private ngZone: NgZone
+        private animationFrames: AnimationFrames
     ) {
         this.deck1ActiveSong = activeSongs.getActiveSong(DeckId.LEFT);
         this.deck2ActiveSong = activeSongs.getActiveSong(DeckId.RIGHT);
 
         this.deck1ActiveSong.songObservable.subscribe((song: Song) => this.onSongChange(DeckId.LEFT, song));
         this.deck2ActiveSong.songObservable.subscribe((song: Song) => this.onSongChange(DeckId.RIGHT, song));
+
+        animationFrames.frames.subscribe((time) => this.onAnimationFrame());
     }
 
     ngAfterViewInit() {
@@ -45,10 +48,18 @@ export class CenterControlsComponent implements AfterViewInit {
         this.deck2Canvas.width = this.deck2Canvas.parentElement.clientWidth;
     }
 
+    onAnimationFrame() {
+        if (this.deck1ActiveSong.isPlaying) {
+            this.drawSong(DeckId.LEFT, this.deck1ActiveSong.song);
+        }
+
+        if (this.deck2ActiveSong.isPlaying) {
+            this.drawSong(DeckId.RIGHT, this.deck2ActiveSong.song);
+        }
+    }
+
     onSongChange(deckId: DeckId, song: Song) {
-        this.ngZone.runOutsideAngular(() => {
-            requestAnimationFrame(this.drawSong.bind(this, deckId, song));
-        });
+        this.drawSong(deckId, song);
     }
 
     drawSong(deckId: DeckId, song: Song) {
@@ -71,7 +82,6 @@ export class CenterControlsComponent implements AfterViewInit {
             }
         }
 
-
         //TODO: when tempo slider is set multiple this by it
         let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
         let startTime = activeSong.currentSongOffset - 3;
@@ -87,7 +97,5 @@ export class CenterControlsComponent implements AfterViewInit {
 
         waveformDetails[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
         this.waveformUtil.drawWaveform(waveformCanvas, waveformDetails, ThemeId.fromDeckId(deckId));
-
-        requestAnimationFrame(this.drawSong.bind(this, deckId, song));
     }
 }

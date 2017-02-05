@@ -12,13 +12,14 @@ import {DeckComponent} from "./deck/deck.component";
 import {CenterControlsComponent} from "./centerControls/centerControls.component";
 import {WaveformUtil} from "../services/waveformUtil";
 import {ActiveSongs} from "../services/activeSongs";
+import {AnimationFrames} from "../services/animationFrames.service";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent, CenterControlsComponent],
     bootstrap: [AppComponent],
-    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs]
+    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames]
 })
 
 export class AppModule {

@@ -5,6 +5,7 @@ import {WaveformUtil} from "../../services/waveformUtil";
 import {DeckId, ThemeId} from "../app.component";
 import {ActiveSongs} from "../../services/activeSongs";
 import {ActiveSong} from "../../services/activeSong";
+import {AnimationFrames} from "../../services/animationFrames.service";
 
 @Component({
     selector: 'deck',
@@ -15,8 +16,13 @@ export class DeckComponent implements OnInit {
     @Input() deckId: DeckId;
     activeSong: ActiveSong;
 
-    constructor(private elementRef: ElementRef, private waveformUtil: WaveformUtil, private activeSongs: ActiveSongs) {
-
+    constructor(
+        private elementRef: ElementRef,
+        private waveformUtil: WaveformUtil,
+        private activeSongs: ActiveSongs,
+        private animationFrames: AnimationFrames)
+    {
+        animationFrames.frames.subscribe((time) => this.onAnimationFrame());
     }
 
     ngOnInit() {
@@ -37,6 +43,12 @@ export class DeckComponent implements OnInit {
             } else {
                 this.activeSong.playBuffer();
             }
+        }
+    }
+
+    onAnimationFrame() {
+        if (this.activeSong.isPlaying) {
+            this.drawWaveform(this.activeSong.song.details);
         }
     }
 

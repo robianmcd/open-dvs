@@ -4,6 +4,8 @@ import {DeckId} from "../app/app.component";
 import {ReplaySubject} from "rxjs";
 
 export class ActiveSong {
+    public song: Song;
+
     private song$ = new ReplaySubject<Song>();
     private source: AudioBufferSourceNode;
     private buffer: AudioBuffer;
@@ -17,7 +19,7 @@ export class ActiveSong {
         private deckId: DeckId,
         private audioUtil: AudioUtil)
     {
-
+        this.song$.subscribe((song) => this.song = song);
     }
 
     get isPlaying() {
