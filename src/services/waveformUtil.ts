@@ -51,7 +51,7 @@ export class WaveformUtil {
         let pixelOffset = Math.round(startTime / timePerPixel);
 
         for (let col = 0; col < outputSize; col++) {
-            if(pixelOffset < 0 && col + pixelOffset < 0) {
+            if (pixelOffset < 0 && col + pixelOffset < 0) {
                 outputSamples.push(0);
                 continue;
             }
@@ -69,7 +69,7 @@ export class WaveformUtil {
             }
 
             let mean: number;
-            if(lastSampleInBucketIndex - firstSampleInBucketIndex === 0) {
+            if (lastSampleInBucketIndex - firstSampleInBucketIndex === 0) {
                 mean = 0;
             } else {
                 mean = sum / (lastSampleInBucketIndex - firstSampleInBucketIndex);
@@ -81,7 +81,7 @@ export class WaveformUtil {
         return outputSamples;
     }
 
-    drawWaveform(canvas: HTMLCanvasElement, waveformDetails: WaveformDetails, themeId: ThemeId) {
+    drawWaveform({canvas, themeId, positiveSamples, negativeSamples, firstColorPixel}: DrawWaveformOptions) {
         let mainColor;
         let highlightColor;
         switch (themeId) {
@@ -98,12 +98,12 @@ export class WaveformUtil {
                 highlightColor = '#a6a6a6';
                 break;
         }
-        let showPositive = !!waveformDetails.positiveSamples;
-        let showNegative = !!waveformDetails.negativeSamples;
+        let showPositive = !!positiveSamples;
+        let showNegative = !!negativeSamples;
         let showBoth = showPositive && showNegative;
 
-        let positiveWaveform = waveformDetails.positiveSamples;
-        let negativeWaveform = waveformDetails.negativeSamples;
+        let positiveWaveform = positiveSamples;
+        let negativeWaveform = negativeSamples;
 
         let canvasCtx = canvas.getContext('2d');
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -131,14 +131,22 @@ export class WaveformUtil {
                 halfWaveformHeight = canvas.height;
             }
 
+            let curPixedMainColor = mainColor;
+            let curPixelHighlightColor = highlightColor;
+
+            if(firstColorPixel !== undefined && firstColorPixel > col) {
+                curPixedMainColor = '#5b5b5b';
+                curPixelHighlightColor = '#a6a6a6';
+            }
+
             if (showPositive) {
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, topY);
 
                 let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
-                gradient.addColorStop(0, highlightColor);
-                gradient.addColorStop(1, mainColor);
+                gradient.addColorStop(0, curPixelHighlightColor);
+                gradient.addColorStop(1, curPixedMainColor);
                 canvasCtx.strokeStyle = gradient;
                 canvasCtx.stroke();
             }
@@ -149,20 +157,20 @@ export class WaveformUtil {
                 canvasCtx.lineTo(col, bottomY);
 
                 let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
-                gradient.addColorStop(0, highlightColor);
-                gradient.addColorStop(1, mainColor);
+                gradient.addColorStop(0, curPixelHighlightColor);
+                gradient.addColorStop(1, curPixedMainColor);
                 canvasCtx.strokeStyle = gradient;
                 canvasCtx.stroke();
             }
         }
     }
 
-    generateDataUrlWaveform(waveformDetails: WaveformDetails, width: number, height: number, themeId: ThemeId) {
+    generateDataUrlWaveform(positiveSamples: number[], negativeSamples: number[], width: number, height: number, themeId: ThemeId) {
         let canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
 
-        this.drawWaveform(canvas, waveformDetails, themeId);
+        this.drawWaveform({canvas, positiveSamples, negativeSamples, themeId});
 
         return canvas.toDataURL();
     }
@@ -263,3 +271,10 @@ export class WaveformUtil {
     }
 }
 
+export interface DrawWaveformOptions {
+    canvas: HTMLCanvasElement,
+    themeId: ThemeId,
+    positiveSamples?: number[],
+    negativeSamples?: number[],
+    firstColorPixel?: number
+}

@@ -58,24 +58,27 @@ export class DeckComponent implements OnInit {
         //Note: setting the width clears the canvas but that's ok because drawWaveform is going to clear it anyway
         waveformElem.width = deckElem.clientWidth;
 
-        let waveformDetails = {
-            numSamples: songDetails.positiveSamples.length,
-            positiveSamples: undefined,
-            negativeSamples: undefined
-        };
-
-        waveformDetails.positiveSamples = this.waveformUtil.projectWaveform(
+        let positiveSamples = this.waveformUtil.projectWaveform(
             songDetails.positiveSamples,
             songDetails.positiveSamples.length / songDetails.lengthSeconds,
             waveformElem.width
         );
 
-        waveformDetails.negativeSamples = this.waveformUtil.projectWaveform(
+        let negativeSamples = this.waveformUtil.projectWaveform(
             songDetails.negativeSamples,
             songDetails.negativeSamples.length / songDetails.lengthSeconds,
             waveformElem.width
         );
 
-        this.waveformUtil.drawWaveform(waveformElem, waveformDetails, ThemeId.fromDeckId(this.deckId));
+        let relativeSongOffset = this.activeSong.currentSongOffset / this.activeSong.song.details.lengthSeconds;
+        let curSample = Math.round(relativeSongOffset * waveformElem.width);
+
+        this.waveformUtil.drawWaveform({
+            canvas: waveformElem,
+            themeId: ThemeId.fromDeckId(this.deckId),
+            positiveSamples,
+            negativeSamples,
+            firstColorPixel: curSample
+        });
     }
 }

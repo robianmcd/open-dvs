@@ -3,7 +3,7 @@ import {ActiveSongs} from "../../services/activeSongs";
 import {ActiveSong} from "../../services/activeSong";
 import {DeckId, ThemeId} from "../app.component";
 import {Song} from "../../models/song";
-import {WaveformUtil} from "../../services/waveformUtil";
+import {WaveformUtil, DrawWaveformOptions} from "../../services/waveformUtil";
 import {WaveformDetails} from "../../models/songDetails";
 import {AudioUtil} from "../../services/audioUtil";
 import {AnimationFrames} from "../../services/animationFrames.service";
@@ -64,7 +64,7 @@ export class CenterControlsComponent implements AfterViewInit {
 
     drawSong(deckId: DeckId, song: Song) {
         let waveformCanvas;
-        let waveformDetails: WaveformDetails;
+        let drawOptions: DrawWaveformOptions;
         let waveformName;
         let activeSong: ActiveSong;
 
@@ -88,14 +88,12 @@ export class CenterControlsComponent implements AfterViewInit {
         let endTime = activeSong.currentSongOffset + 3;
 
 
-        waveformDetails = {
-            negativeSamples: undefined,
-            positiveSamples: undefined,
-            //TODO remove this as it is not used.
-            numSamples: 0
+        drawOptions = {
+            canvas: waveformCanvas,
+            themeId: ThemeId.fromDeckId(deckId),
         };
+        drawOptions[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
 
-        waveformDetails[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
-        this.waveformUtil.drawWaveform(waveformCanvas, waveformDetails, ThemeId.fromDeckId(deckId));
+        this.waveformUtil.drawWaveform(drawOptions);
     }
 }
