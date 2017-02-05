@@ -6,6 +6,7 @@ import {Song} from "../../models/song";
 import {WaveformUtil, DrawWaveformOptions} from "../../services/waveformUtil";
 import {AudioUtil} from "../../services/audioUtil";
 import {AnimationFrames} from "../../services/animationFrames.service";
+import {DocumentEvents} from "../../services/documentEvents.service";
 
 @Component({
     selector: 'center-controls',
@@ -13,8 +14,15 @@ import {AnimationFrames} from "../../services/animationFrames.service";
     styleUrls: ['centerControls.component.css']
 })
 export class CenterControlsComponent implements AfterViewInit {
+    DeckId = DeckId;
+
     deck1ActiveSong: ActiveSong;
     deck2ActiveSong: ActiveSong;
+
+    activeScrubDeck: DeckId;
+    scrubOrigSongOffset: number;
+    scrubOrigScreenX: number;
+    resumePlayingAfterScrub: boolean;
 
     @ViewChild('deck1Canvas') deck1ElementRef: ElementRef;
     @ViewChild('deck2Canvas') deck2ElementRef: ElementRef;
@@ -31,7 +39,8 @@ export class CenterControlsComponent implements AfterViewInit {
         private activeSongs: ActiveSongs,
         private waveformUtil: WaveformUtil,
         private audioUtil: AudioUtil,
-        private animationFrames: AnimationFrames
+        private animationFrames: AnimationFrames,
+        private documentEvents: DocumentEvents
     ) {
         this.deck1ActiveSong = activeSongs.getActiveSong(DeckId.LEFT);
         this.deck2ActiveSong = activeSongs.getActiveSong(DeckId.RIGHT);
@@ -40,6 +49,10 @@ export class CenterControlsComponent implements AfterViewInit {
         this.deck2ActiveSong.songObservable.subscribe((song: Song) => this.onSongChange(DeckId.RIGHT, song));
 
         animationFrames.frames.subscribe((time) => this.onAnimationFrame());
+
+        this.documentEvents.mouseMove.subscribe((event) => this.onMouseMove(event));
+        this.documentEvents.mouseUp.subscribe((event) => this.endScrub(event));
+        this.documentEvents.dragEnd.subscribe((event) => this.endScrub(event));
     }
 
     ngAfterViewInit() {
@@ -48,11 +61,11 @@ export class CenterControlsComponent implements AfterViewInit {
     }
 
     onAnimationFrame() {
-        if (this.deck1ActiveSong.isPlaying) {
+        if (this.deck1ActiveSong.isLoaded) {
             this.drawSong(DeckId.LEFT, this.deck1ActiveSong.song);
         }
 
-        if (this.deck2ActiveSong.isPlaying) {
+        if (this.deck2ActiveSong.isLoaded) {
             this.drawSong(DeckId.RIGHT, this.deck2ActiveSong.song);
         }
     }
@@ -95,4 +108,51 @@ export class CenterControlsComponent implements AfterViewInit {
 
         this.waveformUtil.drawWaveform(drawOptions);
     }
+
+    onMouseMove(event: MouseEvent) {
+        if(this.activeScrubDeck) {
+            let activeSong = this.getActiveSongFromDeckId(this.activeScrubDeck);
+
+            let pixelsPerSecond = this.deck1Canvas.offsetWidth / 6;
+            let deltaX = this.scrubOrigScreenX - event.screenX;
+            let newSongOffset = this.scrubOrigSongOffset + (deltaX / pixelsPerSecond);
+            newSongOffset = Math.max(0, newSongOffset);
+            newSongOffset = Math.min(activeSong.song.details.lengthSeconds, newSongOffset);
+            activeSong.setSongOffset(newSongOffset);
+        }
+    }
+
+    endScrub(event: MouseEvent) {
+        if(this.activeScrubDeck !== undefined) {
+            let activeSong = this.getActiveSongFromDeckId(this.activeScrubDeck);
+            if(this.resumePlayingAfterScrub) {
+                activeSong.playBuffer();
+            }
+
+            this.activeScrubDeck = undefined;
+            document.body.classList.remove('scrubbing');
+        }
+    }
+
+    startScrub(deckId: DeckId, event: MouseEvent) {
+        let activeSong = this.getActiveSongFromDeckId(deckId);
+        if(activeSong.isLoaded) {
+            this.activeScrubDeck = deckId;
+            this.resumePlayingAfterScrub = activeSong.isPlaying;
+            this.scrubOrigSongOffset = activeSong.currentSongOffset;
+            this.scrubOrigScreenX = event.screenX;
+
+            activeSong.isPlaying && activeSong.pauseBuffer();
+            document.body.classList.add('scrubbing');
+        }
+    }
+
+    getActiveSongFromDeckId(deckId: DeckId) {
+        if(deckId === DeckId.LEFT) {
+            return this.deck1ActiveSong;
+        } else {
+            return this.deck2ActiveSong;
+        }
+    }
+
 }

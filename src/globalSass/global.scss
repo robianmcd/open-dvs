@@ -3,7 +3,6 @@
 @import 'material/materialTheme';
 @import 'material/palettes';
 
-
 body {
   margin: 0;
   min-width: 1152px;
@@ -11,4 +10,11 @@ body {
 
 html, body, md-sidenav-container {
   height: 100%;
+}
+
+.scrubbing * {
+  cursor: -webkit-grabbing !important;
+  cursor: -moz-grabbing !important;
+  cursor: grabbing !important;
+  user-select: none;
 }

@@ -1,8 +1,14 @@
 <div id="center-controls">
     <div>
-        <canvas height="100" width="1" style="width: 100%; height: 100px" #deck1Canvas></canvas>
+        <canvas height="100" width="1" class="waveform"
+                #deck1Canvas (mousedown)="startScrub(DeckId.LEFT, $event)"
+                [class.scrubbable]="deck1ActiveSong.isLoaded">
+        </canvas>
     </div>
     <div>
-        <canvas height="100" width="1" style="width: 100%; height: 100px" #deck2Canvas></canvas>
+        <canvas height="100" width="1" class="waveform"
+                #deck2Canvas (mousedown)="startScrub(DeckId.RIGHT, $event)"
+                [class.scrubbable]="deck2ActiveSong.isLoaded">
+        </canvas>
     </div>
 </div>
