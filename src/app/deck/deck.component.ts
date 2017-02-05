@@ -1,6 +1,6 @@
 import {Song} from "../../models/song";
 import {SongDetails} from "../../models/songDetails";
-import {Component, ElementRef, Input, OnInit} from "@angular/core";
+import {Component, ElementRef, Input, OnInit, AfterViewInit} from "@angular/core";
 import {WaveformUtil} from "../../services/waveformUtil";
 import {DeckId, ThemeId} from "../app.component";
 import {ActiveSongs} from "../../services/activeSongs";
@@ -12,21 +12,28 @@ import {AnimationFrames} from "../../services/animationFrames.service";
     templateUrl: 'deck.component.html',
     styleUrls: ['deck.component.css']
 })
-export class DeckComponent implements OnInit {
+export class DeckComponent implements OnInit, AfterViewInit {
     @Input() deckId: DeckId;
     activeSong: ActiveSong;
+    deckElem: HTMLElement;
+    waveformElem: HTMLCanvasElement;
 
     constructor(
         private elementRef: ElementRef,
         private waveformUtil: WaveformUtil,
         private activeSongs: ActiveSongs,
-        private animationFrames: AnimationFrames)
-    {
+        private animationFrames: AnimationFrames
+    ) {
         animationFrames.frames.subscribe((time) => this.onAnimationFrame());
     }
 
     ngOnInit() {
         this.activeSong = this.activeSongs.getActiveSong(this.deckId);
+    }
+
+    ngAfterViewInit() {
+        this.deckElem = <HTMLElement>this.elementRef.nativeElement;
+        this.waveformElem = <HTMLCanvasElement>this.deckElem.querySelector('.waveform');
     }
 
     loadSong(song: Song) {
@@ -47,38 +54,43 @@ export class DeckComponent implements OnInit {
     }
 
     onAnimationFrame() {
-        if (this.activeSong.isPlaying) {
+        if (this.activeSong.isLoaded) {
             this.drawWaveform(this.activeSong.song.details);
         }
     }
 
     drawWaveform(songDetails: SongDetails) {
-        let deckElem = <HTMLElement>this.elementRef.nativeElement;
-        let waveformElem = <HTMLCanvasElement>deckElem.querySelector('.waveform');
         //Note: setting the width clears the canvas but that's ok because drawWaveform is going to clear it anyway
-        waveformElem.width = deckElem.clientWidth;
+        this.waveformElem.width = this.waveformElem.offsetWidth;
 
         let positiveSamples = this.waveformUtil.projectWaveform(
             songDetails.positiveSamples,
             songDetails.positiveSamples.length / songDetails.lengthSeconds,
-            waveformElem.width
+            this.waveformElem.width
         );
 
         let negativeSamples = this.waveformUtil.projectWaveform(
             songDetails.negativeSamples,
             songDetails.negativeSamples.length / songDetails.lengthSeconds,
-            waveformElem.width
+            this.waveformElem.width
         );
 
         let relativeSongOffset = this.activeSong.currentSongOffset / this.activeSong.song.details.lengthSeconds;
-        let curSample = Math.round(relativeSongOffset * waveformElem.width);
+        let curSample = Math.round(relativeSongOffset * this.waveformElem.width);
 
         this.waveformUtil.drawWaveform({
-            canvas: waveformElem,
+            canvas: this.waveformElem,
             themeId: ThemeId.fromDeckId(this.deckId),
             positiveSamples,
             negativeSamples,
             firstColorPixel: curSample
         });
+    }
+
+    onCanvasClick(event) {
+        if (this.activeSong.isLoaded) {
+            let relativeSongOffse = event.offsetX / this.waveformElem.offsetWidth;
+            this.activeSong.setSongOffset(relativeSongOffse * this.activeSong.song.details.lengthSeconds);
+        }
     }
 }

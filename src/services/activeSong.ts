@@ -39,9 +39,14 @@ export class ActiveSong {
         return this.songOffset + songOffsetSinceLastRecording;
     }
 
-    private updateSongOffset() {
-        this.songOffset = this.currentSongOffset;
+    setSongOffset(time) {
+        this.songOffset = time;
         this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+
+        if(this.isPlaying) {
+            this.pauseBuffer();
+            this.playBuffer();
+        }
     }
 
     loadSong(song: Song) {
@@ -83,5 +88,10 @@ export class ActiveSong {
             this.source.stop();
             this.source = undefined;
         }
+    }
+
+    private updateSongOffset() {
+        this.songOffset = this.currentSongOffset;
+        this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
     }
 }

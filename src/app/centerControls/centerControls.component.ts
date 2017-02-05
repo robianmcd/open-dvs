@@ -4,7 +4,6 @@ import {ActiveSong} from "../../services/activeSong";
 import {DeckId, ThemeId} from "../app.component";
 import {Song} from "../../models/song";
 import {WaveformUtil, DrawWaveformOptions} from "../../services/waveformUtil";
-import {WaveformDetails} from "../../models/songDetails";
 import {AudioUtil} from "../../services/audioUtil";
 import {AnimationFrames} from "../../services/animationFrames.service";
 
@@ -44,8 +43,8 @@ export class CenterControlsComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.deck1Canvas.width = this.deck1Canvas.parentElement.clientWidth;
-        this.deck2Canvas.width = this.deck2Canvas.parentElement.clientWidth;
+        this.deck1Canvas.width = this.deck1Canvas.offsetWidth;
+        this.deck2Canvas.width = this.deck2Canvas.offsetWidth;
     }
 
     onAnimationFrame() {

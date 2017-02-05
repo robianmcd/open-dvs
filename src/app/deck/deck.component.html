@@ -1,7 +1,10 @@
 <div id="deck">
     <div>
         <div>
-            <canvas height="76" width="1" class="waveform" style="height: 76px; width: 100%"></canvas>
+            <canvas height="76" width="1"
+                    class="waveform" [class.clickable]="activeSong.isLoaded"
+                    (click)="onCanvasClick($event)">
+            </canvas>
         </div>
         <div>
             <button (click)="playPause()" [disabled]="!activeSong.isLoaded" md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
