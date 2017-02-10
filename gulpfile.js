@@ -73,7 +73,7 @@ let globalSass = gulp.series(
 
 //Add anything that just needs to be copied into the dist folder here
 let resources = function () {
-    return gulp.src(['src/**/*.ico'])
+    return gulp.src(['src/**/*.ico', 'src/**/*.svg'])
         .pipe(gulp.dest('dist'));
 };
 

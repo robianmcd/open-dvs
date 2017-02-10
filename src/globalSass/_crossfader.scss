@@ -1,0 +1,28 @@
+.crossfader {
+  cursor: pointer;
+
+  .md-slider-thumb {
+    border-left: 6px solid #5b5b5b;
+    border-right: 6px solid #5b5b5b;
+    border-top: 4px solid #5b5b5b;
+    border-bottom: 4px solid #5b5b5b;
+
+    border-radius: 0;
+    //right border / 2 + width / 2
+    right: -4px;
+    width: 2px;
+    height: 30px;
+    //bottom border / 2 + height / 2
+    bottom: -17px;
+    transform: scale(1);
+
+  }
+
+  &.md-slider-horizontal {
+    width: 250px;
+  }
+
+  .md-slider-track-fill {
+    background-color: black;
+  }
+}

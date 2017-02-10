@@ -14,12 +14,16 @@ export class ActiveSong {
     private songOffset: number;
 
     private playbackRate = 0;
+    private gainNode: GainNode;
 
     constructor(
         private deckId: DeckId,
         private audioUtil: AudioUtil)
     {
         this.song$.subscribe((song) => this.song = song);
+
+        this.gainNode = this.audioUtil.context.createGain();
+        this.gainNode.connect(this.audioUtil.context.destination);
     }
 
     get isPlaying() {
@@ -71,12 +75,12 @@ export class ActiveSong {
             }
 
             this.updateSongOffset();
-            //todo: replace 1 with value of the temo slider
+            //todo: replace 1 with value of the tempo slider
             this.playbackRate = 1;
             this.source = context.createBufferSource();
             this.source.playbackRate.value = this.playbackRate;
             this.source.buffer = this.buffer;
-            this.source.connect(context.destination);
+            this.source.connect(this.gainNode);
             this.source.start(context.currentTime, this.songOffset);
         }
     }
@@ -88,6 +92,10 @@ export class ActiveSong {
             this.source.stop();
             this.source = undefined;
         }
+    }
+
+    setGain(gain: number) {
+        this.gainNode.gain.value = gain;
     }
 
     private updateSongOffset() {

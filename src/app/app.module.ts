@@ -14,11 +14,12 @@ import {WaveformUtil} from "../services/waveformUtil";
 import {ActiveSongs} from "../services/activeSongs";
 import {AnimationFrames} from "../services/animationFrames.service";
 import {DocumentEvents} from "../services/documentEvents.service";
+import {CrossfaderComponent} from "./centerControls/crossfader/crossfader.component";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
-    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent, CenterControlsComponent],
+    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent, CenterControlsComponent, CrossfaderComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames, DocumentEvents]
 })

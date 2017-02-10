@@ -2,16 +2,16 @@
 @import 'palettes';
 
 // Include the base styles for Angular Material core.
-@include md-core();
+@include mat-core();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue.
-$dvs-grey-palette: md-palette($dvs-grey);
-$dvs-purple-palette:  md-palette($dvs-purple);
+$dvs-grey-palette: mat-palette($dvs-grey);
+$dvs-purple-palette:  mat-palette($dvs-purple);
 
 //Override material default dark theme background colors
-$md-dark-theme-background: (
+$mat-dark-theme-background: (
         status-bar: black,
         app-bar:    $background-color,
         background: $background-color,
@@ -22,24 +22,24 @@ $md-dark-theme-background: (
 );
 
 // Create the theme object (a Sass map containing all of the palettes).
-$app-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-white));
-$deck1-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-purple));
-$deck2-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-blue));
+$app-theme: mat-dark-theme(mat-palette($dvs-grey), mat-palette($dvs-white));
+$deck1-theme: mat-dark-theme(mat-palette($dvs-grey), mat-palette($dvs-purple));
+$deck2-theme: mat-dark-theme(mat-palette($dvs-grey), mat-palette($dvs-blue));
 
 @mixin button-pseudo-selectors($hover, $active) {
-  [md-raised-button].md-primary:hover:not([disabled]) {
+  [mat-raised-button].mat-primary:hover:not([disabled]) {
     background-color: map_get($dvs-grey, 400);
   }
 
-  [md-raised-button].md-primary:active:not([disabled]) {
+  [mat-raised-button].mat-primary:active:not([disabled]) {
     background-color: map_get($dvs-grey, 600);
   }
 
-  [md-raised-button].md-accent:hover:not([disabled]) {
+  [mat-raised-button].mat-accent:hover:not([disabled]) {
     background-color: $hover;
   }
 
-  [md-raised-button].md-accent:active:not([disabled]) {
+  [mat-raised-button].mat-accent:active:not([disabled]) {
     background-color: $active;
   }
 }
@@ -61,15 +61,19 @@ $deck2-theme: md-dark-theme(md-palette($dvs-grey), md-palette($dvs-blue));
   @include button-pseudo-selectors(map_get($dvs-blue, 400), map_get($dvs-blue, 600));
 }
 
-[md-raised-button] {
+[mat-raised-button] {
   font-weight: bold;
 }
 
-[md-raised-button], [md-raised-button]:active {
+[mat-raised-button], [mat-raised-button]:active {
   box-shadow: none;
 }
 
-md-grid-tile figure {
+mat-grid-tile figure {
   align-items: stretch;
   justify-content: flex-start;
+}
+
+.mat-slide-toggle.mat-slide-toggle-focused .mat-ink-ripple {
+  opacity: 0;
 }

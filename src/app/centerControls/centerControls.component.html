@@ -11,4 +11,13 @@
                 [class.scrubbable]="deck2ActiveSong.isLoaded">
         </canvas>
     </div>
+    <div style="position: relative; left: -3px; top: 2px;">
+        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 0;"></div>
+        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 62px;"></div>
+        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 125px;"></div>
+        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 187px;"></div>
+        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 250px;"></div>
+    </div>
+    <crossfader (change)="crossfaderChange($event)"></crossfader>
+
 </div>

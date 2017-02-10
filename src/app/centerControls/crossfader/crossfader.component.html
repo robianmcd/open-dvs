@@ -1,0 +1,21 @@
+<div>
+    <md-slider class="crossfader" [min]="0" [max]="1" [step]="1/128" [value]="sliderValue.getValue()" (input)="sliderValue.next($event.value)"></md-slider>
+    <div>
+        <img (click)="curveSharpness.next(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">
+        <!--
+        TODO: replace the change event with an input event when this commit makes it to npm
+        https://github.com/angular/material2/commit/99963c4fd182b490241e4b25f08e948020d7ced8
+        or use the master build with
+        npm install --save https://github.com/angular/material2-builds.git
+        -->
+        <md-slide-toggle
+                [checked]="curveSharpness.getValue() === 1"
+                (change)="curveSharpness.next($event.checked? 1 : 0)"
+                class="curveTypeToggle" style="display:inline-block; position:relative; left:3px; top:7px;">
+        </md-slide-toggle>
+        <img (click)="curveSharpness.next(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">
+    </div>
+    <div >
+        CF Curve
+    </div>
+</div>

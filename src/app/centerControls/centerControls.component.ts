@@ -7,6 +7,7 @@ import {WaveformUtil, DrawWaveformOptions} from "../../services/waveformUtil";
 import {AudioUtil} from "../../services/audioUtil";
 import {AnimationFrames} from "../../services/animationFrames.service";
 import {DocumentEvents} from "../../services/documentEvents.service";
+import {CrossfaderChangeEvent} from "./crossfader/crossfader.component";
 
 @Component({
     selector: 'center-controls',
@@ -153,6 +154,11 @@ export class CenterControlsComponent implements AfterViewInit {
         } else {
             return this.deck2ActiveSong;
         }
+    }
+
+    crossfaderChange({leftGain, rightGain}: CrossfaderChangeEvent) {
+        this.deck1ActiveSong.setGain(leftGain);
+        this.deck2ActiveSong.setGain(rightGain);
     }
 
 }
