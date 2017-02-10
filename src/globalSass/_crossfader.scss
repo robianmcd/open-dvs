@@ -1,28 +1,42 @@
 .crossfader {
   cursor: pointer;
 
-  .md-slider-thumb {
+  .mat-slider-thumb {
     border-left: 6px solid #5b5b5b;
     border-right: 6px solid #5b5b5b;
     border-top: 4px solid #5b5b5b;
     border-bottom: 4px solid #5b5b5b;
 
     border-radius: 0;
-    //right border / 2 + width / 2
     right: -4px;
-    width: 2px;
-    height: 30px;
-    //bottom border / 2 + height / 2
+    width: 13px;
+    height: 38px;
     bottom: -17px;
     transform: scale(1);
 
   }
 
-  &.md-slider-horizontal {
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+    border-color: #5b5b5b;
+    background-color: white;
+  }
+
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing):hover .mat-slider-thumb,
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing).mat-slider-active .mat-slider-thumb {
+    border-color: #5b5b5b;
+  }
+
+  &.mat-slider-horizontal {
     width: 250px;
   }
 
-  .md-slider-track-fill {
+  .mat-slider-track-fill {
     background-color: black;
+  }
+
+  &.mat-slider-horizontal .mat-slider-track-background,
+  .mat-slider-track-fill
+  {
+    transform: translateX(0px) scaleX(1) !important
   }
 }

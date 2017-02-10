@@ -23,7 +23,6 @@ export class CrossfaderComponent {
 
     getGain(sliderValue, curveSharpness) {
         let equalPowerValue = Math.cos(sliderValue * Math.PI / 2);
-
         return Math.min(1, equalPowerValue * (curveSharpness * 19 + 1));
     }
 
