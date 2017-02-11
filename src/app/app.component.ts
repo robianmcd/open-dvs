@@ -2,6 +2,7 @@ import {Component, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
 import moment from 'moment';
 import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
+import {SideNav, SideNavState} from "../services/sidenav.service";
 
 @Component({
     selector: 'my-app',
@@ -14,7 +15,9 @@ export class AppComponent implements AfterViewInit {
     deck1: DeckComponent;
     deck2: DeckComponent;
 
-    constructor() {
+    SideNavState = SideNavState;
+
+    constructor(public sideNav: SideNav) {
         let sampleMomentUsage = moment().format();
     }
 
@@ -25,6 +28,10 @@ export class AppComponent implements AfterViewInit {
     onLoadSong({song, deckId}: LoadSongEvent) {
         let deck: DeckComponent = this[`deck${deckId}`];
         deck.loadSong(song);
+    }
+
+    onCloseSideNav() {
+        this.sideNav.setState(SideNavState.Closed);
     }
 }
 

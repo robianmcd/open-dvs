@@ -1,4 +1,7 @@
 <md-sidenav-container>
+    <md-sidenav [opened]="(sideNav.state$ | async) !== SideNavState.Closed" (close)="onCloseSideNav()">
+        <side-nav></side-nav>
+    </md-sidenav>
     <div  class="main-content">
         <md-toolbar>
             <toolbar></toolbar>

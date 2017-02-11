@@ -1,4 +1,5 @@
 import {Component} from "@angular/core";
+import {SideNav, SideNavState} from "../../services/sidenav.service";
 
 @Component({
     selector: 'toolbar',
@@ -6,8 +7,24 @@ import {Component} from "@angular/core";
     styleUrls: ['toolbar.component.css']
 })
 export class ToolbarComponent {
-    constructor() {
+    constructor(private sideNav: SideNav) {
 
+    }
+
+    toggleMidiSettings() {
+        if(this.sideNav.getState() === SideNavState.Midi) {
+            this.sideNav.setState(SideNavState.Closed);
+        } else {
+            this.sideNav.setState(SideNavState.Midi);
+        }
+    }
+
+    toggleAudioSettings() {
+        if(this.sideNav.getState() === SideNavState.Audio) {
+            this.sideNav.setState(SideNavState.Closed);
+        } else {
+            this.sideNav.setState(SideNavState.Audio);
+        }
     }
 
     toggleFullScreen() {

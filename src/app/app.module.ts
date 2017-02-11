@@ -15,13 +15,18 @@ import {ActiveSongs} from "../services/activeSongs";
 import {AnimationFrames} from "../services/animationFrames.service";
 import {DocumentEvents} from "../services/documentEvents.service";
 import {CrossfaderComponent} from "./centerControls/crossfader/crossfader.component";
+import {SideNav} from "../services/sidenav.service";
+import {SideNavComponent} from "./sideNav/sideNav.component";
+import {AudioSettingsComponent} from "./sideNav/audioSettings.component";
+import {MidiSettingsComponent} from "./sideNav/midiSettings.component";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
-    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent, CenterControlsComponent, CrossfaderComponent],
+    declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
+        CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent],
     bootstrap: [AppComponent],
-    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames, DocumentEvents]
+    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames, DocumentEvents, SideNav]
 })
 
 export class AppModule {
