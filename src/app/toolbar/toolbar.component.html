@@ -1,3 +1,25 @@
-<div>
-    Open DVS
+<div id="toolbar">
+    <div>
+        Open DVS
+    </div>
+    <div class="right-toolbar">
+        <div class="toolbar-item" title="MIDI settings">
+            <span class="icon-midi"></span>
+        </div>
+        <div class="toolbar-item" title="Audio settings">
+            <span class="icon-speaker"></span>
+        </div>
+        <div class="toolbar-item">
+            <span *ngIf="!isFullScreen()" (click)="toggleFullScreen()" title="Fullscreen">
+                <span class="icon-enlarge-color">
+                    <span class="path1"></span><span class="path2"></span>
+                </span>
+            </span>
+                <span *ngIf="isFullScreen()" (click)="toggleFullScreen()" title="Exit fullscreen">
+                <span class="icon-shrink-color">
+                    <span class="path1"></span><span class="path2"></span>
+                </span>
+            </span>
+        </div>
+    </div>
 </div>

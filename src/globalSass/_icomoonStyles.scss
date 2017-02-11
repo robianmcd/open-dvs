@@ -1,0 +1,148 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?hww2if');
+  src:  url('fonts/icomoon.eot?hww2if#iefix') format('embedded-opentype'),
+  url('fonts/icomoon.ttf?hww2if') format('truetype'),
+  url('fonts/icomoon.woff?hww2if') format('woff'),
+  url('fonts/icomoon.svg?hww2if#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-backward:before {
+  content: "\e900";
+}
+.icon-enlarge:before {
+  content: "\e901";
+}
+.icon-enlarge-color .path1:before {
+  content: "\e902";
+  color: rgb(22, 93, 170);
+}
+.icon-enlarge-color .path2:before {
+  content: "\e903";
+  margin-left: -1em;
+  color: rgb(99, 43, 155);
+}
+.icon-equalizer:before {
+  content: "\e904";
+}
+.icon-first:before {
+  content: "\e905";
+}
+.icon-forward:before {
+  content: "\e906";
+}
+.icon-last:before {
+  content: "\e907";
+}
+.icon-midi:before {
+  content: "\e908";
+}
+.icon-midi-color .path1:before {
+  content: "\e909";
+}
+.icon-midi-color .path2:before {
+  content: "\e90a";
+  margin-left: -1em;
+  color: rgb(22, 94, 160);
+}
+.icon-midi-color .path3:before {
+  content: "\e90b";
+  margin-left: -1em;
+}
+.icon-midi-color .path4:before {
+  content: "\e90c";
+  margin-left: -1em;
+  color: rgb(22, 94, 160);
+}
+.icon-midi-color .path5:before {
+  content: "\e90d";
+  margin-left: -1em;
+}
+.icon-midi-color .path6:before {
+  content: "\e90e";
+  margin-left: -1em;
+  color: rgb(22, 94, 160);
+}
+.icon-next:before {
+  content: "\e90f";
+}
+.icon-pause:before {
+  content: "\e910";
+}
+.icon-play:before {
+  content: "\e911";
+}
+.icon-previous:before {
+  content: "\e912";
+}
+.icon-scratch-curve .path1:before {
+  content: "\e913";
+  color: rgb(22, 93, 170);
+}
+.icon-scratch-curve .path2:before {
+  content: "\e914";
+  margin-left: -2em;
+  color: rgb(99, 43, 155);
+}
+.icon-settings_input_composite:before {
+  content: "\e915";
+}
+.icon-shrink:before {
+  content: "\e916";
+}
+.icon-shrink-color .path1:before {
+  content: "\e917";
+  color: rgb(99, 43, 155);
+}
+.icon-shrink-color .path2:before {
+  content: "\e918";
+  margin-left: -1em;
+  color: rgb(22, 93, 170);
+}
+.icon-smooth-curve .path1:before {
+  content: "\e919";
+  color: rgb(99, 43, 155);
+}
+.icon-smooth-curve .path2:before {
+  content: "\e91a";
+  margin-left: -2em;
+  color: rgb(22, 94, 170);
+}
+.icon-speaker:before {
+  content: "\e91b";
+}
+.icon-speaker-color .path1:before {
+  content: "\e91c";
+}
+.icon-speaker-color .path2:before {
+  content: "\e91d";
+  margin-left: -1em;
+  color: rgb(99, 43, 155);
+}
+.icon-speaker-solid:before {
+  content: "\e91e";
+}
+.icon-stop:before {
+  content: "\e91f";
+}
+.icon-volume-medium:before {
+  content: "\e920";
+}
+

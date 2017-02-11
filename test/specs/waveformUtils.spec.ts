@@ -1,6 +1,6 @@
 import {WaveformUtil} from "../../src/services/waveformUtil";
 
-describe("A suite is just a function", () => {
+describe("waveformUtil", () => {
     let waveformUtil: WaveformUtil;
 
     beforeEach(() => {

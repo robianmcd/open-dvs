@@ -1,0 +1,35 @@
+:host {
+  display: flex;
+  flex-grow: 1;
+}
+
+#toolbar {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  line-height: 64px;
+}
+
+.right-toolbar {
+  font-size: 25px;
+  display: flex;
+}
+
+.toolbar-item {
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.icon-enlarge-color:not(:hover) span:before,
+.icon-shrink-color:not(:hover) span:before
+{
+  color: inherit;
+}
+
+.icon-midi:hover {
+  color: #165eaa;
+}
+
+.icon-speaker:hover {
+  color: #632B9B;
+}
