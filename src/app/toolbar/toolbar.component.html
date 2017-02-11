@@ -3,19 +3,22 @@
         Open DVS
     </div>
     <div class="right-toolbar">
-        <div class="toolbar-item" title="MIDI settings" (click)="toggleMidiSettings()">
+        <div class="toolbar-item" md-tooltip="Learn MIDI Mapping">
+            <span class="icon-equalizer"></span>
+        </div>
+        <div class="toolbar-item" mdTooltip="MIDI settings" (click)="toggleMidiSettings()">
             <span class="icon-midi"></span>
         </div>
-        <div class="toolbar-item" title="Audio settings" (click)="toggleAudioSettings()">
+        <div class="toolbar-item" mdTooltip="Audio settings" (click)="toggleAudioSettings()">
             <span class="icon-speaker"></span>
         </div>
         <div class="toolbar-item">
-            <span *ngIf="!isFullScreen()" (click)="toggleFullScreen()" title="Fullscreen">
+            <span *ngIf="!isFullScreen()" (click)="toggleFullScreen()" mdTooltip="Fullscreen">
                 <span class="icon-enlarge-color">
                     <span class="path1"></span><span class="path2"></span>
                 </span>
             </span>
-                <span *ngIf="isFullScreen()" (click)="toggleFullScreen()" title="Exit fullscreen">
+                <span *ngIf="isFullScreen()" (click)="toggleFullScreen()" mdTooltip="Exit fullscreen">
                 <span class="icon-shrink-color">
                     <span class="path1"></span><span class="path2"></span>
                 </span>

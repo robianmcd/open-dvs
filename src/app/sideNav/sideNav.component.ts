@@ -4,7 +4,7 @@ import {SideNav, SideNavState} from "../../services/sidenav.service";
 @Component({
     selector: 'side-nav',
     template: `
-<div id="sideNav" style="width: 300px">
+<div id="sideNav" style="width: 350px; padding:10px">
     <midi-settings *ngIf="(sideNav.state$ | async) === SideNavState.Midi"></midi-settings>
     <audio-settings *ngIf="(sideNav.state$ | async) === SideNavState.Audio"></audio-settings>
 </div>

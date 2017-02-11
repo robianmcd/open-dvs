@@ -7,7 +7,6 @@
   display: flex;
   flex-grow: 1;
   justify-content: space-between;
-  line-height: 64px;
 }
 
 .right-toolbar {
@@ -21,12 +20,11 @@
 }
 
 .icon-enlarge-color:not(:hover) span:before,
-.icon-shrink-color:not(:hover) span:before
-{
+.icon-shrink-color:not(:hover) span:before {
   color: inherit;
 }
 
-.icon-midi:hover {
+.icon-midi:hover, .icon-equalizer:hover {
   color: #165eaa;
 }
 

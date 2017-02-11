@@ -3,6 +3,7 @@ import moment from 'moment';
 import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
 import {SideNav, SideNavState} from "../services/sidenav.service";
+import {MidiUtil} from "../services/midiUtil.service";
 
 @Component({
     selector: 'my-app',
@@ -17,7 +18,8 @@ export class AppComponent implements AfterViewInit {
 
     SideNavState = SideNavState;
 
-    constructor(public sideNav: SideNav) {
+    //Injecting midiUtil to initialize midi access request so it is ready when needed later on
+    constructor(public sideNav: SideNav, midiUtil: MidiUtil) {
         let sampleMomentUsage = moment().format();
     }
 

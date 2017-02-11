@@ -1,3 +1,16 @@
 <div id="midi-settings">
-    <h1>MIDI Settings</h1>
+    <h1 style="margin-top:0;">MIDI Settings</h1>
+    <h2>Enable Devices</h2>
+    <table>
+        <tr>
+            <th>Enabled</th>
+            <th>Name</th>
+        </tr>
+        <tr *ngFor="let device of midiIo.getInputDevices()">
+            <td>
+                <md-checkbox></md-checkbox>
+            </td>
+            <td>{{device.name}}</td>
+        </tr>
+    </table>
 </div>

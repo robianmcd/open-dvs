@@ -10,6 +10,7 @@ export class MidiUtil {
         if (navigator.requestMIDIAccess) {
             navigator.requestMIDIAccess()
                 .then((midiAccess) => {
+                    console.log('connecting to', midiAccess);
                     this.midi = midiAccess;
                 })
                 .catch(() => {
@@ -27,7 +28,7 @@ export class MidiUtil {
         let subType: number;
         let amount: number;
 
-        switch(msgType) {
+        switch (msgType) {
             case MidiMsgType.ProgramChange: {
                 subType = byte2;
                 amount = 1;
@@ -58,7 +59,7 @@ export class MidiUtil {
         let byte2;
         let byte3;
 
-        switch(msg.msgType) {
+        switch (msg.msgType) {
             case MidiMsgType.ProgramChange: {
                 byte2 = msg.subType;
                 byte3 = 0;

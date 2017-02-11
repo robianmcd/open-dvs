@@ -6,25 +6,28 @@ import MIDIInput = WebMidi.MIDIInput;
 @Injectable()
 export class MidiIo {
 
-    private outputDeviceNames = new Set<string>();
+    private outputDeviceIds = new Set<string>();
 
     constructor(private midiUtil: MidiUtil) {
 
     }
 
-    getDeviceNames() {
-        let inputs = Object.keys(this.midiUtil.midi.inputs);
-        let outputs = Object.keys(this.midiUtil.midi.outputs.values());
+    getInputDevices() {
+        let inputDevices = [];
 
-        return Array.from(new Set([...inputs, ...outputs]));
+        this.midiUtil.midi.inputs.forEach((device) => {
+            inputDevices.push(device);
+        });
+
+        return inputDevices;
     }
 
-    connectDevice(deviceName: string) {
-        let input = this.getInput(deviceName);
-        let output = this.getOutput(deviceName);
+    connectDevice(deviceId: string) {
+        let input = this.getInput(deviceId);
+        let output = this.getOutput(deviceId);
 
         input && (input.onmidimessage = this.onInputMsg.bind(this));
-        output && this.outputDeviceNames.add(deviceName);
+        output && this.outputDeviceIds.add(deviceId);
     }
 
     disconnectDevice(deviceName: string) {
@@ -32,7 +35,7 @@ export class MidiIo {
     }
 
     sendMessage(msg: MidiMsg) {
-        for(let name of <any>this.outputDeviceNames) {
+        for (let name of <any>this.outputDeviceIds) {
             let outputDevice = this.getOutput(name);
             outputDevice.send(this.midiUtil.serializeMsg(msg));
         }
@@ -42,11 +45,11 @@ export class MidiIo {
 
     }
 
-    private getInput(deviceName): MIDIInput {
-        return this.midiUtil.midi.inputs[deviceName];
+    private getInput(deviceId): MIDIInput {
+        return this.midiUtil.midi.inputs[deviceId];
     }
 
-    private getOutput(deviceName): MIDIOutput {
-        return this.midiUtil.midi.outputs[deviceName];
+    private getOutput(deviceId): MIDIOutput {
+        return this.midiUtil.midi.outputs[deviceId];
     }
 }

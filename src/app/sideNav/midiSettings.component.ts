@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {MidiIo} from "../../services/midiIo.service";
 
 @Component({
     selector: 'midi-settings',
@@ -6,7 +7,7 @@ import {Component} from '@angular/core';
     styleUrls: ['midiSettings.component.css']
 })
 export class MidiSettingsComponent {
-    constructor() {
+    constructor(public midiIo: MidiIo) {
 
     }
 }
