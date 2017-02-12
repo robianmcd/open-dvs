@@ -10,7 +10,6 @@ export class MidiUtil {
         if (navigator.requestMIDIAccess) {
             navigator.requestMIDIAccess()
                 .then((midiAccess) => {
-                    console.log('connecting to', midiAccess);
                     this.midi = midiAccess;
                 })
                 .catch(() => {
@@ -21,7 +20,11 @@ export class MidiUtil {
         }
     }
 
-    parseRawMsg([byte1, byte2, byte3]: number[]): MidiMsg {
+    parseRawMsg(rawMessage: Uint8Array): MidiMsg {
+        let byte1 = rawMessage[0];
+        let byte2 = rawMessage[1];
+        let byte3 = rawMessage[2];
+
         let msgType: MidiMsgType = byte1 >> 4;
         let channel = (byte1 & 0b00001111) + 1;
 

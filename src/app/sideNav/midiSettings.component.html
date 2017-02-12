@@ -8,7 +8,7 @@
         </tr>
         <tr *ngFor="let device of midiIo.getInputDevices()">
             <td>
-                <md-checkbox></md-checkbox>
+                <md-checkbox [checked]="midiIo.deviceIsEnabled(device.id)" (change)="midiIo.toggleDevice(device.id)"></md-checkbox>
             </td>
             <td>{{device.name}}</td>
         </tr>

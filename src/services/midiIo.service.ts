@@ -2,17 +2,18 @@ import {Injectable} from "@angular/core";
 import {MidiMsg, MidiUtil} from "./midiUtil.service";
 import MIDIOutput = WebMidi.MIDIOutput;
 import MIDIInput = WebMidi.MIDIInput;
+import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 
 @Injectable()
 export class MidiIo {
 
-    private outputDeviceIds = new Set<string>();
+    private enabledDeviceIds = new Set<string>();
 
     constructor(private midiUtil: MidiUtil) {
 
     }
 
-    getInputDevices() {
+    getInputDevices(): MIDIInput[] {
         let inputDevices = [];
 
         this.midiUtil.midi.inputs.forEach((device) => {
@@ -22,34 +23,49 @@ export class MidiIo {
         return inputDevices;
     }
 
-    connectDevice(deviceId: string) {
+    enableDevice(deviceId: string) {
         let input = this.getInput(deviceId);
-        let output = this.getOutput(deviceId);
-
         input && (input.onmidimessage = this.onInputMsg.bind(this));
-        output && this.outputDeviceIds.add(deviceId);
+
+        this.enabledDeviceIds.add(deviceId);
     }
 
-    disconnectDevice(deviceName: string) {
+    deviceIsEnabled(deviceId: string) {
+        return this.enabledDeviceIds.has(deviceId);
+    }
 
+    disableDevice(deviceId: string) {
+        let input = this.getInput(deviceId);
+        input && (input.close());
+
+        this.enabledDeviceIds.delete(deviceId);
+    }
+
+    toggleDevice(deviceId: string) {
+        if (this.deviceIsEnabled(deviceId)) {
+            this.disableDevice(deviceId);
+        } else {
+            this.enableDevice(deviceId);
+        }
     }
 
     sendMessage(msg: MidiMsg) {
-        for (let name of <any>this.outputDeviceIds) {
+        for (let name of <any>this.enabledDeviceIds) {
             let outputDevice = this.getOutput(name);
             outputDevice.send(this.midiUtil.serializeMsg(msg));
         }
     }
 
-    private onInputMsg(rawMsg: number[]) {
-
+    private onInputMsg(msgEvent: MIDIMessageEvent) {
+        let msg = this.midiUtil.parseRawMsg(msgEvent.data);
+        console.log(msg);
     }
 
     private getInput(deviceId): MIDIInput {
-        return this.midiUtil.midi.inputs[deviceId];
+        return this.midiUtil.midi.inputs.get(deviceId);
     }
 
     private getOutput(deviceId): MIDIOutput {
-        return this.midiUtil.midi.outputs[deviceId];
+        return this.midiUtil.midi.outputs.get(deviceId);
     }
 }
