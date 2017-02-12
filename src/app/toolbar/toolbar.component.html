@@ -3,8 +3,8 @@
         Open DVS
     </div>
     <div class="right-toolbar">
-        <div class="toolbar-item" md-tooltip="Learn MIDI Mapping">
-            <span class="icon-equalizer"></span>
+        <div class="toolbar-item" md-tooltip="Learn MIDI Mapping" (click)="midiMapper.toggleLearnMode()">
+            <span class="icon-equalizer" [class.active]="midiMapper.getLearnMode()"></span>
         </div>
         <div class="toolbar-item" mdTooltip="MIDI settings" (click)="toggleMidiSettings()">
             <span class="icon-midi"></span>

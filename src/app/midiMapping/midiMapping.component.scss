@@ -1,0 +1,13 @@
+#midi-mapping {
+  position: absolute;
+  background-color: rgba(148, 192, 214, 0.65);
+  z-index: 500;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.active {
+    background-color: rgba(64, 123, 185, 0.65);
+  }
+}

@@ -100,12 +100,15 @@ export enum MidiMsgType {
     SysEx = 15
 }
 
-export interface MidiMsg {
+export interface MidiControl {
     msgType: MidiMsgType,
     //1 - 16
     channel: number;
     //0 - 127
     subType: number;
+}
+
+export interface MidiMsg extends MidiControl {
     //0 - 1
     amount: number;
 }

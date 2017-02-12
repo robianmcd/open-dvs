@@ -1,5 +1,8 @@
 <div>
-    <md-slider class="crossfader" [min]="0" [max]="1" [step]="1/128" [value]="sliderValue.getValue()" (input)="sliderValue.next($event.value)"></md-slider>
+    <div>
+        <md-slider id="crossfader" class="crossfader" [min]="0" [max]="1" [step]="1/128" [value]="sliderValue.getValue()" (input)="sliderValue.next($event.value)"></md-slider>
+        <midi-mapping elemId="crossfader" [amount]="sliderValue.getValue()" (amountChange)="sliderValue.next($event)"></midi-mapping>
+    </div>
     <div>
         <img (click)="curveSharpness.next(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">
         <!--
@@ -9,13 +12,15 @@
         npm install --save https://github.com/angular/material2-builds.git
         -->
         <md-slide-toggle
+                id="crossfader-curve-toggle"
                 [checked]="curveSharpness.getValue() === 1"
                 (change)="curveSharpness.next($event.checked? 1 : 0)"
                 class="curveTypeToggle" style="display:inline-block; position:relative; left:3px; top:7px;">
         </md-slide-toggle>
+        <midi-mapping elemId="crossfader-curve-toggle" [amount]="curveSharpness.getValue()" (amountChange)="curveSharpness.next($event? 1 : 0)"></midi-mapping>
         <img (click)="curveSharpness.next(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">
     </div>
-    <div >
+    <div>
         CF Curve
     </div>
 </div>

@@ -1,5 +1,6 @@
 import {Component} from "@angular/core";
 import {SideNav, SideNavState} from "../../services/sidenav.service";
+import {MidiMapper} from "../../services/midiMapper.service";
 
 @Component({
     selector: 'toolbar',
@@ -7,7 +8,7 @@ import {SideNav, SideNavState} from "../../services/sidenav.service";
     styleUrls: ['toolbar.component.css']
 })
 export class ToolbarComponent {
-    constructor(private sideNav: SideNav) {
+    constructor(private sideNav: SideNav, public midiMapper: MidiMapper) {
 
     }
 

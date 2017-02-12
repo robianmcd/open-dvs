@@ -21,14 +21,18 @@ import {AudioSettingsComponent} from "./sideNav/audioSettings.component";
 import {MidiSettingsComponent} from "./sideNav/midiSettings.component";
 import {MidiIo} from "../services/midiIo.service";
 import {MidiUtil} from "../services/midiUtil.service";
+import {MidiMapper} from "../services/midiMapper.service";
+import {MidiMappingComponent} from "./midiMapping/midiMapping.component";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
-        CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent],
+        CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
+        MidiMappingComponent],
     bootstrap: [AppComponent],
-    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil]
+    providers: [AudioUtil, WaveformUtil, Db, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
+        MidiMapper]
 })
 
 export class AppModule {

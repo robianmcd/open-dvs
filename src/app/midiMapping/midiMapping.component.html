@@ -1,0 +1,6 @@
+<div id="midi-mapping" *ngIf="midiMapper.getLearnMode()" (click)="midiMapper.activeLearnMappingComp=ctrl"
+     [class.active]="midiMapper.activeLearnMappingComp === ctrl"
+     [style.top]="inputElem.offsetTop + 'px'" [style.left]="inputElem.offsetLeft + 'px'"
+     [style.width]="inputElem.offsetWidth + 'px'" [style.height]="inputElem.offsetHeight + 'px'">
+    {{getMappedControlMessage()}}
+</div>

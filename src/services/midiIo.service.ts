@@ -1,5 +1,6 @@
 import {Injectable} from "@angular/core";
 import {MidiMsg, MidiUtil} from "./midiUtil.service";
+import {Subject, Observable} from "rxjs";
 import MIDIOutput = WebMidi.MIDIOutput;
 import MIDIInput = WebMidi.MIDIInput;
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
@@ -8,6 +9,11 @@ import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 export class MidiIo {
 
     private enabledDeviceIds = new Set<string>();
+    private msg = new Subject<MidiMsg>();
+
+    get msg$(): Observable<MidiMsg> {
+        return this.msg.asObservable();
+    }
 
     constructor(private midiUtil: MidiUtil) {
 
@@ -58,7 +64,7 @@ export class MidiIo {
 
     private onInputMsg(msgEvent: MIDIMessageEvent) {
         let msg = this.midiUtil.parseRawMsg(msgEvent.data);
-        console.log(msg);
+        this.msg.next(msg);
     }
 
     private getInput(deviceId): MIDIInput {

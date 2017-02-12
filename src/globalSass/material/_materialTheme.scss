@@ -77,3 +77,7 @@ mat-grid-tile figure {
 .mat-slide-toggle.mat-slide-toggle-focused .mat-ink-ripple {
   opacity: 0;
 }
+
+.mat-slider-thumb-container {
+  transition: none;
+}
