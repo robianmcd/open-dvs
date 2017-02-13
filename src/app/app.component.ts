@@ -1,10 +1,9 @@
-import {Component, ViewChildren, QueryList, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import {Component, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
 import moment from 'moment';
 import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
 import {SideNav, SideNavState} from "../services/sidenav.service";
 import {MidiUtil} from "../services/midiUtil.service";
-import {MidiIo} from "../services/midiIo.service";
 
 @Component({
     selector: 'my-app',
@@ -20,16 +19,8 @@ export class AppComponent implements AfterViewInit {
     SideNavState = SideNavState;
 
     //Injecting midiUtil to initialize midi access request so it is ready when needed later on
-    constructor(public sideNav: SideNav, midiUtil: MidiUtil, changeDetector: ChangeDetectorRef, midiIo: MidiIo) {
+    constructor(public sideNav: SideNav, midiUtil: MidiUtil) {
         let sampleMomentUsage = moment().format();
-
-        //Without this change detection doesn't fire after midi messages are recieved
-        //https://github.com/angular/zone.js/issues/634
-        midiIo.msg$.subscribe(() => {
-            setTimeout(() => {
-                changeDetector.detectChanges();
-            })
-        })
     }
 
     ngAfterViewInit() {

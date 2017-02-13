@@ -31,7 +31,7 @@ export class MidiIo {
 
     enableDevice(deviceId: string) {
         let input = this.getInput(deviceId);
-        input && (input.onmidimessage = this.onInputMsg.bind(this));
+        input && input.addEventListener('midimessage', this.onInputMsg.bind(this));
 
         this.enabledDeviceIds.add(deviceId);
     }
