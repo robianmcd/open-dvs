@@ -4,6 +4,7 @@ import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
 import {SideNav, SideNavState} from "../services/sidenav.service";
 import {MidiUtil} from "../services/midiUtil.service";
+import {Db} from "../services/db/db.service";
 
 @Component({
     selector: 'my-app',
@@ -19,8 +20,10 @@ export class AppComponent implements AfterViewInit {
     SideNavState = SideNavState;
 
     //Injecting midiUtil to initialize midi access request so it is ready when needed later on
-    constructor(public sideNav: SideNav, midiUtil: MidiUtil) {
+    constructor(public sideNav: SideNav, midiUtil: MidiUtil, db: Db) {
         let sampleMomentUsage = moment().format();
+
+        db.initialize();
     }
 
     ngAfterViewInit() {

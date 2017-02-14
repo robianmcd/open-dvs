@@ -7,3 +7,6 @@ aot
 src/**/*.css
 src/**/*.js
 src/**/*.js.map
+src/**/*.ngsummary.json
+src/**/*.ngstyle.ts
+src/**/*.ngfactory.ts

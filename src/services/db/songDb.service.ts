@@ -1,57 +1,37 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {BehaviorSubject} from "rxjs/BehaviorSubject"
 import {Observable} from "rxjs/Observable";
-import {Song} from "../models/song";
-import {SongDetails, SongDetailsDraft} from "../models/songDetails";
-import {WaveformUtil} from "./waveformUtil";
-import {ThemeId} from "../app/app.component";
+import {Song} from "../../models/song";
+import {SongDetails, SongDetailsDraft} from "../../models/songDetails";
+import {WaveformUtil} from "../waveformUtil";
+import {ThemeId} from "../../app/app.component";
+import {Db} from "./db.service";
 
 @Injectable()
-export class Db {
-    dbInitialized: Promise<IDBDatabase>;
+export class SongDb {
     db: IDBDatabase;
 
     private allSongDetails$ = new BehaviorSubject<SongDetails[]>([]);
 
-    constructor(private waveformUtil: WaveformUtil) {
-        this.dbInitialized = new Promise((resolve, reject) => {
-            let openRequest = indexedDB.open('dvs', 1);
+    constructor(dbService: Db, private waveformUtil: WaveformUtil) {
+        dbService.dbInitialized.then((db) => {
+            this.db = db;
 
-            openRequest.onupgradeneeded = function (e) {
-                let db = e.target['result'];
+            let getMetadataTransaction = this.db.transaction(['songDetails'], 'readonly');
+            let getMetadataCursor = getMetadataTransaction.objectStore('songDetails').openCursor();
 
-                if (!db.objectStoreNames.contains('songDetails')) {
-                    db.createObjectStore('songDetails', {autoIncrement: true, keyPath: 'id'});
-                }
-
-                if (!db.objectStoreNames.contains('songBuffer')) {
-                    db.createObjectStore('songBuffer');
+            let allMetadata = [];
+            getMetadataCursor.onsuccess = (e) => {
+                let cursor = e.target['result'];
+                if (cursor) {
+                    allMetadata.push(cursor.value);
+                    cursor.continue();
                 }
             };
 
-            openRequest.onsuccess = (event) => {
-                this.db = event.target['result'];
-
-                let getMetadataTransaction = this.db.transaction(['songDetails'], 'readonly');
-                let getMetadataCursor = getMetadataTransaction.objectStore('songDetails').openCursor();
-
-                let allMetadata = [];
-                getMetadataCursor.onsuccess = (e) => {
-                    let cursor = e.target['result'];
-                    if (cursor) {
-                        allMetadata.push(cursor.value);
-                        cursor.continue();
-                    }
-                };
-
-                getMetadataTransaction.oncomplete = () => {
-                    this.allSongDetails$.next(allMetadata);
-                };
-
-                resolve(this.db);
+            getMetadataTransaction.oncomplete = () => {
+                this.allSongDetails$.next(allMetadata);
             };
-
-            openRequest.onerror = reject;
         });
     }
 
@@ -95,7 +75,7 @@ export class Db {
             !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
 
             if (tags.picture) {
-                songDetailsDraft.base64Pic = this._arrayBufferToBase64(tags.picture.data);
+                songDetailsDraft.base64Pic = Db.arrayBufferToBase64(tags.picture.data);
                 songDetailsDraft.picFormat = tags.picture.format;
             }
         }
@@ -106,7 +86,7 @@ export class Db {
 
         let addTransaction = this.db.transaction(['songDetails', 'songBuffer'], 'readwrite');
 
-        this.reqToPromise(
+        Db.reqToPromise(
             addTransaction
                 .objectStore('songDetails')
                 .add(songDetailsDraft)
@@ -122,7 +102,7 @@ export class Db {
                     waveformCompressed100X: waveformData.compress100X
                 };
 
-                return this.reqToPromise(
+                return Db.reqToPromise(
                     addTransaction
                         .objectStore('songBuffer')
                         .add(songBuffer, id)
@@ -138,7 +118,7 @@ export class Db {
         let deleteDetailsReq = deleteTransaction.objectStore('songDetails').delete(songDetails.id);
         let deleteBufferReq = deleteTransaction.objectStore('songBuffer').delete(songDetails.id);
 
-        Promise.all([this.reqToPromise(deleteDetailsReq), this.reqToPromise(deleteBufferReq)])
+        Promise.all([Db.reqToPromise(deleteDetailsReq), Db.reqToPromise(deleteBufferReq)])
             .then(() => {
                 let currentDetails = this.allSongDetails$.getValue();
                 let filteredDetails = currentDetails.filter(d => d.id !== songDetails.id);
@@ -147,7 +127,7 @@ export class Db {
     }
 
     getSong(songDetails: SongDetails): Promise<Song> {
-        return this.reqToPromise(
+        return Db.reqToPromise(
             this.db.transaction(['songBuffer'], 'readonly')
                 .objectStore('songBuffer')
                 .get(songDetails.id)
@@ -160,23 +140,5 @@ export class Db {
                     waveformCompressed100X: songBuffer.waveformCompressed100X
                 });
             });
-
     }
-
-    reqToPromise(req: IDBRequest): Promise<any> {
-        return new Promise((resolve, reject) => {
-            req.onsuccess = resolve;
-            req.onerror = reject;
-        });
-    }
-
-    _arrayBufferToBase64( buffer ) {
-    let binary = '';
-    let bytes = new Uint8Array( buffer );
-    let len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode( bytes[ i ] );
-    }
-    return btoa( binary );
-}
 }

@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Output} from "@angular/core";
 import {AudioUtil} from "../../services/audioUtil";
-import {Db} from "../../services/db";
+import {SongDb} from "../../services/db/songDb.service";
 import {SongDetails} from "../../models/songDetails";
 import {Observable} from "rxjs/Observable";
 import {Song} from "../../models/song";
@@ -21,8 +21,8 @@ export class LibraryComponent {
 
     @Output() onLoadSong = new EventEmitter<LoadSongEvent>();
 
-    constructor(private audioUtil: AudioUtil, private db: Db) {
-        this.allSongDetails = this.db.getAllSongDetails();
+    constructor(private audioUtil: AudioUtil, private songDb: SongDb) {
+        this.allSongDetails = this.songDb.getAllSongDetails();
     }
 
     public onFileOverDrop(fileIsOver: boolean): void {
@@ -54,7 +54,7 @@ export class LibraryComponent {
 
         Promise.all([readAsAudioBufferPromise, readMediaTagsPromise])
             .then(([audioBuffer, tags]: [AudioBuffer, any]) => {
-                this.db.addSong(arrayBuffer, audioBuffer, tags, file.name);
+                this.songDb.addSong(arrayBuffer, audioBuffer, tags, file.name);
                 this.uploadingFile = false;
             })
             .catch((error) => {
@@ -64,11 +64,11 @@ export class LibraryComponent {
     }
 
     deleteSong(songDetails: SongDetails) {
-        this.db.deleteSong(songDetails);
+        this.songDb.deleteSong(songDetails);
     }
 
     loadSong(songDetails, deckId) {
-        this.db.getSong(songDetails)
+        this.songDb.getSong(songDetails)
             .then((song: Song) => {
                 this.onLoadSong.emit({song, deckId});
             });

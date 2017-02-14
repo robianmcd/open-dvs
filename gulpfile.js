@@ -88,7 +88,7 @@ function index() {
 }
 
 function clean() {
-    return del('dist');
+    return del(['dist', 'src/**/*.css', 'src/**/*.js', 'src/**/*.js.map', 'src/**/*.ngsummary.json', 'src/**/*.ngstyle.ts', 'src/**/*.ngfactory.ts']);
 }
 
 function reloadBrowser(done) {
@@ -120,6 +120,7 @@ function runTestsInBrowser() {
         .pipe(gutil.noop());
 }
 
+gulp.task('clean', clean);
 gulp.task('componentStyles', componentStyles);
 gulp.task('ngc', ngc);
 gulp.task('vendor', rollupVendor);
