@@ -44,7 +44,7 @@ export class MidiUtil {
             }
             case MidiMsgType.PitchBend: {
                 subType = 0;
-                amount = ((byte2 << 7) + byte3) / ((1 << 14) - 1);
+                amount = ((byte3 << 7) + byte2) / ((1 << 14) - 1);
                 break;
             }
             default: {
@@ -75,8 +75,8 @@ export class MidiUtil {
             }
             case MidiMsgType.PitchBend: {
                 let integerAmount = Math.round(msg.amount * ((1 << 14) - 1));
-                byte2 = integerAmount >> 7;
-                byte3 = integerAmount & 0b1111111;
+                byte2 = integerAmount & 0b1111111;
+                byte3 = integerAmount >> 7;
                 break;
             }
             default: {
