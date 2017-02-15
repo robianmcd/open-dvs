@@ -1,5 +1,6 @@
 import {Component, Output, EventEmitter} from "@angular/core";
 import {BehaviorSubject} from "rxjs";
+import {PreferencesDb} from "../../../services/db/preferencesDb.service";
 
 @Component({
     selector: 'crossfader',
@@ -12,12 +13,16 @@ export class CrossfaderComponent {
 
     //0 represents an equal power fade
     //1 represents a scratch fade
-    curveSharpness = new BehaviorSubject(0);
+    crossfaderCurveSharpness = new BehaviorSubject(0);
 
     @Output() change = new EventEmitter<CrossfaderChangeEvent>();
 
-    constructor() {
-        this.curveSharpness.subscribe(() => this.sendCrossfaderChange());
+    constructor(private preferencesDb: PreferencesDb) {
+        preferencesDb.initialized.then(() => {
+            this.crossfaderCurveSharpness.next(preferencesDb.getCrossfaderCurveSharpness());
+        });
+
+        this.crossfaderCurveSharpness.subscribe(() => this.sendCrossfaderChange());
         this.sliderValue.subscribe(() => this.sendCrossfaderChange());
     }
 
@@ -28,11 +33,16 @@ export class CrossfaderComponent {
 
     sendCrossfaderChange() {
         let sliderValue = this.sliderValue.getValue();
-        let curveSharpness = this.curveSharpness.getValue();
+        let curveSharpness = this.crossfaderCurveSharpness.getValue();
 
         let leftGain = this.getGain(sliderValue, curveSharpness);
         let rightGain = this.getGain(1 - sliderValue, curveSharpness);
         this.change.emit({leftGain, rightGain});
+    }
+
+    setCurveSharpness(value: number) {
+        this.preferencesDb.setCrossfaderCurveSharpness(value);
+        this.crossfaderCurveSharpness.next(value);
     }
 }
 

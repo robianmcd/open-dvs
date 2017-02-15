@@ -3,6 +3,9 @@ import {Injectable} from '@angular/core';
 @Injectable()
 export class Db {
 
+    static READONLY_TRANSACTION = 'readonly';
+    static READWRITE_TRANSACTION = 'readwrite';
+
     dbInitialized: Promise<IDBDatabase>;
     private db: IDBDatabase;
     private resolveInitialized: (db: IDBDatabase) => void;

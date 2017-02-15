@@ -4,21 +4,15 @@
         <midi-mapping elemId="crossfader" [amount]="sliderValue.getValue()" (amountChange)="sliderValue.next($event)"></midi-mapping>
     </div>
     <div>
-        <img (click)="curveSharpness.next(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">
-        <!--
-        TODO: replace the change event with an input event when this commit makes it to npm
-        https://github.com/angular/material2/commit/99963c4fd182b490241e4b25f08e948020d7ced8
-        or use the master build with
-        npm install --save https://github.com/angular/material2-builds.git
-        -->
+        <img (click)="setCurveSharpness(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">
         <md-slide-toggle
                 id="crossfader-curve-toggle"
-                [checked]="curveSharpness.getValue() === 1"
-                (change)="curveSharpness.next($event.checked? 1 : 0)"
+                [checked]="crossfaderCurveSharpness.getValue() === 1"
+                (change)="setCurveSharpness($event.checked? 1 : 0)"
                 class="curveTypeToggle" style="display:inline-block; position:relative; left:3px; top:7px;">
         </md-slide-toggle>
-        <midi-mapping elemId="crossfader-curve-toggle" [amount]="curveSharpness.getValue()" (amountChange)="curveSharpness.next($event? 1 : 0)"></midi-mapping>
-        <img (click)="curveSharpness.next(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">
+        <midi-mapping elemId="crossfader-curve-toggle" [amount]="crossfaderCurveSharpness.getValue()" (amountChange)="setCurveSharpness($event? 1 : 0)"></midi-mapping>
+        <img (click)="setCurveSharpness(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">
     </div>
     <div>
         CF Curve

@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter} from "@angular/core";
+import {Component, Input, Output, EventEmitter, OnInit} from "@angular/core";
 import {MidiMapper, MappingType} from "../../services/midiMapper.service";
 import {MidiMsg, MidiMsgType} from "../../services/midiUtil.service";
 import {MidiIo} from "../../services/midiIo.service";
@@ -8,7 +8,7 @@ import {MidiIo} from "../../services/midiIo.service";
     templateUrl: 'midiMapping.component.html',
     styleUrls: ['midiMapping.component.css']
 })
-export class MidiMappingComponent {
+export class MidiMappingComponent implements OnInit {
     @Input() elemId: string;
 
     @Input() set amount(value: number) {
@@ -48,11 +48,14 @@ export class MidiMappingComponent {
 
     }
 
+    ngOnInit() {
+        this.midiMapper.registerMappingComp(this.elemId, this);
+    }
+
     onLearnMsg(msg: MidiMsg) {
         this.midiMapper.setMapping(this.elemId, {
             control: {msgType: msg.msgType, channel: msg.channel, subType: msg.subType},
-            type: MappingType.Amount,
-            comp: this
+            type: MappingType.Amount
         });
     }
 

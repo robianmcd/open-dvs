@@ -17,12 +17,12 @@ export class SongDb {
         dbService.dbInitialized.then((db) => {
             this.db = db;
 
-            let getMetadataTransaction = this.db.transaction(['songDetails'], 'readonly');
+            let getMetadataTransaction = this.db.transaction(['songDetails'], Db.READONLY_TRANSACTION);
             let getMetadataCursor = getMetadataTransaction.objectStore('songDetails').openCursor();
 
             let allMetadata = [];
             getMetadataCursor.onsuccess = (e) => {
-                let cursor = e.target['result'];
+                let cursor: IDBCursorWithValue = e.target['result'];
                 if (cursor) {
                     allMetadata.push(cursor.value);
                     cursor.continue();
@@ -84,7 +84,7 @@ export class SongDb {
             songDetailsDraft.title = fileName;
         }
 
-        let addTransaction = this.db.transaction(['songDetails', 'songBuffer'], 'readwrite');
+        let addTransaction = this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
 
         Db.reqToPromise(
             addTransaction
@@ -114,7 +114,7 @@ export class SongDb {
     }
 
     deleteSong(songDetails: SongDetails) {
-        let deleteTransaction = this.db.transaction(['songDetails', 'songBuffer'], 'readwrite');
+        let deleteTransaction = this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
         let deleteDetailsReq = deleteTransaction.objectStore('songDetails').delete(songDetails.id);
         let deleteBufferReq = deleteTransaction.objectStore('songBuffer').delete(songDetails.id);
 
@@ -128,7 +128,7 @@ export class SongDb {
 
     getSong(songDetails: SongDetails): Promise<Song> {
         return Db.reqToPromise(
-            this.db.transaction(['songBuffer'], 'readonly')
+            this.db.transaction(['songBuffer'], Db.READONLY_TRANSACTION)
                 .objectStore('songBuffer')
                 .get(songDetails.id)
         )
