@@ -3,12 +3,20 @@
     <h2>Enable Devices</h2>
     <table>
         <tr>
-            <th>Enabled</th>
+            <th>Input</th>
+            <th>Output</th>
             <th>Name</th>
         </tr>
-        <tr *ngFor="let device of midiIo.getInputDevices()">
+        <tr *ngFor="let device of midiIo.devices;trackBy:getDeviceName">
             <td>
-                <md-checkbox [checked]="midiIo.deviceIsEnabled(device.id)" (change)="midiIo.toggleDevice(device.id)"></md-checkbox>
+                <div *ngIf="device.input">
+                    <md-checkbox [checked]="midiIo.inputIsEnabled(device.name)" (change)="midiIo.toggleInput(device.name)"></md-checkbox>
+                </div>
+            </td>
+            <td>
+                <div *ngIf="device.output">
+                    <md-checkbox [checked]="midiIo.outputIsEnabled(device.name)" (change)="midiIo.toggleOutput(device.name)"></md-checkbox>
+                </div>
             </td>
             <td>{{device.name}}</td>
         </tr>

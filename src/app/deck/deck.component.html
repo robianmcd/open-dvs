@@ -7,9 +7,13 @@
             </canvas>
         </div>
         <div>
-            <button (click)="playPause()" [disabled]="!activeSong.isLoaded" md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
+            <button [id]="deckName + '-play-pause'"
+                    (click)="activeSong.isPlaying ? pause() : play()"
+                    [disabled]="!activeSong.isLoaded"
+                    md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
                 Play/Pause
             </button>
+            <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
         </div>
     </div>
 </div>

@@ -18,6 +18,10 @@ export class DeckComponent implements OnInit, AfterViewInit {
     deckElem: HTMLElement;
     waveformElem: HTMLCanvasElement;
 
+    get deckName() {
+        return DeckId[this.deckId];
+    }
+
     constructor(
         private elementRef: ElementRef,
         private waveformUtil: WaveformUtil,
@@ -43,13 +47,15 @@ export class DeckComponent implements OnInit, AfterViewInit {
             })
     }
 
-    playPause() {
-        if (this.activeSong.isLoaded) {
-            if (this.activeSong.isPlaying) {
-                this.activeSong.pauseBuffer();
-            } else {
-                this.activeSong.playBuffer();
-            }
+    play() {
+        if (this.activeSong.isLoaded && !this.activeSong.isPlaying) {
+            this.activeSong.playBuffer();
+        }
+    }
+
+    pause() {
+        if (this.activeSong.isLoaded && this.activeSong.isPlaying) {
+            this.activeSong.pauseBuffer();
         }
     }
 

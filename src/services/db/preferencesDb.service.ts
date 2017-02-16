@@ -54,12 +54,20 @@ export class PreferencesDb {
         return this.preferences.crossfaderCurveSharpness;
     }
 
-    getEnabledMidiDevices() {
-
+    getEnabledMidiInputNames() {
+        return this.preferences.enabledMidiInputNames;
     }
 
-    setEnabledMidiDevices() {
+    setEnabledMidiInputNames(inputs: Set<string>) {
+        return this.setPreference('enabledMidiInputNames', inputs);
+    }
 
+    getEnabledMidiOutputNames() {
+        return this.preferences.enabledMidiOutputNames;
+    }
+
+    setEnabledMidiOutputNames(outputs: Set<string>) {
+        return this.setPreference('enabledMidiOutputNames', outputs);
     }
 
     getMidiMappings(): Map<string, MidiMapping> {

@@ -4,13 +4,15 @@ import MIDIAccess = WebMidi.MIDIAccess;
 @Injectable()
 export class MidiUtil {
 
+    midiInitialized: Promise<MIDIAccess>;
     midi: MIDIAccess;
 
     constructor() {
         if (navigator.requestMIDIAccess) {
-            navigator.requestMIDIAccess()
+            this.midiInitialized = navigator.requestMIDIAccess()
                 .then((midiAccess) => {
                     this.midi = midiAccess;
+                    return midiAccess;
                 })
                 .catch(() => {
                     console.error("No access to MIDI devices or your browser doesn't support WebMIDI API");

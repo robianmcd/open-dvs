@@ -10,4 +10,8 @@ export class MidiSettingsComponent {
     constructor(public midiIo: MidiIo) {
 
     }
+
+    getDeviceName(device) {
+        return device.name;
+    }
 }
