@@ -19,11 +19,15 @@ export class AppComponent implements AfterViewInit {
 
     SideNavState = SideNavState;
 
-    //Injecting midiUtil to initialize midi access request so it is ready when needed later on
     constructor(public sideNav: SideNav, midiUtil: MidiUtil, db: Db) {
         let sampleMomentUsage = moment().format();
 
         db.initialize();
+        midiUtil.initialize();
+
+        if ('serviceWorker' in navigator) {
+            navigator['serviceWorker'].register('/sw.js');
+        }
     }
 
     ngAfterViewInit() {
@@ -40,12 +44,12 @@ export class AppComponent implements AfterViewInit {
     }
 }
 
-export enum DeckId {LEFT=1, RIGHT=2}
+export enum DeckId {LEFT = 1, RIGHT = 2}
 
-enum ThemeId {DEFAULT=0, DECK1=1, DECK2=2}
+enum ThemeId {DEFAULT = 0, DECK1 = 1, DECK2 = 2}
 namespace ThemeId {
     export function fromDeckId(deckId: DeckId): ThemeId {
-        switch(deckId) {
+        switch (deckId) {
             case DeckId.LEFT:
                 return ThemeId.DECK1;
             case DeckId.RIGHT:

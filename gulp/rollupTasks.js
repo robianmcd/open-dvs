@@ -17,7 +17,7 @@ let prodMode = argv.prod;
 //************************************************************
 let rollupApp = gulp.series(
     function cleanApp() {
-        return del(['dist/app*.js', 'dist/app*.js.map'])
+        return del(['dist/app.js', 'dist/app.js.map'])
     },
     function buildApp() {
         let devPlugins = [
@@ -42,7 +42,7 @@ let rollupApp = gulp.series(
             .then((bundle) => {
                 return bundle.write({
                     format: 'iife',
-                    dest: `dist/app-${Date.now().toString(36)}.js`,
+                    dest: `dist/app.js`,
                     sourceMap: !prodMode,
                     globals: prodMode ? {} : vendorUtils.getModuleToGlobalMap()
                 });
@@ -60,7 +60,7 @@ let rollupApp = gulp.series(
 let vendorRollUpBundle;
 let rollupVendor = gulp.series(
     function cleanVendor() {
-        return del(['dist/vendor*.js', 'dist/vendor*.js.map'])
+        return del(['dist/vendor.js', 'dist/vendor.js.map'])
     },
     function buildVendor() {
         let rollupConfig = {
@@ -81,7 +81,7 @@ let rollupVendor = gulp.series(
                 return bundle.write({
                     format: 'iife',
                     moduleName: 'vendor',
-                    dest: `dist/vendor-${Date.now().toString(36)}.js`,
+                    dest: `dist/vendor.js`,
                     sourceMap: !prodMode
                 });
             });

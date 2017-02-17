@@ -31,7 +31,7 @@ export class PreferencesDb {
             prefCursor.onsuccess = (e) => {
                 let cursor: IDBCursorWithValue = e.target['result'];
                 if (cursor) {
-                    if (!this.preferences[<string>cursor.key]) {
+                    if (!(<string>cursor.key in this.preferences)) {
                         console.warn('Found preference key in DB that does not exist in preference model: ' + cursor.key);
                     }
 

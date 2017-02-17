@@ -56,11 +56,6 @@ export class MidiIo {
         }
     }
 
-    //TODO: if this is not needed remove it
-    // getInputDevices(): MIDIInput[] {
-    //     return Array.from(this.midiUtil.midi.inputs.values());
-    // }
-
     inputIsEnabled(deviceName: string) {
         return this.enabledInputNames.has(deviceName);
     }

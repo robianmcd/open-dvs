@@ -7,17 +7,29 @@ export class MidiUtil {
     midiInitialized: Promise<MIDIAccess>;
     midi: MIDIAccess;
 
+    private resolveMidiInitialized: (access: MIDIAccess) => void;
+    private rejectMidiInitialized: (rejection?) => void;
+
     constructor() {
+        this.midiInitialized = new Promise((resolve, reject) => {
+            this.resolveMidiInitialized = resolve;
+            this.rejectMidiInitialized = reject;
+        });
+    }
+
+    initialize() {
         if (navigator.requestMIDIAccess) {
-            this.midiInitialized = navigator.requestMIDIAccess()
+            navigator.requestMIDIAccess()
                 .then((midiAccess) => {
                     this.midi = midiAccess;
-                    return midiAccess;
+                    this.resolveMidiInitialized(midiAccess);
                 })
                 .catch(() => {
+                    this.rejectMidiInitialized();
                     console.error("No access to MIDI devices or your browser doesn't support WebMIDI API");
                 });
         } else {
+            this.rejectMidiInitialized();
             console.error("No MIDI support in your browser.");
         }
     }

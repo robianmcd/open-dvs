@@ -52,7 +52,6 @@ let globalJs = gulp.series(
             'lib/jsmediatags/jsmediatags.min.js'
         ])
             .pipe(concat('global.js'))
-            .pipe(rev())
             .pipe(gulp.dest('dist'));
     }
 );
@@ -66,21 +65,21 @@ let globalSass = gulp.series(
 
         return gulp.src('src/globalSass/global.scss')
             .pipe(sass(sassOptions).on('error', sass.logError))
-            .pipe(rev())
             .pipe(gulp.dest('dist'));
     }
 );
 
+let resourcePaths = ['src/**/*.ico', 'src/**/*.svg', 'src/**/*.eot', 'src/**/*.ttf', 'src/**/*.woff', 'workers/**/*.js'];
 //Add anything that just needs to be copied into the dist folder here
 let resources = function () {
-    return gulp.src(['src/**/*.ico', 'src/**/*.svg', 'src/**/*.eot', 'src/**/*.ttf', 'src/**/*.woff'])
+    return gulp.src(resourcePaths)
         .pipe(gulp.dest('dist'));
 };
 
 
 function index() {
     //vendor*.js will only exist in dev mode. In prod it will be rolled up into the app so rollup can apply treeshaking
-    let srcStream = gulp.src(['dist/global*.js', 'dist/vendor*.js', 'dist/app*.js', 'dist/global*.css'], {read: false});
+    let srcStream = gulp.src(['dist/global.js', 'dist/vendor*.js', 'dist/app.js', 'dist/global.css'], {read: false});
 
     return gulp.src('src/index.html')
         .pipe(inject(srcStream, {addRootSlash: false, ignorePath: 'dist'}))
@@ -102,7 +101,7 @@ function runTests() {
         headless.end();
     });
 
-    return gulp.src(['dist/global-*.js', 'dist/vendor-*.js', 'dist-test/**'])
+    return gulp.src(['dist/global.js', 'dist/vendor.js', 'dist-test/**'])
         .pipe(plumber())
         //Uncomment the next two lines if you want to debug tests in a browser
         //.pipe(jasmineBrowser.specRunner())
@@ -115,7 +114,7 @@ function runTests() {
 }
 
 function runTestsInBrowser() {
-    return gulp.src(['dist/global-*.js', 'dist/vendor-*.js', 'dist-test/**'])
+    return gulp.src(['dist/global.js', 'dist/vendor.js', 'dist-test/**'])
 
         .pipe(gutil.noop());
 }
@@ -158,16 +157,17 @@ gulp.task('default', gulp.series(build, function watch() {
         {usePolling: true},
         gulp.series(
             gulp.parallel(appJs, rollupTest),
-            gulp.parallel(runTests, gulp.series(index, reloadBrowser))
+            gulp.parallel(runTests, reloadBrowser)
         )
     );
-    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, index, reloadBrowser));
+    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, reloadBrowser));
     gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
+    gulp.watch(resourcePaths, gulp.series(resources, reloadBrowser));
 
     gulp.watch('test/**/*.spec.ts', gulp.series(rollupTest, runTests));
 
     if(!prodMode) {
-        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, index, reloadBrowser, runTests));
+        gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, reloadBrowser, runTests));
     }
 
     browserSync.init(null, {
