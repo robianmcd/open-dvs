@@ -25,13 +25,14 @@ import {MidiMapper} from "../services/midiMapper.service";
 import {MidiMappingComponent} from "./midiMapping/midiMapping.component";
 import {Db} from "../services/db/db.service";
 import {PreferencesDb} from "../services/db/preferencesDb.service";
+import {FixedTableHeaderContainerDirective} from "./library/fixedTableHeaderContainer.directive";
 //import {AgGridModule} from "ag-grid-ng2/main";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
         CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
-        MidiMappingComponent],
+        MidiMappingComponent, FixedTableHeaderContainerDirective],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
         MidiMapper, Db, PreferencesDb]

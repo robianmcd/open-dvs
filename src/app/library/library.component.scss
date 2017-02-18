@@ -23,4 +23,10 @@
   flex-grow: 1;
   margin-left: 3px;
   overflow: auto;
+
+  th {
+    background-color: #161616;
+    position: relative;
+    top: -2px;
+  }
 }
