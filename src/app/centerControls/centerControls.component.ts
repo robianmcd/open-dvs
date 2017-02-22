@@ -104,6 +104,7 @@ export class CenterControlsComponent implements AfterViewInit {
         drawOptions = {
             canvas: waveformCanvas,
             themeId: ThemeId.fromDeckId(deckId),
+            useGradient: false
         };
         drawOptions[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
 

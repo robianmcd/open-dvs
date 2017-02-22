@@ -11,7 +11,10 @@ import {MidiIo} from "../../services/midiIo.service";
 export class MidiMappingComponent implements OnInit {
     @Input() elemId: string;
 
+    private _amount: number;
     @Input() set amount(value: number) {
+        this._amount = value;
+
         let mapping = this.midiMapper.getMapping(this.elemId);
         if (mapping) {
             let msg: MidiMsg = {
@@ -33,14 +36,14 @@ export class MidiMappingComponent implements OnInit {
     @Output() amountChange = new EventEmitter();
 
     private shortMidiTypeNames = {
-        [MidiMsgType.NoteOff] : 'Note Off',
-        [MidiMsgType.NoteOn] : 'Note On',
-        [MidiMsgType.PolyAfterTouch] : 'AfTo',
-        [MidiMsgType.CC] : 'CC',
-        [MidiMsgType.ProgramChange] : 'Prog',
-        [MidiMsgType.ChannelAfterTouch] : 'Chan AfTo',
-        [MidiMsgType.PitchBend] : 'Pitch Bend',
-        [MidiMsgType.SysEx] : 'SysEx',
+        [MidiMsgType.NoteOff]: 'Note Off',
+        [MidiMsgType.NoteOn]: 'Note On',
+        [MidiMsgType.PolyAfterTouch]: 'AfTo',
+        [MidiMsgType.CC]: 'CC',
+        [MidiMsgType.ProgramChange]: 'Prog',
+        [MidiMsgType.ChannelAfterTouch]: 'Chan AfTo',
+        [MidiMsgType.PitchBend]: 'Pitch Bend',
+        [MidiMsgType.SysEx]: 'SysEx',
 
     };
 
@@ -53,14 +56,36 @@ export class MidiMappingComponent implements OnInit {
     }
 
     onLearnMsg(msg: MidiMsg) {
+        if (msg.msgType === MidiMsgType.NoteOff) {
+            return;
+        }
+
+        let mappingType = (msg.msgType === MidiMsgType.NoteOn) ? MappingType.Latch : MappingType.Amount;
+
         this.midiMapper.setMapping(this.elemId, {
             control: {msgType: msg.msgType, channel: msg.channel, subType: msg.subType},
-            type: MappingType.Amount
+            type: mappingType
         });
     }
 
     onInputMsg(msg: MidiMsg) {
-        this.amountChange.next(msg.amount);
+        let mapping = this.midiMapper.getMapping(this.elemId);
+
+        if (mapping.type === MappingType.Amount) {
+            this.amountChange.next(msg.amount);
+
+        } else if (mapping.type === MappingType.Latch) {
+            if(msg.amount === 0) {
+                return;
+            } else {
+                if(this._amount === 1) {
+                    this.amountChange.next(0);
+                } else {
+                    this.amountChange.next(1);
+                }
+            }
+        }
+
     }
 
     getMappedControlMessage() {

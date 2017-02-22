@@ -18,6 +18,13 @@ export class DeckComponent implements OnInit, AfterViewInit {
     deckElem: HTMLElement;
     waveformElem: HTMLCanvasElement;
 
+    inputType: DeckInputType;
+    inputTypeOptions = [
+        {label: 'File', type: DeckInputType.File},
+        {label: 'Audio In', type: DeckInputType.AudioIn}
+    ];
+
+
     get deckName() {
         return DeckId[this.deckId];
     }
@@ -100,3 +107,5 @@ export class DeckComponent implements OnInit, AfterViewInit {
         }
     }
 }
+
+export enum DeckInputType {File, AudioIn}

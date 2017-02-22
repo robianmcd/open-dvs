@@ -1,6 +1,14 @@
 <div id="deck">
     <div>
         <div>
+            <md-radio-group [value]="inputType">
+                <md-radio-button class="example-radio-button" *ngFor="let inputTypeOption of inputTypeOptions" [value]="inputTypeOption.type">
+                    {{inputTypeOption.label}}
+                </md-radio-button>
+            </md-radio-group>
+            Selected {{inputType}}
+        </div>
+        <div>
             <canvas height="76" width="1"
                     class="waveform" [class.clickable]="activeSong.isLoaded"
                     (click)="onCanvasClick($event)">

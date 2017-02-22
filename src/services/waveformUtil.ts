@@ -1,4 +1,3 @@
-import {WaveformDetails} from "../models/songDetails";
 import {ThemeId} from "../app/app.component";
 export class WaveformUtil {
     constructor() {
@@ -81,7 +80,7 @@ export class WaveformUtil {
         return outputSamples;
     }
 
-    drawWaveform({canvas, themeId, positiveSamples, negativeSamples, firstColorPixel}: DrawWaveformOptions) {
+    drawWaveform({canvas, themeId, positiveSamples, negativeSamples, firstColorPixel, useGradient = true}: DrawWaveformOptions) {
         let mainColor;
         let highlightColor;
         switch (themeId) {
@@ -144,10 +143,15 @@ export class WaveformUtil {
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, topY);
 
-                let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
-                gradient.addColorStop(0, curPixelHighlightColor);
-                gradient.addColorStop(1, curPixedMainColor);
-                canvasCtx.strokeStyle = gradient;
+                if(useGradient) {
+                    let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
+                    gradient.addColorStop(0, curPixelHighlightColor);
+                    gradient.addColorStop(1, curPixedMainColor);
+                    canvasCtx.strokeStyle = gradient;
+                } else {
+                    canvasCtx.strokeStyle = mainColor;
+                }
+
                 canvasCtx.stroke();
             }
 
@@ -156,10 +160,16 @@ export class WaveformUtil {
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, bottomY);
 
-                let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
-                gradient.addColorStop(0, curPixelHighlightColor);
-                gradient.addColorStop(1, curPixedMainColor);
-                canvasCtx.strokeStyle = gradient;
+                if(useGradient) {
+                    let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
+                    gradient.addColorStop(0, curPixelHighlightColor);
+                    gradient.addColorStop(1, curPixedMainColor);
+                    canvasCtx.strokeStyle = gradient;
+                }
+                else {
+                    canvasCtx.strokeStyle = mainColor;
+                }
+
                 canvasCtx.stroke();
             }
         }
@@ -276,5 +286,6 @@ export interface DrawWaveformOptions {
     themeId: ThemeId,
     positiveSamples?: number[],
     negativeSamples?: number[],
-    firstColorPixel?: number
+    firstColorPixel?: number,
+    useGradient?: boolean
 }
