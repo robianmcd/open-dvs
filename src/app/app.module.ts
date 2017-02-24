@@ -17,7 +17,7 @@ import {DocumentEvents} from "../services/documentEvents.service";
 import {CrossfaderComponent} from "./centerControls/crossfader/crossfader.component";
 import {SideNav} from "../services/sidenav.service";
 import {SideNavComponent} from "./sideNav/sideNav.component";
-import {AudioSettingsComponent} from "./sideNav/audioSettings.component";
+import {AudioSettingsComponent} from "./sideNav/audioSettings/audioSettings.component";
 import {MidiSettingsComponent} from "./sideNav/midiSettings.component";
 import {MidiIo} from "../services/midiIo.service";
 import {MidiUtil} from "../services/midiUtil.service";
@@ -26,16 +26,18 @@ import {MidiMappingComponent} from "./midiMapping/midiMapping.component";
 import {Db} from "../services/db/db.service";
 import {PreferencesDb} from "../services/db/preferencesDb.service";
 import {FixedTableHeaderContainerDirective} from "./library/fixedTableHeaderContainer.directive";
-//import {AgGridModule} from "ag-grid-ng2/main";
+import {AudioSettings} from "./sideNav/audioSettings/audioSettings.service";
+import {DeckAudioSettingsComponent} from "./sideNav/audioSettings/deckAudioSettings.component";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
-    imports: [BrowserModule, MaterialModule.forRoot()/*, AgGridModule.withComponents([])*/],
+    imports: [BrowserModule, MaterialModule, FormsModule],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
         CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
-        MidiMappingComponent, FixedTableHeaderContainerDirective],
+        MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb]
+        MidiMapper, Db, PreferencesDb, AudioSettings]
 })
 
 export class AppModule {

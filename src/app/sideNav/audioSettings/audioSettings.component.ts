@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {DeckId} from '../../app.component'
 
 @Component({
     selector: 'audio-settings',
@@ -6,6 +7,7 @@ import {Component} from '@angular/core';
     styleUrls: ['audioSettings.component.css']
 })
 export class AudioSettingsComponent {
+    DeckId = DeckId;
     constructor() {
 
     }

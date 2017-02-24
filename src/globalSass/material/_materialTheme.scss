@@ -18,7 +18,8 @@ $mat-dark-theme-background: (
         hover:      rgba(white, 0.04),
         card:       $background-color,
         dialog:     $background-color,
-        disabled-button: rgba(white, 0.12)
+        disabled-button: rgba(white, 0.12),
+        raised-button: $background-color,
 );
 
 // Create the theme object (a Sass map containing all of the palettes).

@@ -1,0 +1,27 @@
+<div>
+    <h2>Deck {{deckNames[deckId]}}</h2>
+
+    <h4>Live Input</h4>
+    <div>
+        <md-select placeholder="Left" [ngModel]="(deckAudioSettings.liveIn$ | async).left" (change)="deckAudioSettings.setLiveInLeft($event.value)">
+            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>
+        </md-select>
+    </div>
+    <div>
+        <md-select placeholder="Right" [ngModel]="(deckAudioSettings.liveIn$ | async).right" (change)="deckAudioSettings.setLiveInRight($event.value)">
+            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>
+        </md-select>
+    </div>
+
+    <h4>Control Input</h4>
+    <div>
+        <md-select placeholder="Left" [ngModel]="(deckAudioSettings.controlIn$ | async).left" (change)="deckAudioSettings.setControlInLeft($event.value)">
+            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>
+        </md-select>
+    </div>
+    <div>
+        <md-select placeholder="Right" [ngModel]="(deckAudioSettings.controlIn$ | async).right" (change)="deckAudioSettings.setControlInRight($event.value)">
+            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>
+        </md-select>
+    </div>
+</div>
