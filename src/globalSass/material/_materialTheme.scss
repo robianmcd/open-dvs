@@ -45,20 +45,40 @@ $deck2-theme: mat-dark-theme(mat-palette($dvs-grey), mat-palette($dvs-blue));
   }
 }
 
+@mixin custom-theme($theme) {
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+
+  .mat-option {
+    color: mat-color($primary);
+
+    &.mat-selected {
+      color: mat-color($accent);
+    }
+
+  }
+}
+
 @include button-pseudo-selectors(map_get($dvs-white, 200), map_get($dvs-white, 50));
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include angular-material-theme($app-theme);
+@include custom-theme($app-theme);
 
 .deck1 {
   @include angular-material-theme($deck1-theme);
+  @include custom-theme($deck1-theme);
   @include button-pseudo-selectors(map_get($dvs-purple, 400), map_get($dvs-purple, 600));
 }
 
 .deck2 {
   @include angular-material-theme($deck2-theme);
+  @include custom-theme($deck2-theme);
   @include button-pseudo-selectors(map_get($dvs-blue, 400), map_get($dvs-blue, 600));
 }
 

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Db} from "./db.service";
 import {Preferences} from "./preferences";
 import {MidiMapping} from "../midiMapper.service";
+import {AudioSettingsDbFormat} from "../../app/sideNav/audioSettings/audioSettings.service";
 
 @Injectable()
 export class PreferencesDb {
@@ -78,7 +79,13 @@ export class PreferencesDb {
         return this.setPreference('midiMappings', mappings);
     }
 
-    //get/set audio inputs and outputs
+    getAudioSettings(): AudioSettingsDbFormat {
+        return this.preferences.audioSettings;
+    }
+
+    setAudioSettings(settings: AudioSettingsDbFormat) {
+        return this.setPreference('audioSettings', settings);
+    }
 
 
     private setPreference(key: string, value) {

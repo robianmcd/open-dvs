@@ -5,4 +5,10 @@ export class Preferences {
     midiMappings = new Map<string, MidiMapping>();
     enabledMidiInputNames = new Set<string>();
     enabledMidiOutputNames = new Set<string>();
+    audioSettings = {
+        input: {
+            deckA: {controlDeviceId: undefined, liveDeviceId: undefined},
+            deckB: {controlDeviceId: undefined, liveDeviceId: undefined}
+        }
+    }
 }

@@ -1,11 +1,11 @@
 import {Injectable} from "@angular/core";
-import {BehaviorSubject, Observable} from "rxjs";
+import {Observable, ReplaySubject} from "rxjs";
 
 @Injectable()
 export class AudioUtil {
     context = new AudioContext();
-    private inputDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
-    private outputDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
+    private inputDevices = new ReplaySubject<MediaDeviceInfo[]>();
+    private outputDevices = new ReplaySubject<MediaDeviceInfo[]>();
 
     get inputDevices$(): Observable<MediaDeviceInfo[]> {
         return this.inputDevices.asObservable();
@@ -35,11 +35,27 @@ export class AudioUtil {
             let inputDevices = [];
             let outputDevices = [];
 
-            devices.forEach((device) => {
+            devices.forEach((device: MediaDeviceInfo) => {
                 //Not sure what the 'Communications' device is...
                 if (device.label !== 'Communications') {
                     if (device.kind === 'audioinput') {
                         inputDevices.push(device);
+
+
+                        let constraints = {
+                            audio: {
+                                optional: [{
+                                    sourceId: device.deviceId
+                                }]
+                            }
+                        };
+
+                        navigator.getUserMedia(constraints, (openDevice) => {
+                            console.log(device.label, this.context.createMediaStreamSource(openDevice));
+                        }, (err) => {
+                            console.log('err', err);
+                        });
+
                     } else if (device.kind === 'audiooutput') {
                         outputDevices.push(device);
                     }

@@ -22,5 +22,8 @@
             </button>
             <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
         </div>
+        <div>
+            <button md-raised-button>Control</button>
+        </div>
     </div>
 </div>
