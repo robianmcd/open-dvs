@@ -1,8 +1,1 @@
 .idea
-node_modules
-dist
-aot
-
-src/**/*.css
-src/**/*.js
-src/**/*.js.map
