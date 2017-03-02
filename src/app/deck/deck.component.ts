@@ -21,7 +21,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
     inputType: DeckInputType;
     inputTypeOptions = [
         {label: 'File', type: DeckInputType.File},
-        {label: 'Audio In', type: DeckInputType.AudioIn}
+        {label: 'Live', type: DeckInputType.Live}
     ];
 
 
@@ -108,4 +108,4 @@ export class DeckComponent implements OnInit, AfterViewInit {
     }
 }
 
-export enum DeckInputType {File, AudioIn}
+export enum DeckInputType {File, Live}

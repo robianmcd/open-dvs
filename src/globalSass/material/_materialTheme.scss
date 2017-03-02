@@ -8,16 +8,16 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue.
 $dvs-grey-palette: mat-palette($dvs-grey);
-$dvs-purple-palette:  mat-palette($dvs-purple);
+$dvs-purple-palette: mat-palette($dvs-purple);
 
 //Override material default dark theme background colors
 $mat-dark-theme-background: (
         status-bar: black,
-        app-bar:    $background-color,
+        app-bar: $background-color,
         background: $background-color,
-        hover:      rgba(white, 0.04),
-        card:       $background-color,
-        dialog:     $background-color,
+        hover: rgba(white, 0.04),
+        card: $background-color,
+        dialog: $background-color,
         disabled-button: rgba(white, 0.12),
         raised-button: $background-color,
 );
@@ -101,4 +101,8 @@ mat-grid-tile figure {
 
 .mat-slider-thumb-container {
   transition: none;
+}
+
+.mat-toolbar {
+  height: 48px;
 }

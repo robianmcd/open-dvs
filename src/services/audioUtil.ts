@@ -41,21 +41,6 @@ export class AudioUtil {
                     if (device.kind === 'audioinput') {
                         inputDevices.push(device);
 
-
-                        let constraints = {
-                            audio: {
-                                optional: [{
-                                    sourceId: device.deviceId
-                                }]
-                            }
-                        };
-
-                        navigator.getUserMedia(constraints, (openDevice) => {
-                            console.log(device.label, this.context.createMediaStreamSource(openDevice));
-                        }, (err) => {
-                            console.log('err', err);
-                        });
-
                     } else if (device.kind === 'audiooutput') {
                         outputDevices.push(device);
                     }

@@ -16,14 +16,15 @@
         <div>
             <button [id]="deckName + '-play-pause'"
                     (click)="activeSong.isPlaying ? pause() : play()"
-                    [disabled]="!activeSong.isLoaded"
+                    [disabled]="!activeSong.isLoaded || activeSong.isControlled"
                     md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
                 Play/Pause
             </button>
             <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
         </div>
         <div>
-            <button md-raised-button>Control</button>
+            <button [id]="deckName + '-toggle-control'" md-raised-button (click)="activeSong.toggleControl()" [color]="activeSong.isControlled ? 'accent' : 'primary'">Control</button>
+            <midi-mapping [elemId]="deckName + '-toggle-control'" [amount]="activeSong.isControlled ? 1 : 0" (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>
         </div>
     </div>
 </div>

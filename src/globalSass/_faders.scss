@@ -1,0 +1,86 @@
+@import '../../node_modules/@angular/material/core/theming/all-theme';
+@import 'material/palettes';
+
+.crossfader {
+  cursor: pointer;
+
+  .mat-slider-thumb {
+    border-left: 6px solid map_get($dvs-grey, 500);
+    border-right: 6px solid map_get($dvs-grey, 500);
+    border-top: 4px solid map_get($dvs-grey, 500);
+    border-bottom: 4px solid map_get($dvs-grey, 500);
+
+    border-radius: 0;
+    right: -4px;
+    width: 13px;
+    height: 38px;
+    bottom: -17px;
+    transform: scale(1);
+  }
+
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+    border-color: map_get($dvs-grey, 500);
+    background-color: white;
+  }
+
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing):hover .mat-slider-thumb,
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing).mat-slider-active .mat-slider-thumb {
+    border-color: map_get($dvs-grey, 500);
+  }
+
+  &.mat-slider-horizontal {
+    width: 250px;
+  }
+
+  .mat-slider-track-fill {
+    background-color: black;
+  }
+
+  &.mat-slider-horizontal .mat-slider-track-background,
+  .mat-slider-track-fill
+  {
+    transform: translateX(0px) scaleX(1) !important
+  }
+}
+
+.fader {
+  cursor: pointer;
+
+  .mat-slider-thumb {
+    border-top: 6px solid map_get($dvs-grey, 500);
+    border-bottom: 6px solid map_get($dvs-grey, 500);
+    border-left: 4px solid map_get($dvs-grey, 500);
+    border-right: 4px solid map_get($dvs-grey, 500);
+
+    border-radius: 0;
+    bottom: -4px;
+    height: 13px;
+    width: 38px;
+    right: -17px;
+    transform: scale(1);
+  }
+
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+    border-color: map_get($dvs-grey, 500);
+    background-color: white;
+  }
+
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing):hover .mat-slider-thumb,
+  &.mat-slider-min-value:not(.mat-slider-thumb-label-showing).mat-slider-active .mat-slider-thumb {
+    border-color: map_get($dvs-grey, 500);
+  }
+
+  &.mat-slider-horizontal {
+    height: 250px;
+  }
+
+  .mat-slider-track-fill {
+    background-color: black;
+  }
+
+  &.mat-slider-horizontal .mat-slider-track-background,
+  .mat-slider-track-fill
+  {
+    transform: translateX(0px) scaleX(1) !important
+  }
+}

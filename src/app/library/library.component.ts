@@ -83,5 +83,7 @@ export class LibraryComponent {
     }
 }
 
-export interface LoadSongEvent {song: Song, deckId: DeckId
+export interface LoadSongEvent {
+    song: Song,
+    deckId: DeckId
 }

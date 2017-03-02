@@ -1,0 +1,4 @@
+<div>
+    <md-slider class="fader" [id]="'fader-' + name" [min]="0" [max]="1" [step]="1/128" [value]="value" (input)="change.next($event.value)" [vertical]="true"></md-slider>
+    <midi-mapping [elemId]="'fader-' + name" [amount]="value" (amountChange)="change.next($event)"></midi-mapping>
+</div>

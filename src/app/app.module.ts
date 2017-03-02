@@ -29,15 +29,17 @@ import {FixedTableHeaderContainerDirective} from "./library/fixedTableHeaderCont
 import {AudioSettings} from "./sideNav/audioSettings/audioSettings.service";
 import {DeckAudioSettingsComponent} from "./sideNav/audioSettings/deckAudioSettings.component";
 import {FormsModule} from "@angular/forms";
+import {DspUtil} from "../services/dspUtil.service";
+import {FaderComponent} from "./fader/fader.component";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule, FormsModule],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
         CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
-        MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent],
+        MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb, AudioSettings]
+        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil]
 })
 
 export class AppModule {

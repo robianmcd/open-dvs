@@ -16,3 +16,17 @@
   cursor: -moz-grab;
   cursor: grab;
 }
+
+.waveform-container {
+  position: relative;
+}
+
+.center-line {
+  position: absolute;
+  left:50%;
+
+  height: 100%;
+  width: 1px;
+
+  background-color: grey;
+}

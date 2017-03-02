@@ -1,15 +1,20 @@
 <div id="center-controls">
-    <div>
+    <div class="waveform-container">
+        <div class="center-line"></div>
         <canvas height="100" width="1" class="waveform"
                 #deck1Canvas (mousedown)="startScrub(DeckId.LEFT, $event)"
                 [class.scrubbable]="deck1ActiveSong.isLoaded">
         </canvas>
     </div>
-    <div>
+    <div class="waveform-container">
+        <div class="center-line"></div>
         <canvas height="100" width="1" class="waveform"
                 #deck2Canvas (mousedown)="startScrub(DeckId.RIGHT, $event)"
                 [class.scrubbable]="deck2ActiveSong.isLoaded">
         </canvas>
+    </div>
+    <div>
+        <!--<fader name="deckAGain" [value]="1"></fader>-->
     </div>
     <div style="position: relative; left: -3px; top: 2px;">
         <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 0;"></div>

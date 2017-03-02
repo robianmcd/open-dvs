@@ -1,5 +1,4 @@
 import {Component, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
-import moment from 'moment';
 import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
 import {SideNav, SideNavState} from "../services/sidenav.service";
@@ -20,13 +19,11 @@ export class AppComponent implements AfterViewInit {
     SideNavState = SideNavState;
 
     constructor(public sideNav: SideNav, midiUtil: MidiUtil, db: Db) {
-        let sampleMomentUsage = moment().format();
-
         db.initialize();
         midiUtil.initialize();
 
         if ('serviceWorker' in navigator) {
-            navigator['serviceWorker'].register('/sw.js');
+            navigator['serviceWorker'].register('./sw.js');
         }
     }
 

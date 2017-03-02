@@ -10,6 +10,7 @@ let browserSync = require('browser-sync').create();
 let jasmineBrowser = require('gulp-jasmine-browser');
 let gutil = require('gulp-util');
 let vendorUtils = require('./gulp/vendorBuildUtils');
+let uglify = require('gulp-uglify');
 let {rollupApp, rollupVendor, rollupTest} = require('./gulp/rollupTasks');
 let plumber = require('gulp-plumber');
 
@@ -45,14 +46,17 @@ let globalJs = gulp.series(
     },
     function BuildGlobalJs() {
 
-        return gulp.src([
+        let stream = gulp.src([
             'node_modules/core-js/client/shim.min.js',
             'node_modules/zone.js/dist/zone.min.js',
             'node_modules/hammerjs/hammer.js',
             'lib/jsmediatags/jsmediatags.min.js'
         ])
-            .pipe(concat('global.js'))
-            .pipe(gulp.dest('dist'));
+            .pipe(concat('global.js'));
+
+        prodMode && (stream = stream.pipe(uglify()));
+
+        return stream.pipe(gulp.dest('dist'));
     }
 );
 
