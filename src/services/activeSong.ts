@@ -62,7 +62,8 @@ export class ActiveSong {
 
             let constraints = {
                 audio: {
-                    deviceId: controlDevice.deviceId
+                    deviceId: controlDevice.deviceId,
+                    echoCancellation: {exact: false}
                 }
             };
 
@@ -73,7 +74,6 @@ export class ActiveSong {
 
                         let scriptNode = this.audioUtil.context.createScriptProcessor(this.BUFFER_SIZE);
                         scriptNode.onaudioprocess = (e: AudioProcessingEvent) => this.processControlAudio(e);
-
 
                         controlSource.connect(scriptNode);
                         scriptNode.connect(this.gainNode);
@@ -112,30 +112,32 @@ export class ActiveSong {
         if (pilotHz === -1) {
             //Not enough of a signal to detect/too quiet
             this.playbackRate = 0;
+            for (let i = 0; i < this.BUFFER_SIZE; i++) {
+                leftScriptOutputBuffer[i] = 0;
+                rightScriptOutputBuffer[i] = 0;
+            }
             return;
-        }
-
-        let periodSamples = context.sampleRate / pilotHz;
-
-        //console.log(leftInputBuffer[0], rightInputBuffer[0]);
-
-        let phaseSamples = this.dspUtil.crossCorrelate(leftInputBuffer, rightInputBuffer);
-
-        if (phaseSamples < periodSamples - phaseSamples) {
-            //console.log('f', phaseSamples);
-        } else {
-            //console.log('b', phaseSamples);
         }
 
         let outputSize = Math.round(this.BUFFER_SIZE * (pilotHz / defaultPilotHz));
         let outputPlaybackRate = outputSize / this.BUFFER_SIZE;
         let offlineSampleRate = context.sampleRate * outputPlaybackRate;
 
+        let leftSongBuffer = this.buffer.getChannelData(0);
+        let rightSongBuffer = this.buffer.getChannelData(1);
+
+        let phaseSamples = this.dspUtil.crossCorrelate(leftInputBuffer, rightInputBuffer);
+        let periodSamples = context.sampleRate / pilotHz;
+        let playingInReverse = phaseSamples < periodSamples - phaseSamples;
+
+        if (playingInReverse) {
+            leftSongBuffer = this.dspUtil.reverseChannelData(leftSongBuffer);
+            rightSongBuffer = this.dspUtil.reverseChannelData(leftSongBuffer);
+        }
+
         //Cannot create a buffer with a sample rate lower than 3000
         if (offlineSampleRate > 3000) {
-
-            let leftSongBuffer = this.buffer.getChannelData(0);
-            let rightSongBuffer = this.buffer.getChannelData(1);
+            //console.log(leftInputBuffer[0], rightInputBuffer[0]);
 
             let offlineCtx = new OfflineAudioContext(2, this.BUFFER_SIZE, context.sampleRate);
 
@@ -150,9 +152,10 @@ export class ActiveSong {
             let outputBufferSource = offlineCtx.createBufferSource();
             outputBufferSource.buffer = outputBuffer;
 
+            let offsetInSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
             for (let i = 0; i < outputSize; i++) {
-                leftOutputBuffer[i] = leftSongBuffer[i + this.songOffset];
-                rightOutputBuffer[i] = rightSongBuffer[i + this.songOffset];
+                leftOutputBuffer[i] = leftSongBuffer[i + offsetInSamples];
+                rightOutputBuffer[i] = rightSongBuffer[i + offsetInSamples];
             }
 
             outputBufferSource.connect(offlineCtx.destination);
@@ -175,9 +178,14 @@ export class ActiveSong {
         }
 
 
-        this.songOffset += outputSize;
+        if(playingInReverse) {
+            this.songOffset -= outputSize  / this.audioUtil.context.sampleRate;
+            this.playbackRate = -outputSize / this.BUFFER_SIZE;
+        } else {
+            this.songOffset += outputSize / this.audioUtil.context.sampleRate;
+            this.playbackRate = outputSize / this.BUFFER_SIZE;
+        }
         this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
-        this.playbackRate = outputSize / this.BUFFER_SIZE;
     }
 
     setSongOffset(time) {

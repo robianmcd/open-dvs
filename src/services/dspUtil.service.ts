@@ -112,4 +112,8 @@ export class DspUtil {
         return -1;
     }
 
+    reverseChannelData(channelData: Float32Array) {
+        let channelCopy = new Float32Array(channelData);
+        return Array.prototype.reverse.call(channelCopy);
+    }
 }

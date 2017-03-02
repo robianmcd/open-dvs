@@ -23,7 +23,13 @@
             <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
         </div>
         <div>
-            <button [id]="deckName + '-toggle-control'" md-raised-button (click)="activeSong.toggleControl()" [color]="activeSong.isControlled ? 'accent' : 'primary'">Control</button>
+            <button [id]="deckName + '-toggle-control'"
+                    md-raised-button
+                    (click)="activeSong.toggleControl()"
+                    [disabled]="!activeSong.isLoaded"
+                    [color]="activeSong.isControlled ? 'accent' : 'primary'">
+                Control
+            </button>
             <midi-mapping [elemId]="deckName + '-toggle-control'" [amount]="activeSong.isControlled ? 1 : 0" (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>
         </div>
     </div>
