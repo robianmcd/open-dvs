@@ -19,7 +19,7 @@ export class ActiveSong {
     private gainNode: GainNode;
 
     private controlled = false;
-    private BUFFER_SIZE = 1024;
+    private BUFFER_SIZE = 512;
 
     constructor(
         private deckId: DeckId,
@@ -111,7 +111,9 @@ export class ActiveSong {
         let pilotHz = this.dspUtil.autoCorrelate(leftInputBuffer, context.sampleRate);
         if (pilotHz === -1) {
             //Not enough of a signal to detect/too quiet
+            //TODO this code is duplicated...make it not duplicated
             this.playbackRate = 0;
+            this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
             for (let i = 0; i < this.BUFFER_SIZE; i++) {
                 leftScriptOutputBuffer[i] = 0;
                 rightScriptOutputBuffer[i] = 0;
@@ -129,11 +131,7 @@ export class ActiveSong {
         let phaseSamples = this.dspUtil.crossCorrelate(leftInputBuffer, rightInputBuffer);
         let periodSamples = context.sampleRate / pilotHz;
         let playingInReverse = phaseSamples < periodSamples - phaseSamples;
-
-        if (playingInReverse) {
-            leftSongBuffer = this.dspUtil.reverseChannelData(leftSongBuffer);
-            rightSongBuffer = this.dspUtil.reverseChannelData(leftSongBuffer);
-        }
+        let reverseMultiplier = playingInReverse ? -1 : 1;
 
         //Cannot create a buffer with a sample rate lower than 3000
         if (offlineSampleRate > 3000) {
@@ -154,8 +152,8 @@ export class ActiveSong {
 
             let offsetInSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
             for (let i = 0; i < outputSize; i++) {
-                leftOutputBuffer[i] = leftSongBuffer[i + offsetInSamples];
-                rightOutputBuffer[i] = rightSongBuffer[i + offsetInSamples];
+                leftOutputBuffer[i] = leftSongBuffer[i * reverseMultiplier + offsetInSamples];
+                rightOutputBuffer[i] = rightSongBuffer[i * reverseMultiplier + offsetInSamples];
             }
 
             outputBufferSource.connect(offlineCtx.destination);
@@ -171,20 +169,17 @@ export class ActiveSong {
                 }
             });
         } else {
+            this.playbackRate = 0;
+            this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
             for (let i = 0; i < this.BUFFER_SIZE; i++) {
                 leftScriptOutputBuffer[i] = 0;
                 rightScriptOutputBuffer[i] = 0;
             }
+            return;
         }
 
-
-        if(playingInReverse) {
-            this.songOffset -= outputSize  / this.audioUtil.context.sampleRate;
-            this.playbackRate = -outputSize / this.BUFFER_SIZE;
-        } else {
-            this.songOffset += outputSize / this.audioUtil.context.sampleRate;
-            this.playbackRate = outputSize / this.BUFFER_SIZE;
-        }
+        this.songOffset += outputSize * reverseMultiplier / this.audioUtil.context.sampleRate;
+        this.playbackRate = outputSize * reverseMultiplier / this.BUFFER_SIZE;
         this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
     }
 
