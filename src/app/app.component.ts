@@ -2,7 +2,7 @@ import {Component, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
 import {DeckComponent} from "./deck/deck.component";
 import {LoadSongEvent} from "./library/library.component";
 import {SideNav, SideNavState} from "../services/sidenav.service";
-import {MidiUtil} from "../services/midiUtil.service";
+import {MidiUtil} from "../services/midi/midiUtil.service";
 import {Db} from "../services/db/db.service";
 
 @Component({

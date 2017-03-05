@@ -1,4 +1,4 @@
-import {MidiMapping} from "../midiMapper.service";
+import {MidiMapping} from "../midi/midiMapper.service";
 
 export class Preferences {
     crossfaderCurveSharpness = 0;

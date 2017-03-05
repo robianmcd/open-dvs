@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MidiIo} from "../../services/midiIo.service";
+import {MidiIo} from "../../services/midi/midiIo.service";
 
 @Component({
     selector: 'midi-settings',

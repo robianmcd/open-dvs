@@ -1,9 +1,10 @@
 <div id="deck">
     <div>
         <div>
+            Input:
             <md-radio-group [value]="inputType">
                 <md-radio-button class="example-radio-button" *ngFor="let inputTypeOption of inputTypeOptions" [value]="inputTypeOption.type">
-                    {{inputTypeOption.label}}
+                    {{inputTypeOption.label}} &nbsp;&nbsp;
                 </md-radio-button>
             </md-radio-group>
         </div>

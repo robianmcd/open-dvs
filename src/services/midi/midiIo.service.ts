@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {MidiMsg, MidiUtil} from "./midiUtil.service";
 import {Subject, Observable} from "rxjs";
-import {PreferencesDb} from "./db/preferencesDb.service";
+import {PreferencesDb} from "../db/preferencesDb.service";
 import MIDIOutput = WebMidi.MIDIOutput;
 import MIDIInput = WebMidi.MIDIInput;
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;

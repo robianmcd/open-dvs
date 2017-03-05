@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Db} from "./db.service";
 import {Preferences} from "./preferences";
-import {MidiMapping} from "../midiMapper.service";
+import {MidiMapping} from "../midi/midiMapper.service";
 import {AudioSettingsDbFormat} from "../../app/sideNav/audioSettings/audioSettings.service";
 
 @Injectable()

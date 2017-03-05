@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {SideNav, SideNavState} from "../../services/sidenav.service";
-import {MidiMapper} from "../../services/midiMapper.service";
+import {MidiMapper} from "../../services/midi/midiMapper.service";
 
 @Component({
     selector: 'toolbar',

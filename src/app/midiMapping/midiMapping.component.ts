@@ -1,7 +1,7 @@
 import {Component, Input, Output, EventEmitter, OnInit} from "@angular/core";
-import {MidiMapper, MappingType} from "../../services/midiMapper.service";
-import {MidiMsg, MidiMsgType} from "../../services/midiUtil.service";
-import {MidiIo} from "../../services/midiIo.service";
+import {MidiMapper, MappingType} from "../../services/midi/midiMapper.service";
+import {MidiMsg, MidiMsgType} from "../../services/midi/midiUtil.service";
+import {MidiIo} from "../../services/midi/midiIo.service";
 
 @Component({
     selector: 'midi-mapping',

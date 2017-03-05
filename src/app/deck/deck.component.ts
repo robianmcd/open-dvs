@@ -3,7 +3,7 @@ import {SongDetails} from "../../models/songDetails";
 import {Component, ElementRef, Input, OnInit, AfterViewInit} from "@angular/core";
 import {WaveformUtil} from "../../services/audio/waveformUtil.service";
 import {DeckId, ThemeId} from "../app.component";
-import {ActiveSongs} from "../../services/activeSongs";
+import {ActiveSongs} from "../../services/activeSongs.service";
 import {ActiveSong} from "../../services/activeSong";
 import {AnimationFrames} from "../../services/animationFrames.service";
 
@@ -18,7 +18,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
     deckElem: HTMLElement;
     waveformElem: HTMLCanvasElement;
 
-    inputType: DeckInputType;
+    inputType: DeckInputType = DeckInputType.File;
     inputTypeOptions = [
         {label: 'File', type: DeckInputType.File},
         {label: 'Live', type: DeckInputType.Live}

@@ -1,9 +1,9 @@
 import {Injectable} from "@angular/core";
 import {BehaviorSubject, Observable} from "rxjs";
 import {MidiIo} from "./midiIo.service";
-import {MidiMappingComponent} from "../app/midiMapping/midiMapping.component";
+import {MidiMappingComponent} from "../../app/midiMapping/midiMapping.component";
 import {MidiControl, MidiMsg} from "./midiUtil.service";
-import {PreferencesDb} from "./db/preferencesDb.service";
+import {PreferencesDb} from "../db/preferencesDb.service";
 
 @Injectable()
 export class MidiMapper {

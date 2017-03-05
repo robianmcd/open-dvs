@@ -20,6 +20,24 @@ export class AudioUtil {
         navigator.getUserMedia({audio: true}, () => this.onUserMediaLoad(), () => this.onUserMediaError());
     }
 
+    public copyBuffer(buf: Float32Array, start?: number, size?: number) {
+        if(start === undefined) {
+            start = 0;
+        }
+
+        if(size === undefined) {
+            size = buf.length;
+        }
+
+        let output = new Float32Array(size);
+
+        for (let i = 0; i < size; i++) {
+            output[i] = buf[i + start];
+        }
+
+        return output;
+    }
+
     private onUserMediaLoad() {
         //TODO: check if this event actually triggers change detection. Might have issues with zone.js
         navigator.mediaDevices.ondevicechange = () => this.updateDeviceLists();

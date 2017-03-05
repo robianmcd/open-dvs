@@ -1,4 +1,4 @@
-import {MidiMsgType, MidiUtil} from "../../src/services/midiUtil.service";
+import {MidiMsgType, MidiUtil} from "../../src/services/midi/midiUtil.service";
 
 describe("midiUtil", () => {
     let midiUtil: MidiUtil;

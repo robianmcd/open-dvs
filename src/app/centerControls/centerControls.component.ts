@@ -1,5 +1,5 @@
 import {Component, ViewChild, AfterViewInit, ElementRef} from "@angular/core";
-import {ActiveSongs} from "../../services/activeSongs";
+import {ActiveSongs} from "../../services/activeSongs.service";
 import {ActiveSong} from "../../services/activeSong";
 import {DeckId, ThemeId} from "../app.component";
 import {Song} from "../../models/song";
