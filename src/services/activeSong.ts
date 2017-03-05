@@ -1,9 +1,10 @@
 import {Song} from "../models/song";
-import {AudioUtil} from "./audioUtil";
+import {AudioUtil} from "./audio/audioUtil.service";
 import {DeckId} from "../app/app.component";
 import {ReplaySubject} from "rxjs";
 import {DeckAudioSettings} from "../app/sideNav/audioSettings/audioSettings.service";
-import {DspUtil} from "./dspUtil.service";
+import {DspUtil} from "./audio/dspUtil.service";
+import {Resampler} from "./audio/resampler.service";
 
 export class ActiveSong {
     public song: Song;
@@ -19,13 +20,14 @@ export class ActiveSong {
     private gainNode: GainNode;
 
     private controlled = false;
-    private BUFFER_SIZE = 512;
+    private BUFFER_SIZE = 1024;
 
     constructor(
         private deckId: DeckId,
         private audioUtil: AudioUtil,
         private deckAudioSettings: DeckAudioSettings,
-        private dspUtil: DspUtil
+        private dspUtil: DspUtil,
+        private resampler: Resampler
     ) {
         this.song$.subscribe((song) => this.song = song);
 
@@ -109,9 +111,10 @@ export class ActiveSong {
 
         const defaultPilotHz = 2000;
         let pilotHz = this.dspUtil.autoCorrelate(leftInputBuffer, context.sampleRate);
-        if (pilotHz === -1) {
-            //Not enough of a signal to detect/too quiet
-            //TODO this code is duplicated...make it not duplicated
+        let periodSamples = context.sampleRate / pilotHz;
+
+        //Not enough of a signal to detect/too quiet or too slow
+        if (pilotHz === -1 || periodSamples > 350) {
             this.playbackRate = 0;
             this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
             for (let i = 0; i < this.BUFFER_SIZE; i++) {
@@ -121,61 +124,41 @@ export class ActiveSong {
             return;
         }
 
+        let phaseSamples = this.dspUtil.crossCorrelate(leftInputBuffer, rightInputBuffer);
+
+        let playingInReverse;
+        //TODO: figure out why this keeps happening.
+        if (phaseSamples === -1) {
+            console.log('skipping directing and assuming ' + ((this.playbackRate < 0) ? 'reverse':'forward'));
+            playingInReverse = this.playbackRate < 0;
+        } else {
+            playingInReverse = phaseSamples < periodSamples - phaseSamples;
+        }
+        let reverseMultiplier = playingInReverse ? -1 : 1;
+
+
         let outputSize = Math.round(this.BUFFER_SIZE * (pilotHz / defaultPilotHz));
         let outputPlaybackRate = outputSize / this.BUFFER_SIZE;
-        let offlineSampleRate = context.sampleRate * outputPlaybackRate;
+        let activeSectionSampleRate = context.sampleRate * outputPlaybackRate;
 
         let leftSongBuffer = this.buffer.getChannelData(0);
         let rightSongBuffer = this.buffer.getChannelData(1);
 
-        let phaseSamples = this.dspUtil.crossCorrelate(leftInputBuffer, rightInputBuffer);
-        let periodSamples = context.sampleRate / pilotHz;
-        let playingInReverse = phaseSamples < periodSamples - phaseSamples;
-        let reverseMultiplier = playingInReverse ? -1 : 1;
+        let leftActiveSectionSongBuffer = new Float32Array(outputSize);
+        let rightActiveSectionBuffer = new Float32Array(outputSize);
 
-        //Cannot create a buffer with a sample rate lower than 3000
-        if (offlineSampleRate > 3000) {
-            //console.log(leftInputBuffer[0], rightInputBuffer[0]);
+        let offsetInSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
+        for (let i = 0; i < outputSize; i++) {
+            leftActiveSectionSongBuffer[i] = leftSongBuffer[i * reverseMultiplier + offsetInSamples];
+            rightActiveSectionBuffer[i] = rightSongBuffer[i * reverseMultiplier + offsetInSamples];
+        }
 
-            let offlineCtx = new OfflineAudioContext(2, this.BUFFER_SIZE, context.sampleRate);
+        let leftRenderedBuffer = this.resampler.resample(leftActiveSectionSongBuffer, activeSectionSampleRate, context.sampleRate);
+        let rightRenderedBuffer = this.resampler.resample(rightActiveSectionBuffer, activeSectionSampleRate, context.sampleRate);
 
-            let outputBuffer = offlineCtx.createBuffer(
-                2,
-                outputSize,
-                offlineSampleRate
-            );
-            let leftOutputBuffer = outputBuffer.getChannelData(0);
-            let rightOutputBuffer = outputBuffer.getChannelData(1);
-
-            let outputBufferSource = offlineCtx.createBufferSource();
-            outputBufferSource.buffer = outputBuffer;
-
-            let offsetInSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
-            for (let i = 0; i < outputSize; i++) {
-                leftOutputBuffer[i] = leftSongBuffer[i * reverseMultiplier + offsetInSamples];
-                rightOutputBuffer[i] = rightSongBuffer[i * reverseMultiplier + offsetInSamples];
-            }
-
-            outputBufferSource.connect(offlineCtx.destination);
-            outputBufferSource.start(0);
-
-            offlineCtx.startRendering().then((renderedBuffer) => {
-                let leftRenderedBuffer = renderedBuffer.getChannelData(0);
-                let rightRenderedBuffer = renderedBuffer.getChannelData(1);
-
-                for (let i = 0; i < this.BUFFER_SIZE; i++) {
-                    leftScriptOutputBuffer[i] = leftRenderedBuffer[i];
-                    rightScriptOutputBuffer[i] = rightRenderedBuffer[i];
-                }
-            });
-        } else {
-            this.playbackRate = 0;
-            this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
-            for (let i = 0; i < this.BUFFER_SIZE; i++) {
-                leftScriptOutputBuffer[i] = 0;
-                rightScriptOutputBuffer[i] = 0;
-            }
-            return;
+        for (let i = 0; i < this.BUFFER_SIZE; i++) {
+            leftScriptOutputBuffer[i] = leftRenderedBuffer[i];
+            rightScriptOutputBuffer[i] = rightRenderedBuffer[i];
         }
 
         this.songOffset += outputSize * reverseMultiplier / this.audioUtil.context.sampleRate;
@@ -235,9 +218,9 @@ export class ActiveSong {
     }
 
     setGain(gain: number) {
-        //delay when gain is set to make up for audio latency. Maybe set this to 30ms in OSX and 160ms on windows
-        //this.gainNode.gain.setValueAtTime(gain, this.audioUtil.context.currentTime + 30/1000);
-        this.gainNode.gain.value = gain;
+        //delay when gain is set to make up for audio latency. Maybe set this to 40ms in OSX and 170ms on windows
+        this.gainNode.gain.setValueAtTime(gain, this.audioUtil.context.currentTime + 40/1000);
+        //this.gainNode.gain.value = gain;
     }
 
     private updateSongOffset() {

@@ -5,12 +5,12 @@ import {AppComponent} from "./app.component";
 import {LibraryComponent} from "./library/library.component";
 import {FileDropDirective} from "./library/fileDrop.directive";
 import {ToolbarComponent} from "./toolbar/toolbar.component";
-import {AudioUtil} from "../services/audioUtil";
+import {AudioUtil} from "../services/audio/audioUtil.service";
 import {SongDb} from "../services/db/songDb.service";
 import {SpinnerComponent} from "./spinner/spinner.component";
 import {DeckComponent} from "./deck/deck.component";
 import {CenterControlsComponent} from "./centerControls/centerControls.component";
-import {WaveformUtil} from "../services/waveformUtil";
+import {WaveformUtil} from "../services/audio/waveformUtil.service";
 import {ActiveSongs} from "../services/activeSongs";
 import {AnimationFrames} from "../services/animationFrames.service";
 import {DocumentEvents} from "../services/documentEvents.service";
@@ -29,8 +29,9 @@ import {FixedTableHeaderContainerDirective} from "./library/fixedTableHeaderCont
 import {AudioSettings} from "./sideNav/audioSettings/audioSettings.service";
 import {DeckAudioSettingsComponent} from "./sideNav/audioSettings/deckAudioSettings.component";
 import {FormsModule} from "@angular/forms";
-import {DspUtil} from "../services/dspUtil.service";
+import {DspUtil} from "../services/audio/dspUtil.service";
 import {FaderComponent} from "./fader/fader.component";
+import {Resampler} from "../services/audio/resampler.service";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule, FormsModule],
@@ -39,7 +40,7 @@ import {FaderComponent} from "./fader/fader.component";
         MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil]
+        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler]
 })
 
 export class AppModule {

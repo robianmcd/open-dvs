@@ -24,8 +24,10 @@ export class DspUtil {
             rms += val * val;
         }
         rms = Math.sqrt(rms / SIZE);
-        if (rms < 0.01) // not enough signal
+        // not enough signal
+        if (rms < 0.01) {
             return -1;
+        }
 
         let lastCorrelation = 1;
         for (let offset = MIN_SAMPLES; offset < MAX_SAMPLES; offset++) {
@@ -110,10 +112,5 @@ export class DspUtil {
             return best_offset;
         }
         return -1;
-    }
-
-    reverseChannelData(channelData: Float32Array) {
-        let channelCopy = new Float32Array(channelData);
-        return Array.prototype.reverse.call(channelCopy);
     }
 }

@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {AudioUtil} from "../../../services/audioUtil";
+import {AudioUtil} from "../../../services/audio/audioUtil.service";
 import {DeckId} from "../../app.component";
 import {DeckAudioSettings, AudioSettings} from "./audioSettings.service";
 

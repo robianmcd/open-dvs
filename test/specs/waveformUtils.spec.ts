@@ -1,4 +1,4 @@
-import {WaveformUtil} from "../../src/services/waveformUtil";
+import {WaveformUtil} from "../../src/services/audio/waveformUtil.service";
 
 describe("waveformUtil", () => {
     let waveformUtil: WaveformUtil;

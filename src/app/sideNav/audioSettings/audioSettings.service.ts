@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {DeckId} from "../../app.component";
 import {BehaviorSubject, Observable} from "rxjs";
 import {PreferencesDb} from "../../../services/db/preferencesDb.service";
-import {AudioUtil} from "../../../services/audioUtil";
+import {AudioUtil} from "../../../services/audio/audioUtil.service";
 
 @Injectable()
 export class AudioSettings {

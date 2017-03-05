@@ -3,7 +3,7 @@ import {BehaviorSubject} from "rxjs/BehaviorSubject"
 import {Observable} from "rxjs/Observable";
 import {Song} from "../../models/song";
 import {SongDetails, SongDetailsDraft} from "../../models/songDetails";
-import {WaveformUtil} from "../waveformUtil";
+import {WaveformUtil} from "../audio/waveformUtil.service";
 import {ThemeId} from "../../app/app.component";
 import {Db} from "./db.service";
 

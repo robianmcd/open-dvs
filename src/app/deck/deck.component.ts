@@ -1,7 +1,7 @@
 import {Song} from "../../models/song";
 import {SongDetails} from "../../models/songDetails";
 import {Component, ElementRef, Input, OnInit, AfterViewInit} from "@angular/core";
-import {WaveformUtil} from "../../services/waveformUtil";
+import {WaveformUtil} from "../../services/audio/waveformUtil.service";
 import {DeckId, ThemeId} from "../app.component";
 import {ActiveSongs} from "../../services/activeSongs";
 import {ActiveSong} from "../../services/activeSong";

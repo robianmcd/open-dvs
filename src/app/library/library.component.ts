@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Output} from "@angular/core";
-import {AudioUtil} from "../../services/audioUtil";
+import {AudioUtil} from "../../services/audio/audioUtil.service";
 import {SongDb} from "../../services/db/songDb.service";
 import {SongDetails} from "../../models/songDetails";
 import {Observable} from "rxjs/Observable";

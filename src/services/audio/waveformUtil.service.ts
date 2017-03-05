@@ -1,4 +1,4 @@
-import {ThemeId} from "../app/app.component";
+import {ThemeId} from "../../app/app.component";
 export class WaveformUtil {
     constructor() {
 
