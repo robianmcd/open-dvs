@@ -30,7 +30,7 @@ export class WaveformUtil {
         };
     }
 
-    projectWaveform(samples: number[], sampleRate: number, outputSize: number, startTime: number = undefined, endTime: number = undefined) {
+    projectWaveform(samples: number[], sampleRate: number, outputSize: number, startTime: number = undefined, endTime: number = undefined): number[] {
         let outputSamples = [];
 
         if (startTime === undefined) {
@@ -175,12 +175,15 @@ export class WaveformUtil {
         }
     }
 
-    generateDataUrlWaveform(positiveSamples: number[], negativeSamples: number[], width: number, height: number, themeId: ThemeId) {
+    generateDataUrlWaveform(positiveSamples: number[], negativeSamples: number[], sampleRate: number, width: number, height: number, themeId: ThemeId) {
         let canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
 
-        this.drawWaveform({canvas, positiveSamples, negativeSamples, themeId});
+        let projectedPositiveSamples = this.projectWaveform(positiveSamples, sampleRate, width);
+        let projectedNegativeSamples = this.projectWaveform(negativeSamples, sampleRate, width);
+
+        this.drawWaveform({canvas, positiveSamples: projectedPositiveSamples, negativeSamples: projectedNegativeSamples, themeId});
 
         return canvas.toDataURL();
     }

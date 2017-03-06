@@ -6,6 +6,7 @@ import {SongDetails, SongDetailsDraft} from "../../models/songDetails";
 import {WaveformUtil} from "../audio/waveformUtil.service";
 import {ThemeId} from "../../app/app.component";
 import {Db} from "./db.service";
+import {AudioUtil} from "../audio/audioUtil.service";
 
 @Injectable()
 export class SongDb {
@@ -13,7 +14,7 @@ export class SongDb {
 
     private allSongDetails$ = new BehaviorSubject<SongDetails[]>([]);
 
-    constructor(dbService: Db, private waveformUtil: WaveformUtil) {
+    constructor(dbService: Db, private waveformUtil: WaveformUtil, private audioUtil: AudioUtil) {
         dbService.dbInitialized.then((db) => {
             this.db = db;
 
@@ -58,6 +59,7 @@ export class SongDb {
         songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
             waveformData.positiveSamples,
             waveformData.negativeSamples,
+            this.audioUtil.context.sampleRate,
             150,
             50,
             ThemeId.DEFAULT
