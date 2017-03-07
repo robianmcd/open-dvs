@@ -1,28 +1,26 @@
 <div id="center-controls">
     <div class="waveform-container">
         <div class="center-line"></div>
-        <canvas height="100" width="1" class="waveform"
+        <canvas height="80" width="1" class="waveform"
                 #deck1Canvas (mousedown)="startScrub(DeckId.LEFT, $event)"
                 [class.scrubbable]="deck1ActiveSong.isLoaded">
         </canvas>
     </div>
     <div class="waveform-container">
         <div class="center-line"></div>
-        <canvas height="100" width="1" class="waveform"
+        <canvas height="80" width="1" class="waveform"
                 #deck2Canvas (mousedown)="startScrub(DeckId.RIGHT, $event)"
                 [class.scrubbable]="deck2ActiveSong.isLoaded">
         </canvas>
     </div>
-    <div>
-        <!--<fader name="deckAGain" [value]="1"></fader>-->
-    </div>
-    <div style="position: relative; left: -3px; top: 2px;">
-        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 0;"></div>
-        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 62px;"></div>
-        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 125px;"></div>
-        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 187px;"></div>
-        <div style="height:40px; width: 1px; background-color: white; position: absolute; left: 250px;"></div>
+    <div class="volume-faders">
+        <div class="deck1">
+            <fader name="deckAGain" [value]="1"></fader>
+        </div>
+        <fader name="masterGain" [value]="1"></fader>
+        <div class="deck2">
+            <fader name="deckBGain" [value]="1"></fader>
+        </div>
     </div>
     <crossfader (change)="crossfaderChange($event)"></crossfader>
-
 </div>

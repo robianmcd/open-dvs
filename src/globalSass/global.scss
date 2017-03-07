@@ -2,8 +2,9 @@
 @import 'flex';
 @import 'icomoonStyles';
 @import 'faders';
-@import 'material/materialTheme';
 @import 'material/palettes';
+@import 'material/materialTheme';
+@import 'material/materialOverrides';
 
 body {
   margin: 0;

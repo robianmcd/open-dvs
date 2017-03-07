@@ -1,9 +1,18 @@
-<div>
-    <div>
+<div class="crossfader-comp">
+    <div class="crossfader-container">
+
+        <!--<div style="position: relative; left: -3px; top: 2px;">-->
+        <!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 0;"></div>-->
+        <!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 62px;"></div>-->
+        <!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 125px;"></div>-->
+        <!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 187px;"></div>-->
+        <!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 250px;"></div>-->
+        <!--</div>-->
+
         <md-slider id="crossfader" class="crossfader" [min]="0" [max]="1" [step]="1/128" [value]="sliderValue.getValue()" (input)="sliderValue.next($event.value)"></md-slider>
         <midi-mapping elemId="crossfader" [amount]="sliderValue.getValue()" (amountChange)="sliderValue.next($event)"></midi-mapping>
     </div>
-    <div>
+    <div class="crossfader-shape-container">
         <img (click)="setCurveSharpness(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">
         <md-slide-toggle
                 id="crossfader-curve-toggle"
@@ -13,8 +22,5 @@
         </md-slide-toggle>
         <midi-mapping elemId="crossfader-curve-toggle" [amount]="crossfaderCurveSharpness.getValue()" (amountChange)="setCurveSharpness($event? 1 : 0)"></midi-mapping>
         <img (click)="setCurveSharpness(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">
-    </div>
-    <div>
-        CF Curve
     </div>
 </div>

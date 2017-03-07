@@ -8,7 +8,6 @@ import {PreferencesDb} from "../../../services/db/preferencesDb.service";
     styleUrls: ['crossfader.component.css']
 })
 export class CrossfaderComponent {
-
     sliderValue = new BehaviorSubject(0.5);
 
     //0 represents an equal power fade

@@ -81,28 +81,3 @@ $deck2-theme: mat-dark-theme(mat-palette($dvs-grey), mat-palette($dvs-blue));
   @include custom-theme($deck2-theme);
   @include button-pseudo-selectors(map_get($dvs-blue, 400), map_get($dvs-blue, 600));
 }
-
-[mat-raised-button] {
-  font-weight: bold;
-}
-
-[mat-raised-button], [mat-raised-button]:active {
-  box-shadow: none;
-}
-
-mat-grid-tile figure {
-  align-items: stretch;
-  justify-content: flex-start;
-}
-
-.mat-slide-toggle.mat-slide-toggle-focused .mat-ink-ripple {
-  opacity: 0;
-}
-
-.mat-slider-thumb-container {
-  transition: none;
-}
-
-.mat-toolbar {
-  height: 48px;
-}

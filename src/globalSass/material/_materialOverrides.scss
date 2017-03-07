@@ -1,0 +1,33 @@
+.mat-toolbar {
+  height: 40px;
+  min-height: 40px;
+}
+
+.mat-toolbar-row {
+  height: 40px;
+}
+
+[mat-raised-button] {
+  font-weight: bold;
+}
+
+[mat-raised-button], [mat-raised-button]:active {
+  box-shadow: none;
+}
+
+mat-grid-tile figure {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.mat-slide-toggle.mat-slide-toggle-focused .mat-ink-ripple {
+  opacity: 0;
+}
+
+.mat-slider-thumb-container {
+  transition: none;
+}
+
+.mat-slide-toggle {
+  margin: 5px 0;
+}

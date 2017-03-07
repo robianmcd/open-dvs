@@ -1,0 +1,17 @@
+.crossfader-comp {
+  position: relative;
+}
+
+.crossfader-container {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.crossfader-shape-container {
+  position: absolute;
+  left: calc(50% + 170px);
+  transform: translate(-50%);
+  white-space: nowrap;
+  vertical-align: top;
+}
