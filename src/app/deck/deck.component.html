@@ -8,12 +8,32 @@
                 </md-radio-button>
             </md-radio-group>
         </div>
+        <div class="song-details-section">
+            <div *ngIf="activeSong.song">
+                <img height="100px" [src]="albumCoverDataUrl" alt="Album Cover">
+                <div class="song-labels">
+                    <div class="song-title">{{activeSong.song.details.title}}</div>
+                    <div>{{activeSong.song.details.album}}</div>
+                    <div>{{activeSong.song.details.artist}}</div>
+                </div>
+            </div>
+        </div>
         <div>
             <canvas height="60" width="1"
                     class="waveform" [class.clickable]="activeSong.isLoaded"
                     (click)="onCanvasClick($event)">
             </canvas>
         </div>
+
+        <div class="song-position-section">
+            <div class="song-time">
+                {{formattedSongOffset$ | async}}
+            </div>
+            <div class="song-time">
+                {{activeSong.isLoaded ? formatTime(activeSong.song.details.lengthSeconds) : '0:00'}}
+            </div>
+        </div>
+
         <div>
             <button [id]="deckName + '-play-pause'"
                     (click)="activeSong.isPlaying ? pause() : play()"
@@ -22,8 +42,7 @@
                 Play/Pause
             </button>
             <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
-        </div>
-        <div>
+
             <button [id]="deckName + '-toggle-control'"
                     md-raised-button
                     (click)="activeSong.toggleControl()"
@@ -31,7 +50,8 @@
                     [color]="activeSong.isControlled ? 'accent' : 'primary'">
                 Control
             </button>
-            <midi-mapping [elemId]="deckName + '-toggle-control'" [amount]="activeSong.isControlled ? 1 : 0" (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>
+            <midi-mapping [elemId]="deckName + '-toggle-control'" [amount]="activeSong.isControlled ? 1 : 0"
+                          (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>
         </div>
     </div>
 </div>

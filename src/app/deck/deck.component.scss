@@ -14,3 +14,24 @@
 .clickable {
   cursor: pointer;
 }
+
+.song-details-section {
+  height: 100px;
+  padding: 16px 0 8px 0;
+}
+
+.song-labels {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 3px;
+}
+
+.song-title {
+  font-size: 24px;
+}
+
+.song-position-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}

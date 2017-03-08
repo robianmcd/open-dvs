@@ -6,6 +6,7 @@ import {DeckId, ThemeId} from "../app.component";
 import {ActiveSongs} from "../../services/activeSongs.service";
 import {ActiveSong} from "../../services/activeSong";
 import {AnimationFrames} from "../../services/animationFrames.service";
+import {Observable} from "rxjs";
 
 @Component({
     selector: 'deck',
@@ -17,6 +18,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
     activeSong: ActiveSong;
     deckElem: HTMLElement;
     waveformElem: HTMLCanvasElement;
+    formattedSongOffset$: Observable<string>;
 
     inputType: DeckInputType = DeckInputType.File;
     inputTypeOptions = [
@@ -24,6 +26,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
         {label: 'Live', type: DeckInputType.Live}
     ];
 
+    albumCoverDataUrl: string = '';
 
     get deckName() {
         return DeckId[this.deckId];
@@ -40,6 +43,19 @@ export class DeckComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.activeSong = this.activeSongs.getActiveSong(this.deckId);
+
+        this.activeSong.songObservable.subscribe((song: Song) => {
+            this.albumCoverDataUrl = `data:${song.details.picFormat};base64,${song.details.base64Pic}`;
+        });
+
+        this.formattedSongOffset$ = Observable.interval(100 /* ms */)
+            .map(() => {
+                if (this.activeSong.isLoaded) {
+                    return this.formatTime(this.activeSong.currentSongOffset);
+                } else {
+                    return '0:00';
+                }
+            })
     }
 
     ngAfterViewInit() {
@@ -105,6 +121,15 @@ export class DeckComponent implements OnInit, AfterViewInit {
             let relativeSongOffse = event.offsetX / this.waveformElem.offsetWidth;
             this.activeSong.setSongOffset(relativeSongOffse * this.activeSong.song.details.lengthSeconds);
         }
+    }
+
+    formatTime(timeInSeconds: number) {
+        let minutes = Math.round(timeInSeconds / 60).toString();
+        let seconds = Math.round(timeInSeconds % 60).toString();
+
+        seconds.length === 1 && (seconds = '0' + seconds);
+
+        return `${minutes}:${seconds}`;
     }
 }
 
