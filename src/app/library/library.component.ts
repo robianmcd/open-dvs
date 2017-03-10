@@ -17,20 +17,12 @@ export class LibraryComponent {
     fileIsOverDrop = false;
     uploadingFile = false;
     allSongDetails: Observable<SongDetails[]>;
-    dataUrlsByDetails = new Map<SongDetails, string>();
     DeckId = DeckId;
 
     @Output() onLoadSong = new EventEmitter<LoadSongEvent>();
 
     constructor(private audioUtil: AudioUtil, private songDb: SongDb) {
         this.allSongDetails = this.songDb.getAllSongDetails();
-
-        this.allSongDetails.subscribe((allDetails: SongDetails[]) => {
-            this.dataUrlsByDetails.clear();
-            allDetails.forEach((details) => {
-                this.dataUrlsByDetails.set(details, `data:${details.picFormat};base64,${details.base64Pic}`);
-            });
-        })
     }
 
     public onFileOverDrop(fileIsOver: boolean): void {

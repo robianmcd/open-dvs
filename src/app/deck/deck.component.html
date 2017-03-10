@@ -10,7 +10,7 @@
         </div>
         <div class="song-details-section">
             <div *ngIf="activeSong.song">
-                <img height="100px" [src]="albumCoverDataUrl" alt="Album Cover">
+                <img height="100px" [src]="activeSong.song.details.albumDataUrl" alt="Album Cover">
                 <div class="song-labels">
                     <div class="song-title">{{activeSong.song.details.title}}</div>
                     <div>{{activeSong.song.details.album}}</div>

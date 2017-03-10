@@ -9,8 +9,7 @@ export interface SongDetailsDraft extends WaveformDetails {
     track?: number,
     year?: number,
     genre?: string,
-    base64Pic?: string,
-    picFormat?: string,
+    albumDataUrl?: string,
     lengthSeconds: number,
     waveformDataUrl: string
 }

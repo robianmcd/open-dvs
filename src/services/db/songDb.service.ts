@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject} from "rxjs/BehaviorSubject"
+import {Injectable} from "@angular/core";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Observable} from "rxjs/Observable";
 import {Song} from "../../models/song";
 import {SongDetails, SongDetailsDraft} from "../../models/songDetails";
@@ -65,34 +65,41 @@ export class SongDb {
             ThemeId.DEFAULT
         );
 
-        if (tags) {
-            let parsedTrack = parseInt(tags.track);
-            let parsedYear = parseInt(tags.year);
+        let addTransaction: IDBTransaction;
 
-            songDetailsDraft.title = tags.title;
-            songDetailsDraft.album = tags.album;
-            songDetailsDraft.artist = tags.artist;
-            songDetailsDraft.genre = tags.genre;
-            !isNaN(parsedTrack) && (songDetailsDraft.track = parsedTrack);
-            !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
+        return Promise.resolve((() => {
+            if (tags) {
+                let parsedTrack = parseInt(tags.track);
+                let parsedYear = parseInt(tags.year);
 
-            if (tags.picture) {
-                songDetailsDraft.base64Pic = Db.arrayBufferToBase64(tags.picture.data);
-                songDetailsDraft.picFormat = tags.picture.format;
+                songDetailsDraft.title = tags.title;
+                songDetailsDraft.album = tags.album;
+                songDetailsDraft.artist = tags.artist;
+                songDetailsDraft.genre = tags.genre;
+                !isNaN(parsedTrack) && (songDetailsDraft.track = parsedTrack);
+                !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
+
+                if (tags.picture) {
+                    let base64Album = Db.arrayBufferToBase64(tags.picture.data);
+                    return this.resizeBase64Img(tags.picture.format, base64Album, 100, 100)
+                        .then(albumDataUrl => (songDetailsDraft.albumDataUrl = albumDataUrl));
+                }
             }
-        }
+        })())
+            .then(() => {
+            console.log(songDetailsDraft.albumDataUrl);
+                if (!songDetailsDraft.title) {
+                    songDetailsDraft.title = fileName;
+                }
 
-        if (!songDetailsDraft.title) {
-            songDetailsDraft.title = fileName;
-        }
+                addTransaction = this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
 
-        let addTransaction = this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
-
-        Db.reqToPromise(
-            addTransaction
-                .objectStore('songDetails')
-                .add(songDetailsDraft)
-        )
+                return Db.reqToPromise(
+                    addTransaction
+                        .objectStore('songDetails')
+                        .add(songDetailsDraft)
+                )
+            })
             .then((e: Event) => {
                 let id = e.target['result'];
                 songDetails = Object.assign({}, songDetailsDraft, {id: id});
@@ -142,5 +149,48 @@ export class SongDb {
                     waveformCompressed100X: songBuffer.waveformCompressed100X
                 });
             });
+    }
+
+    //based on http://stackoverflow.com/a/20965997/373655
+    resizeBase64Img(type: string, base64: string, maxWidth: number, maxHeight: number): Promise<string> {
+        return new Promise((resolve) => {
+            let img = new Image;
+
+            img.onload = resizeImage;
+            img.src = `data:${type};base64,${base64}`;
+
+            function resizeImage() {
+                let targetWidth = img.width;
+                let targetHeight = img.height;
+
+                if (img.width > maxWidth) {
+                    targetWidth = maxWidth;
+                    targetHeight = img.height / (img.width / maxWidth);
+                }
+
+                if (targetHeight > maxHeight) {
+                    targetHeight = maxHeight;
+                    targetWidth = img.width / (img.height / maxHeight);
+                }
+                resolve(imageToDataUri(img, targetWidth, targetHeight));
+            }
+
+            function imageToDataUri(img, width, height) {
+
+                // create an off-screen canvas
+                let canvas = document.createElement('canvas'),
+                    ctx = canvas.getContext('2d');
+
+                // set its dimension to target size
+                canvas.width = width;
+                canvas.height = height;
+
+                // draw source image into the off-screen canvas:
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // encode image to data-uri with base64 version of compressed image
+                return canvas.toDataURL('image/jpeg', 0.8);
+            }
+        });
     }
 }

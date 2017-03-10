@@ -26,8 +26,6 @@ export class DeckComponent implements OnInit, AfterViewInit {
         {label: 'Live', type: DeckInputType.Live}
     ];
 
-    albumCoverDataUrl: string = '';
-
     get deckName() {
         return DeckId[this.deckId];
     }
@@ -43,10 +41,6 @@ export class DeckComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.activeSong = this.activeSongs.getActiveSong(this.deckId);
-
-        this.activeSong.songObservable.subscribe((song: Song) => {
-            this.albumCoverDataUrl = `data:${song.details.picFormat};base64,${song.details.base64Pic}`;
-        });
 
         this.formattedSongOffset$ = Observable.interval(100 /* ms */)
             .map(() => {
