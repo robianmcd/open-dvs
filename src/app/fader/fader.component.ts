@@ -11,6 +11,8 @@ export class FaderComponent {
     @Input() value;
     @Output() change = new EventEmitter();
 
+    maxValue = 1.2;
+
     constructor() {
 
     }

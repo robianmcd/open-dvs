@@ -31,3 +31,7 @@ mat-grid-tile figure {
 .mat-slide-toggle {
   margin: 5px 0;
 }
+
+.mat-slider-track-background, .mat-slider-track-fill {
+  transition: none;
+}

@@ -8,6 +8,7 @@ import {AudioUtil} from "../../services/audio/audioUtil.service";
 import {AnimationFrames} from "../../services/animationFrames.service";
 import {DocumentEvents} from "../../services/documentEvents.service";
 import {CrossfaderChangeEvent} from "./crossfader/crossfader.component";
+import {AudioOutput} from "../../services/audioOutput.service";
 
 @Component({
     selector: 'center-controls',
@@ -41,7 +42,8 @@ export class CenterControlsComponent implements AfterViewInit {
         private waveformUtil: WaveformUtil,
         private audioUtil: AudioUtil,
         private animationFrames: AnimationFrames,
-        private documentEvents: DocumentEvents
+        private documentEvents: DocumentEvents,
+        public audioOutput: AudioOutput
     ) {
         this.deck1ActiveSong = activeSongs.getActiveSong(DeckId.LEFT);
         this.deck2ActiveSong = activeSongs.getActiveSong(DeckId.RIGHT);

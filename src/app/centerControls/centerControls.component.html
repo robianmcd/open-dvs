@@ -14,12 +14,16 @@
         </canvas>
     </div>
     <div class="volume-faders">
-        <div class="deck1">
-            <fader name="deckAGain" [value]="1"></fader>
-        </div>
-        <fader name="masterGain" [value]="1"></fader>
-        <div class="deck2">
-            <fader name="deckBGain" [value]="1"></fader>
+        <div>
+            <div class="deck1 volume-fader">
+                <fader id="deckAGain" name="deckAGain" [value]="audioOutput.getDeckGain(DeckId.LEFT)" (change)="audioOutput.setDeckGain(DeckId.LEFT, $event)"></fader>
+            </div>
+            <div class="volume-fader">
+                <fader name="masterGain" [value]="audioOutput.getMasterGain()" (change)="audioOutput.setMasterGain($event)"></fader>
+            </div>
+            <div class="deck2 volume-fader">
+                <fader name="deckBGain" [value]="audioOutput.getDeckGain(DeckId.RIGHT)" (change)="audioOutput.setDeckGain(DeckId.RIGHT, $event)"></fader>
+            </div>
         </div>
     </div>
     <crossfader (change)="crossfaderChange($event)"></crossfader>

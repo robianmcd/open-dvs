@@ -1,10 +1,11 @@
 import {Song} from "../models/song";
 import {AudioUtil} from "./audio/audioUtil.service";
 import {DeckId} from "../app/app.component";
-import {ReplaySubject} from "rxjs";
+import {ReplaySubject, Observable} from "rxjs";
 import {DeckAudioSettings} from "../app/sideNav/audioSettings/audioSettings.service";
 import {DspUtil} from "./audio/dspUtil.service";
 import {Resampler} from "./audio/resampler.service";
+import {AudioOutput} from "./audioOutput.service";
 
 export class ActiveSong {
     public song: Song;
@@ -40,12 +41,14 @@ export class ActiveSong {
         private audioUtil: AudioUtil,
         private deckAudioSettings: DeckAudioSettings,
         private dspUtil: DspUtil,
-        private resampler: Resampler
+        private resampler: Resampler,
+        private audioOutput: AudioOutput
     ) {
         this.song$.subscribe((song) => this.song = song);
 
         this.gainNode = this.audioUtil.context.createGain();
-        this.gainNode.connect(this.audioUtil.context.destination);
+        this.gainNode.connect(this.audioOutput.getInputForDeck(deckId));
+
     }
 
     get isPlaying() {
@@ -56,7 +59,7 @@ export class ActiveSong {
         return !!this.buffer;
     }
 
-    get songObservable() {
+    get songObservable(): Observable<Song> {
         return this.song$.asObservable();
     }
 
@@ -113,7 +116,7 @@ export class ActiveSong {
         this.isControlled ? this.disableControl() : this.enableControl();
     }
 
-    processControlAudio(event: AudioProcessingEvent) {
+    private processControlAudio(event: AudioProcessingEvent) {
         let context = this.audioUtil.context;
 
         let leftInputBuffer = event.inputBuffer.getChannelData(0);
@@ -122,11 +125,11 @@ export class ActiveSong {
         let leftScriptOutputBuffer = event.outputBuffer.getChannelData(0);
         let rightScriptOutputBuffer = event.outputBuffer.getChannelData(1);
 
-        const subChunkSize = 256;
+        const subChunkSize = 512;
         const defaultPilotHz = 2000;
 
         try {
-            for (let subChunkOffset = 0; subChunkOffset < this.BUFFER_SIZE; subChunkOffset += 256) {
+            for (let subChunkOffset = 0; subChunkOffset < this.BUFFER_SIZE; subChunkOffset += subChunkSize) {
                 let leftSubInputBuffer = this.audioUtil.copyBuffer(leftInputBuffer, subChunkOffset, subChunkSize);
                 let rightSubInputBuffer = this.audioUtil.copyBuffer(rightInputBuffer, subChunkOffset, subChunkSize);
 
@@ -155,7 +158,7 @@ export class ActiveSong {
 
             }
         }
-        catch(e) {
+        catch (e) {
             this.playbackRate = 0;
             this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
             for (let i = 0; i < this.BUFFER_SIZE; i++) {
@@ -166,34 +169,43 @@ export class ActiveSong {
 
     }
 
-    getControlFreq(buf: Float32Array) {
+    private getControlFreq(buf: Float32Array) {
         let pilotHz = this.dspUtil.autoCorrelate(buf, this.audioUtil.context.sampleRate);
         let periodSamples = this.audioUtil.context.sampleRate / pilotHz;
 
         //Not enough of a signal to detect/too quiet or too slow
-        if (pilotHz === -1 || periodSamples > 350) {
+        if (pilotHz === -1) {
             throw new Error('Could not detect frequency');
         } else {
             return {pilotHz, periodSamples};
         }
     }
 
-    controlIsPlayingForward(leftBuf: Float32Array, rightBuf: Float32Array, periodSamples: number): boolean {
-        let phaseSamples = this.dspUtil.crossCorrelate(leftBuf, rightBuf);
+    private controlIsPlayingForward(leftBuf: Float32Array, rightBuf: Float32Array, periodSamples: number): boolean {
 
-        //This should be from 0.22 to 0.25
-        let relPhaseSeperation = Math.min(periodSamples - phaseSamples, phaseSamples) / periodSamples;
-        let playingForward;
-        if (phaseSamples === -1 || relPhaseSeperation < 0.2 || relPhaseSeperation > 0.3 || phaseSamples > periodSamples) {
-            playingForward = this.lastPlaybackDirectionIsForward;
+        let isPlayingForward = this.dspUtil.isPlayingForward(leftBuf, rightBuf, periodSamples);
+
+        if(isPlayingForward !== undefined) {
+            return isPlayingForward;
         } else {
-            playingForward = phaseSamples > periodSamples - phaseSamples;
+            return this.lastPlaybackDirectionIsForward;
         }
 
-        return playingForward;
+        //let phaseSamples = this.dspUtil.crossCorrelate(leftBuf, rightBuf);
+        //This should be from 0.22 to 0.25
+        // let relPhaseSeperation = Math.min(periodSamples - phaseSamples, phaseSamples) / periodSamples;
+        // let playingForward;
+        // if (phaseSamples === -1 || relPhaseSeperation < 0.2 || relPhaseSeperation > 0.3 || phaseSamples > periodSamples) {
+        //     console.log('could not detect direction', periodSamples, phaseSamples);
+        //     playingForward = this.lastPlaybackDirectionIsForward;
+        // } else {
+        //     playingForward = phaseSamples > periodSamples - phaseSamples;
+        // }
+        //
+        // return playingForward;
     }
 
-    getChunkOfSongForControl(size, playingForward) {
+    private getChunkOfSongForControl(size, playingForward) {
         let leftFullSongBuffer = this.buffer.getChannelData(0);
         let rightFullSongBuffer = this.buffer.getChannelData(1);
 
@@ -210,7 +222,6 @@ export class ActiveSong {
 
         return {leftSongBuffer, rightSongBuffer};
     }
-
 
 
     setSongOffset(time) {

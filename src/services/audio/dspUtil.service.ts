@@ -7,36 +7,62 @@ export class DspUtil {
 
     }
 
-    autoCorrelate(buf, sampleRate) {
-        const MIN_SAMPLES = 0;  // will be initialized when AudioContext is created.
-        const GOOD_ENOUGH_CORRELATION = 0.9; // this is the "bar" for how close a correlation needs to be
+    isPlayingForward(leftBuf, rightBuf, periodSamples) {
+        let seperation = Math.round(periodSamples * 0.23);
 
-        let SIZE = buf.length;
-        let MAX_SAMPLES = Math.floor(SIZE / 2);
-        let best_offset = -1;
-        let best_correlation = 0;
+        let forwardSum = 0;
+        let reverseSum = 0;
+        for(let i = seperation; i < leftBuf.length - seperation; i++) {
+            forwardSum += Math.abs(leftBuf[i] - rightBuf[i - seperation]);
+            reverseSum += Math.abs(leftBuf[i] - rightBuf[i + seperation]);
+        }
+
+        let significance = Math.max(forwardSum, reverseSum) / Math.min(forwardSum, reverseSum);
+
+        if(significance > 2) {
+            return forwardSum < reverseSum;
+        } else {
+            return undefined;
+        }
+    }
+
+    getRms(buf) {
         let rms = 0;
-        let foundGoodCorrelation = false;
-        let correlations = new Array(MAX_SAMPLES);
 
-        for (let i = 0; i < SIZE; i++) {
+        for (let i = 0; i < buf.length; i++) {
             let val = buf[i];
             rms += val * val;
         }
-        rms = Math.sqrt(rms / SIZE);
+        rms = Math.sqrt(rms / buf.length);
+        return rms;
+    }
+
+    autoCorrelate(buf, sampleRate) {
+        const MIN_SAMPLES = 0;  // will be initialized when AudioContext is created.
+        const GOOD_ENOUGH_CORRELATION = 0.1; // this is the "bar" for how close a correlation needs to be
+
+        let SIZE = buf.length;
+        let offsetIterations = Math.floor(SIZE * 3/4);
+        let compareChunkSize = Math.floor(SIZE / 4);
+        let best_offset = -1;
+        let best_correlation = 0;
+        let foundGoodCorrelation = false;
+        let correlations = new Array(offsetIterations);
+
+        let rms = this.getRms(buf);
         // not enough signal
-        if (rms < 0.01) {
+        if (rms < 0.025) {
             return -1;
         }
 
         let lastCorrelation = 1;
-        for (let offset = MIN_SAMPLES; offset < MAX_SAMPLES; offset++) {
+        for (let offset = MIN_SAMPLES; offset < offsetIterations; offset++) {
             let correlation = 0;
 
-            for (let i = 0; i < MAX_SAMPLES; i++) {
+            for (let i = 0; i < compareChunkSize; i++) {
                 correlation += Math.abs((buf[i]) - (buf[i + offset]));
             }
-            correlation = 1 - (correlation / MAX_SAMPLES);
+            correlation = 1 - (correlation / compareChunkSize);
             correlations[offset] = correlation; // store it, for the tweaking we need to do below.
             if ((correlation > GOOD_ENOUGH_CORRELATION) && (correlation > lastCorrelation)) {
                 foundGoodCorrelation = true;
@@ -59,7 +85,7 @@ export class DspUtil {
             }
             lastCorrelation = correlation;
         }
-        if (best_correlation > 0.01) {
+        if (best_correlation > 0.01 && best_offset !== offsetIterations-1) {
             // console.log("f = " + sampleRate/best_offset + "Hz (rms: " + rms + " confidence: " + best_correlation + ")")
             return sampleRate / best_offset;
         }

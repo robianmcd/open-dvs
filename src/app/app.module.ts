@@ -32,6 +32,7 @@ import {FormsModule} from "@angular/forms";
 import {DspUtil} from "../services/audio/dspUtil.service";
 import {FaderComponent} from "./fader/fader.component";
 import {Resampler} from "../services/audio/resampler.service";
+import {AudioOutput} from "../services/audioOutput.service";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule, FormsModule],
@@ -40,7 +41,7 @@ import {Resampler} from "../services/audio/resampler.service";
         MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler]
+        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput]
 })
 
 export class AppModule {
