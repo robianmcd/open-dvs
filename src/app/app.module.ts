@@ -33,15 +33,18 @@ import {DspUtil} from "../services/audio/dspUtil.service";
 import {FaderComponent} from "./fader/fader.component";
 import {Resampler} from "../services/audio/resampler.service";
 import {AudioOutput} from "../services/audioOutput.service";
+import {FormatTimePipe} from "../pipes/formatTime.pipe";
+import {LoadingOverlayComponent} from "./loadingOverlay/loadingOverlay.component";
 
 @NgModule({
     imports: [BrowserModule, MaterialModule, FormsModule],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
         CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
-        MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent],
+        MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent,
+        FormatTimePipe, LoadingOverlayComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput]
+        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput, FormatTimePipe]
 })
 
 export class AppModule {

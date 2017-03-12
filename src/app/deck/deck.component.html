@@ -1,4 +1,5 @@
 <div id="deck">
+    <loading-overlay *ngIf="loadingSong"></loading-overlay>
     <div>
         <div>
             Input:
@@ -30,7 +31,7 @@
                 {{formattedSongOffset$ | async}}
             </div>
             <div class="song-time">
-                {{activeSong.isLoaded ? formatTime(activeSong.song.details.lengthSeconds) : '0:00'}}
+                {{activeSong.isLoaded ? (activeSong.song.details.lengthSeconds | formatTime) : '0:00'}}
             </div>
         </div>
 

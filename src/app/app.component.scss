@@ -1,12 +1,16 @@
+@import '../globalSass/material/palettes';
+@import '../globalSass/variables';
+
 .main-content {
-  padding: 0 3px;
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  background-color: map_get($dvs-grey, 500);
 }
 
 .row {
-  margin-bottom: 3px;
+  margin-bottom: $gutter-size;
 }
 
 .deck-section {

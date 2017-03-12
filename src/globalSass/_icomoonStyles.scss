@@ -1,10 +1,9 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?hww2if');
-  src:  url('fonts/icomoon.eot?hww2if#iefix') format('embedded-opentype'),
-  url('fonts/icomoon.ttf?hww2if') format('truetype'),
-  url('fonts/icomoon.woff?hww2if') format('woff'),
-  url('fonts/icomoon.svg?hww2if#icomoon') format('svg');
+  src:
+          url('fonts/icomoon.ttf?o4y29w') format('truetype'),
+          url('fonts/icomoon.woff?o4y29w') format('woff'),
+          url('fonts/icomoon.svg?o4y29w#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -56,6 +55,7 @@
 }
 .icon-midi-color .path1:before {
   content: "\e909";
+  color: rgb(0, 0, 0);
 }
 .icon-midi-color .path2:before {
   content: "\e90a";
@@ -65,6 +65,7 @@
 .icon-midi-color .path3:before {
   content: "\e90b";
   margin-left: -1em;
+  color: rgb(0, 0, 0);
 }
 .icon-midi-color .path4:before {
   content: "\e90c";
@@ -74,6 +75,7 @@
 .icon-midi-color .path5:before {
   content: "\e90d";
   margin-left: -1em;
+  color: rgb(0, 0, 0);
 }
 .icon-midi-color .path6:before {
   content: "\e90e";
@@ -130,6 +132,7 @@
 }
 .icon-speaker-color .path1:before {
   content: "\e91c";
+  color: rgb(0, 0, 0);
 }
 .icon-speaker-color .path2:before {
   content: "\e91d";
@@ -144,5 +147,14 @@
 }
 .icon-volume-medium:before {
   content: "\e920";
+}
+.icon-undo:before {
+  content: "\e965";
+}
+.icon-redo:before {
+  content: "\e966";
+}
+.icon-bin:before {
+  content: "\e9ac";
 }
 

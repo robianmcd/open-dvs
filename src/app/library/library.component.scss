@@ -1,32 +1,96 @@
+@import '../../globalSass/material/palettes';
+@import '../../globalSass/variables';
+
 #library {
   flex-grow: 1;
   display: flex;
-  margin: 3px;
+  margin: 0 $gutter-size $gutter-size $gutter-size;
   padding: 3px;
-  border: 1px solid grey;
-}
-
-.file-drop-section {
+  border-radius: $border-radius;
   position: relative;
-  align-self: center;
-  width: 200px;
-  height: 200px;
-  border: 4px dashed grey;
-  display: inline-block;
 }
 
-.file-is-over-drop {
-  background-color: rgba(255,255,255,.1);
+.dragging-overlay {
+  border: 4px dashed map_get($dvs-grey, 200);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: none;
+  z-index: 3;
+  pointer-events: none;
+  background-color: rgba(100,100,100,0.7);
+
+  .drop-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,35px);
+  }
 }
 
-.file-list {
+.dragging-overlay.show {
+  display: block;
+}
+
+.file-list-section {
+  background-color: $background-color;
   flex-grow: 1;
   margin-left: 3px;
   overflow: auto;
 
+  .file-list-table {
+    border-spacing: 0;
+    width: 100%;
+  }
+
   th {
-    background-color: #161616;
+    background-color: map_get($dvs-grey, 500);
     position: relative;
     top: -2px;
+    padding: 2px 0;
+    z-index: 2;
+    text-align: left;
+    font-weight: normal;
+  }
+
+  .file-row td {
+    height: 35px;
+    padding: 0 8px;
+  }
+
+  .file-row:nth-child(odd) td {
+    background-color: map_get($dvs-grey, 800);
+  }
+
+  .file-row:hover td {
+    background-color: map_get($dvs-grey, 700);
+  }
+
+  .file-row:not(:hover) .song-buttons {
+    display: none;
+  }
+
+  .song-buttons-container {
+    position: relative;
+  }
+
+  .song-buttons {
+    position: absolute;
+    right: 0;
+    top: -11px;
+  }
+
+  .cover-img-container {
+    overflow: hidden;
+    position: relative;
+    height: 35px;
+    width: 75px;
+  }
+
+  .cover-img {
+    position: absolute;
+    top: -10px;
   }
 }

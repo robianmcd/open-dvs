@@ -1,8 +1,12 @@
+@import '../../globalSass/material/palettes';
+@import '../../globalSass/variables';
+
 #center-controls {
-  margin: 0 3px 3px 3px;
+  margin: $gutter-size 0;
   padding: 3px;
-  border: 1px solid grey;
   flex-grow: 1;
+  background-color: $background-color;
+  border-radius: $border-radius;
 }
 
 .waveform {

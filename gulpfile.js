@@ -152,7 +152,7 @@ if (prodMode) {
 gulp.task('build', build);
 
 gulp.task('default', gulp.series(build, function watch() {
-    let componentStylePaths = ['src/**/*.scss', '!src/globalSass/**'];
+    let componentStylePaths = ['src/**/*.scss', '!src/globalSass/**/*.scss'];
     let componentTemplatePaths = ['src/**/*.html', '!src/index.html'];
 
     //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
@@ -160,11 +160,12 @@ gulp.task('default', gulp.series(build, function watch() {
         ['src/**/*.ts', '!src/vendor.ts', ...componentStylePaths, ...componentTemplatePaths],
         {usePolling: true},
         gulp.series(
-            gulp.parallel(appJs, rollupTest),
-            gulp.parallel(runTests, reloadBrowser)
+            //Disabling tests for now as they aren't testing much and take a while
+            gulp.parallel(appJs/*, rollupTest*/),
+            gulp.parallel(/*runTests, */reloadBrowser)
         )
     );
-    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(globalSass, reloadBrowser));
+    gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(gulp.parallel(globalSass, appJs), reloadBrowser));
     gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
     gulp.watch(resourcePaths, gulp.series(resources, reloadBrowser));
 

@@ -18,7 +18,6 @@ export class LibraryComponent {
     uploadingFile = false;
     allSongDetails: Observable<SongDetails[]>;
     DeckId = DeckId;
-
     @Output() onLoadSong = new EventEmitter<LoadSongEvent>();
 
     constructor(private audioUtil: AudioUtil, private songDb: SongDb) {

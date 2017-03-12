@@ -1,8 +1,13 @@
+@import '../../globalSass/material/palettes';
+@import '../../globalSass/variables';
+
 #deck {
   flex-grow: 1;
-  margin: 0 3px 3px 3px;
+  margin: $gutter-size;
   padding: 3px;
-  border: 1px solid grey;
+  background-color: $background-color;
+  border-radius: $border-radius;
+  position: relative;
 }
 
 .waveform {

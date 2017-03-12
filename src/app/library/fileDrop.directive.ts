@@ -25,6 +25,8 @@ export class FileDropDirective {
         this.element = element;
     }
 
+    dragLevel = 0;
+
     @HostListener('dragover', [
         '$event',
     ])
@@ -37,19 +39,29 @@ export class FileDropDirective {
 
         transfer.dropEffect = 'copy';
         this.preventAndStop(event);
-        this.emitFileOver(true);
+    }
+
+    @HostListener('dragenter', [
+        '$event',
+    ])
+    public onDragEnter(event: any): void {
+        this.dragLevel++;
+        this.emitFileOver();
     }
 
     @HostListener('dragleave', [
         '$event',
     ])
     public onDragLeave(event: any): void {
-        if (event.currentTarget === (this as any).element[0]) {
-            return;
-        }
+        this.dragLevel--;
+        // if (event.currentTarget === (this as any).element[0]) {
+        //     return;
+        // }
 
         this.preventAndStop(event);
-        this.emitFileOver(false);
+        if(this.dragLevel === 0) {
+            this.emitFileOver();
+        }
     }
 
     @HostListener('drop', [
@@ -63,7 +75,8 @@ export class FileDropDirective {
         }
 
         this.preventAndStop(event);
-        this.emitFileOver(false);
+        this.dragLevel = 0;
+        this.emitFileOver();
         this.readFile(transfer.files[0]);
     }
 
@@ -87,8 +100,9 @@ export class FileDropDirective {
         }
     }
 
-    private emitFileOver(isOver: boolean): void {
-        this.fileOver.emit(isOver);
+    private emitFileOver(): void {
+        console.log(this.dragLevel);
+        this.fileOver.emit(this.dragLevel > 0);
     }
 
     private emitFileDrop(file: any): void {

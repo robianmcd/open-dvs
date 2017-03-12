@@ -1,0 +1,19 @@
+@import '../../globalSass/material/palettes';
+
+.loading-overlay {
+  border: 4px dashed map_get($dvs-grey, 200);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  background-color: rgba(29, 29, 29, 0.8);
+}
+
+.drop-msg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,35px);
+}

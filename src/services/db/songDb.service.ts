@@ -61,7 +61,7 @@ export class SongDb {
             waveformData.negativeSamples,
             this.audioUtil.context.sampleRate,
             150,
-            50,
+            35,
             ThemeId.DEFAULT
         );
 
@@ -87,7 +87,6 @@ export class SongDb {
             }
         })())
             .then(() => {
-            console.log(songDetailsDraft.albumDataUrl);
                 if (!songDetailsDraft.title) {
                     songDetailsDraft.title = fileName;
                 }

@@ -7,6 +7,7 @@ import {ActiveSongs} from "../../services/activeSongs.service";
 import {ActiveSong} from "../../services/activeSong";
 import {AnimationFrames} from "../../services/animationFrames.service";
 import {Observable} from "rxjs";
+import {FormatTimePipe} from "../../pipes/formatTime.pipe";
 
 @Component({
     selector: 'deck',
@@ -19,6 +20,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
     deckElem: HTMLElement;
     waveformElem: HTMLCanvasElement;
     formattedSongOffset$: Observable<string>;
+    loadingSong = false;
 
     inputType: DeckInputType = DeckInputType.File;
     inputTypeOptions = [
@@ -34,7 +36,8 @@ export class DeckComponent implements OnInit, AfterViewInit {
         private elementRef: ElementRef,
         private waveformUtil: WaveformUtil,
         private activeSongs: ActiveSongs,
-        private animationFrames: AnimationFrames
+        private animationFrames: AnimationFrames,
+        private formatTime: FormatTimePipe
     ) {
         animationFrames.frames.subscribe((time) => this.onAnimationFrame());
     }
@@ -45,7 +48,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
         this.formattedSongOffset$ = Observable.interval(100 /* ms */)
             .map(() => {
                 if (this.activeSong.isLoaded) {
-                    return this.formatTime(this.activeSong.currentSongOffset);
+                    return this.formatTime.transform(this.activeSong.currentSongOffset);
                 } else {
                     return '0:00';
                 }
@@ -58,10 +61,15 @@ export class DeckComponent implements OnInit, AfterViewInit {
     }
 
     loadSong(song: Song) {
+        this.loadingSong = true;
         this.activeSong.loadSong(song)
-            .then(() => {
-                this.drawWaveform(song.details);
-            })
+            .then(
+                () => {
+                    this.loadingSong = false;
+                    this.drawWaveform(song.details);
+                },
+                () => this.loadingSong = false
+            );
     }
 
     play() {
@@ -115,15 +123,6 @@ export class DeckComponent implements OnInit, AfterViewInit {
             let relativeSongOffse = event.offsetX / this.waveformElem.offsetWidth;
             this.activeSong.setSongOffset(relativeSongOffse * this.activeSong.song.details.lengthSeconds);
         }
-    }
-
-    formatTime(timeInSeconds: number) {
-        let minutes = Math.round(timeInSeconds / 60).toString();
-        let seconds = Math.round(timeInSeconds % 60).toString();
-
-        seconds.length === 1 && (seconds = '0' + seconds);
-
-        return `${minutes}:${seconds}`;
     }
 }
 
