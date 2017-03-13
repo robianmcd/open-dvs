@@ -11,7 +11,8 @@ export interface SongDetailsDraft extends WaveformDetails {
     genre?: string,
     albumDataUrl?: string,
     lengthSeconds: number,
-    waveformDataUrl: string
+    waveformDataUrl: string,
+    cues: number[]
 }
 
 export interface WaveformDetails {

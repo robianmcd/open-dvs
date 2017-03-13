@@ -4,7 +4,7 @@ import {Component, Input} from '@angular/core';
     selector: 'loading-overlay',
     styleUrls: ['loadingOverlay.component.scss'],
     template: `
-<div class="loading-overlay" ondrop="">
+<div class="loading-overlay">
     <div class="drop-msg" *ngIf="msg">{{msg}}</div>
     <spinner *ngIf="showSpinner"></spinner>
 </div>

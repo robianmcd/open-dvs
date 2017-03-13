@@ -1,4 +1,5 @@
 import {ThemeId} from "../../app/app.component";
+
 export class WaveformUtil {
     constructor() {
 
@@ -175,7 +176,7 @@ export class WaveformUtil {
         }
     }
 
-    generateDataUrlWaveform(positiveSamples: number[], negativeSamples: number[], sampleRate: number, width: number, height: number, themeId: ThemeId) {
+    generateDataUrlWaveform(positiveSamples: number[], negativeSamples: number[], sampleRate: number, width: number, height: number, themeId: ThemeId, cues: number[], startTime: number, duration: number) {
         let canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
@@ -184,6 +185,7 @@ export class WaveformUtil {
         let projectedNegativeSamples = this.projectWaveform(negativeSamples, sampleRate, width);
 
         this.drawWaveform({canvas, positiveSamples: projectedPositiveSamples, negativeSamples: projectedNegativeSamples, themeId});
+        this.overlayCues(canvas, cues, startTime, duration);
 
         return canvas.toDataURL();
     }
@@ -281,6 +283,33 @@ export class WaveformUtil {
             positivePeakAvgs: positivePeakAvgs,
             negativePeakAvgs: negativePeakAvgs
         };
+    }
+
+    overlayCues(canvas: HTMLCanvasElement, cues: number[], startTime: number, duration: number, labelAtTop: boolean = true) {
+        cues.forEach((cueTime, index) => {
+            if(cueTime >= startTime && cueTime <= startTime + duration) {
+                let cueX = (cueTime - startTime) / duration * canvas.width;
+
+                let canvasCtx = canvas.getContext('2d');
+
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.fillRect(cueX, 0, 1, canvas.height);
+
+                let textBottom = labelAtTop ? 10 : canvas.height - 4;
+                let textTop = textBottom - 10;
+
+                let lastStrokeStyle = canvasCtx.strokeStyle;
+                canvasCtx.strokeStyle = 'white';
+
+                canvasCtx.clearRect(cueX - 14, textTop, 14, 14);
+                canvasCtx.strokeRect(cueX - 14, textTop, 14, 14);
+
+                canvasCtx.strokeStyle = lastStrokeStyle;
+
+                canvasCtx.strokeText((index + 1).toString(), cueX - 10, textBottom);
+
+            }
+        })
     }
 }
 

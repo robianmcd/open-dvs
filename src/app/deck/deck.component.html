@@ -3,8 +3,8 @@
     <div>
         <div>
             Input:
-            <md-radio-group [value]="inputType">
-                <md-radio-button class="example-radio-button" *ngFor="let inputTypeOption of inputTypeOptions" [value]="inputTypeOption.type">
+            <md-radio-group [(ngModel)]="inputType">
+                <md-radio-button disableRipple="true" class="example-radio-button" *ngFor="let inputTypeOption of inputTypeOptions" [value]="inputTypeOption.type">
                     {{inputTypeOption.label}} &nbsp;&nbsp;
                 </md-radio-button>
             </md-radio-group>
@@ -37,22 +37,59 @@
 
         <div>
             <button [id]="deckName + '-play-pause'"
+                    class="align-top"
                     (click)="activeSong.isPlaying ? pause() : play()"
                     [disabled]="!activeSong.isLoaded || activeSong.isControlled"
-                    md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'">
-                Play/Pause
+                    md-raised-button [color]="activeSong.isPlaying ? 'accent' : 'primary'"
+                    title="Play/Pause">
+                <span class="icon-play"></span>/<span class="icon-pause"></span>
             </button>
             <midi-mapping [elemId]="deckName + '-play-pause'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>
 
             <button [id]="deckName + '-toggle-control'"
+                    class="toggleControl align-top"
                     md-raised-button
                     (click)="activeSong.toggleControl()"
                     [disabled]="!activeSong.isLoaded"
-                    [color]="activeSong.isControlled ? 'accent' : 'primary'">
-                Control
+                    [color]="activeSong.isControlled ? 'accent' : 'primary'"
+                    title="Control Vinyl">
+                <span class="icon-turntable"></span>
             </button>
             <midi-mapping [elemId]="deckName + '-toggle-control'" [amount]="activeSong.isControlled ? 1 : 0"
                           (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>
+        </div>
+        <div class="cue-section">
+            <div>Cues</div>
+            <div class="cues">
+                <span *ngFor="let i of indexArray(5)">
+                    <button [id]="deckName + '-cue-' + i" md-raised-button [color]="activeSong.song?.details.cues[i] ? 'accent' : 'primary'" [disabled]="!activeSong.isLoaded" (click)="cueClicked(i)">
+                        {{i+1}}
+                    </button>
+                    <midi-mapping [elemId]="deckName + '-cue-' + i" [amount]="activeSong.song?.details.cues[i] !== undefined"
+                                  (amountChange)="$event > 0 && cueClicked(i)"></midi-mapping>
+                </span>
+            </div>
+            <div class="cue-mode-section">
+                <md-radio-group [(ngModel)]="cueMode">
+                    <md-radio-button [id]="deckName + '-cue-mode-jump'" disableRipple="true" [value]="CueMode.Jump" [disabled]="!activeSong.isLoaded">
+                        <span class="icon-jump-to"></span>
+                    </md-radio-button>
+                    <midi-mapping [elemId]="deckName + '-cue-mode-jump'" [amount]="(cueMode === CueMode.Jump) ? 1 : 0"
+                                  (amountChange)="($event > 0) && (cueMode = CueMode.Jump)"></midi-mapping>
+
+                    <md-radio-button [id]="deckName + '-cue-mode-set'" disableRipple="true" [value]="CueMode.Set" [disabled]="!activeSong.isLoaded">
+                        <span class="icon-plus"></span>
+                    </md-radio-button>
+                    <midi-mapping [elemId]="deckName + '-cue-mode-set'" [amount]="(cueMode === CueMode.Set) ? 1 : 0"
+                                  (amountChange)="($event > 0) && (cueMode = CueMode.Set)"></midi-mapping>
+
+                    <md-radio-button [id]="deckName + '-cue-mode-delete'" disableRipple="true" [value]="CueMode.Delete" [disabled]="!activeSong.isLoaded">
+                        <span class="icon-bin"></span>
+                    </md-radio-button>
+                    <midi-mapping [elemId]="deckName + '-cue-mode-delete'" [amount]="(cueMode === CueMode.Delete) ? 1 : 0"
+                                  (amountChange)="($event > 0) && (cueMode = CueMode.Delete)"></midi-mapping>
+                </md-radio-group>
+            </div>
         </div>
     </div>
 </div>

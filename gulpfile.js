@@ -157,7 +157,8 @@ gulp.task('default', gulp.series(build, function watch() {
 
     //Need to use polling because of this issue https://github.com/paulmillr/chokidar/issues/328
     gulp.watch(
-        ['src/**/*.ts', '!src/vendor.ts', ...componentStylePaths, ...componentTemplatePaths],
+        //TODO look into why this watcher doesn't work with ...componentStylePaths, ...componentTemplatePaths
+        ['src/**/*.ts', '!src/vendor.ts', 'src/**/*.scss', '!src/globalSass/**/*.scss', 'src/**/*.html', '!src/index.html'],
         {usePolling: true},
         gulp.series(
             //Disabling tests for now as they aren't testing much and take a while

@@ -8,6 +8,8 @@ import {ActiveSong} from "../../services/activeSong";
 import {AnimationFrames} from "../../services/animationFrames.service";
 import {Observable} from "rxjs";
 import {FormatTimePipe} from "../../pipes/formatTime.pipe";
+import {SongDb} from "../../services/db/songDb.service";
+import {AudioUtil} from "../../services/audio/audioUtil.service";
 
 @Component({
     selector: 'deck',
@@ -21,6 +23,9 @@ export class DeckComponent implements OnInit, AfterViewInit {
     waveformElem: HTMLCanvasElement;
     formattedSongOffset$: Observable<string>;
     loadingSong = false;
+    cueMode = CueMode.Jump;
+
+    CueMode = CueMode;
 
     inputType: DeckInputType = DeckInputType.File;
     inputTypeOptions = [
@@ -35,9 +40,11 @@ export class DeckComponent implements OnInit, AfterViewInit {
     constructor(
         private elementRef: ElementRef,
         private waveformUtil: WaveformUtil,
+        private audioUtil: AudioUtil,
         private activeSongs: ActiveSongs,
         private animationFrames: AnimationFrames,
-        private formatTime: FormatTimePipe
+        private formatTime: FormatTimePipe,
+        private songDb: SongDb
     ) {
         animationFrames.frames.subscribe((time) => this.onAnimationFrame());
     }
@@ -66,7 +73,6 @@ export class DeckComponent implements OnInit, AfterViewInit {
             .then(
                 () => {
                     this.loadingSong = false;
-                    this.drawWaveform(song.details);
                 },
                 () => this.loadingSong = false
             );
@@ -116,6 +122,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
             negativeSamples,
             firstColorPixel: curSample
         });
+        this.waveformUtil.overlayCues(this.waveformElem, songDetails.cues, 0, songDetails.lengthSeconds)
     }
 
     onCanvasClick(event) {
@@ -124,6 +131,60 @@ export class DeckComponent implements OnInit, AfterViewInit {
             this.activeSong.setSongOffset(relativeSongOffse * this.activeSong.song.details.lengthSeconds);
         }
     }
+
+    cueClicked(index) {
+        if(this.activeSong.isLoaded) {
+            let cues = this.activeSong.song.details.cues;
+            let updateRequired = false;
+
+
+            switch(this.cueMode) {
+                case CueMode.Jump: {
+                    if (cues[index]) {
+                        this.activeSong.setSongOffset(cues[index]);
+                    } else {
+                        cues[index] = this.activeSong.currentSongOffset;
+                        updateRequired = true;
+                    }
+                    break;
+                }
+                case CueMode.Set: {
+                    cues[index] = this.activeSong.currentSongOffset;
+                    this.cueMode = CueMode.Jump;
+                    updateRequired = true;
+                    break;
+                }
+                case CueMode.Delete: {
+                    cues[index] = undefined;
+                    this.cueMode = CueMode.Jump;
+                    updateRequired = true;
+                    break;
+                }
+            }
+
+            if(updateRequired) {
+                this.activeSong.song.details.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
+                    this.activeSong.song.details.positiveSamples,
+                    this.activeSong.song.details.negativeSamples,
+                    this.audioUtil.context.sampleRate,
+                    150,
+                    35,
+                    ThemeId.DEFAULT,
+                    this.activeSong.song.details.cues,
+                    0,
+                    this.activeSong.song.details.lengthSeconds
+                );
+
+                this.songDb.updateSongDetails(this.activeSong.song.details);
+            }
+
+        }
+    }
+
+    indexArray(num: number) {
+        return Array(num).fill(0).map((x, i) => i);
+    }
 }
 
 export enum DeckInputType {File, Live}
+export enum CueMode {Jump, Set, Delete}

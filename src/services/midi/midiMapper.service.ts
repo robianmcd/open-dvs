@@ -4,6 +4,7 @@ import {MidiIo} from "./midiIo.service";
 import {MidiMappingComponent} from "../../app/midiMapping/midiMapping.component";
 import {MidiControl, MidiMsg} from "./midiUtil.service";
 import {PreferencesDb} from "../db/preferencesDb.service";
+import {DocumentEvents} from "../documentEvents.service";
 
 @Injectable()
 export class MidiMapper {
@@ -17,12 +18,22 @@ export class MidiMapper {
         return this.learnMode.asObservable();
     }
 
-    constructor(midiIo: MidiIo, private preferencesDb: PreferencesDb) {
+    constructor(midiIo: MidiIo, private preferencesDb: PreferencesDb, documentEvents: DocumentEvents) {
         midiIo.msg$.subscribe((msg) => this.onInputMsg(msg));
 
         preferencesDb.initialized.then(() => {
             this.mappings = preferencesDb.getMidiMappings();
         });
+
+        documentEvents.keyUp.subscribe((event: KeyboardEvent) => {
+            if(this.learnMode.getValue()) {
+                if(event.code === 'Backspace' || event.code === 'Delete') {
+                    if(this.activeLearnMappingComp) {
+                        this.mappings.delete(this.activeLearnMappingComp.elemId);
+                    }
+                }
+            }
+        })
     }
 
     setLearnMode(value: boolean) {

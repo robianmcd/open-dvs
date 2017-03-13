@@ -1,13 +1,14 @@
-import {Injectable} from '@angular/core';
+import {Injectable} from "@angular/core";
 import {dbMigration1} from "./migrations/dbMigration1";
 import {dbMigration20} from "./migrations/dbMigration20";
+import {dbMigration21} from "./migrations/dbMigration21";
 
 @Injectable()
 export class Db {
 
     static READONLY_TRANSACTION = 'readonly';
     static READWRITE_TRANSACTION = 'readwrite';
-    static DB_VERSION = 20;
+    static DB_VERSION = 21;
 
     dbInitialized: Promise<IDBDatabase>;
     private db: IDBDatabase;
@@ -50,12 +51,18 @@ export class Db {
         openRequest.onsuccess = (event) => {
             this.db = event.target['result'];
 
-            if(oldVersion < 1) {
-                dbMigration1(this.db);
-            }
+            if (oldVersion !== undefined) {
+                if (oldVersion < 1) {
+                    dbMigration1(this.db);
+                }
 
-            if(oldVersion >= 1 && oldVersion < 20) {
-                dbMigration20(this.db);
+                if (oldVersion >= 1 && oldVersion < 20) {
+                    dbMigration20(this.db);
+                }
+
+                if (oldVersion >= 1 && oldVersion < 21) {
+                    dbMigration21(this.db);
+                }
             }
 
             this.resolveInitialized(this.db);

@@ -40,6 +40,16 @@ export class SongDb {
         return this.allSongDetails$.asObservable();
     }
 
+    updateSongDetails(details: SongDetails) {
+        let updateTransaction = this.db.transaction(['songDetails'], Db.READWRITE_TRANSACTION);
+
+        return Db.reqToPromise(
+            updateTransaction
+                .objectStore('songDetails')
+                .put(details)
+        );
+    }
+
     addSong(arrayBuffer: ArrayBuffer, audioBuffer: AudioBuffer, tags, fileName: string) {
         let songDetails: SongDetails;
         let songDetailsDraft: SongDetailsDraft = {
@@ -48,7 +58,8 @@ export class SongDb {
             positiveSamples: undefined,
             negativeSamples: undefined,
             numSamples: undefined,
-            waveformDataUrl: undefined
+            waveformDataUrl: undefined,
+            cues: []
         };
 
         let waveformData = this.waveformUtil.getWaveformData(audioBuffer);
@@ -62,7 +73,10 @@ export class SongDb {
             this.audioUtil.context.sampleRate,
             150,
             35,
-            ThemeId.DEFAULT
+            ThemeId.DEFAULT,
+            [],
+            0,
+            0
         );
 
         let addTransaction: IDBTransaction;

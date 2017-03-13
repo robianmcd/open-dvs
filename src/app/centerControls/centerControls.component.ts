@@ -111,6 +111,7 @@ export class CenterControlsComponent implements AfterViewInit {
         drawOptions[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
 
         this.waveformUtil.drawWaveform(drawOptions);
+        this.waveformUtil.overlayCues(waveformCanvas, song.details.cues, startTime, 6, deckId === DeckId.RIGHT);
     }
 
     onMouseMove(event: MouseEvent) {
