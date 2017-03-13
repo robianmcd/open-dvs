@@ -65,7 +65,7 @@
                     <button [id]="deckName + '-cue-' + i" md-raised-button [color]="activeSong.song?.details.cues[i] ? 'accent' : 'primary'" [disabled]="!activeSong.isLoaded" (click)="cueClicked(i)">
                         {{i+1}}
                     </button>
-                    <midi-mapping [elemId]="deckName + '-cue-' + i" [amount]="activeSong.song?.details.cues[i] !== undefined"
+                    <midi-mapping [elemId]="deckName + '-cue-' + i" [amount]="!!activeSong.song && (activeSong.song.details.cues[i] !== undefined)"
                                   (amountChange)="$event > 0 && cueClicked(i)"></midi-mapping>
                 </span>
             </div>
