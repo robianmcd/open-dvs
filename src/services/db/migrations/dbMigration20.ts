@@ -1,9 +1,8 @@
 import {SongDetails} from "../../../models/songDetails";
 import {Db} from "../db.service";
 
-export function dbMigration20(db: IDBDatabase) {
-    let getAlbumCoversTransaction = db.transaction(['songDetails'], Db.READWRITE_TRANSACTION);
-    let getSongCursor = getAlbumCoversTransaction.objectStore('songDetails').openCursor();
+export function dbMigration20(db: IDBDatabase, upgradeTransaction: IDBTransaction) {
+    let getSongCursor = upgradeTransaction.objectStore('songDetails').openCursor();
 
     let albumDataUrlById = {};
     let resizingImagesPromises = [];

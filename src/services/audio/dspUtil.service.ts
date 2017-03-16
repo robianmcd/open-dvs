@@ -93,6 +93,7 @@ export class DspUtil {
     }
 
     //Returns phase difference in samples between buf1 and buf2
+    //TODO: don't need to wait for correlation > lastCorrelation to set foundGoodCorrelation
     crossCorrelate(buf1, buf2) {
         const MIN_SAMPLES = 0;  // will be initialized when AudioContext is created.
         const GOOD_ENOUGH_CORRELATION = 0.9; // this is the "bar" for how close a correlation needs to be

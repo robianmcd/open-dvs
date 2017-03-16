@@ -1,9 +1,7 @@
 import {SongDetails} from "../../../models/songDetails";
-import {Db} from "../db.service";
 
-export function dbMigration21(db: IDBDatabase) {
-    let getAlbumCoversTransaction = db.transaction(['songDetails'], Db.READWRITE_TRANSACTION);
-    let getSongCursor = getAlbumCoversTransaction.objectStore('songDetails').openCursor();
+export function dbMigration21(db: IDBDatabase, transaction: IDBTransaction) {
+    let getSongCursor = transaction.objectStore('songDetails').openCursor();
 
     getSongCursor.onsuccess = (e) => {
         let cursor: IDBCursorWithValue = e.target['result'];

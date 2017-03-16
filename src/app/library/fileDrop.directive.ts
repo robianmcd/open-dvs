@@ -101,7 +101,6 @@ export class FileDropDirective {
     }
 
     private emitFileOver(): void {
-        console.log(this.dragLevel);
         this.fileOver.emit(this.dragLevel > 0);
     }
 

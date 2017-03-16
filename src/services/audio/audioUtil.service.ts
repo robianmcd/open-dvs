@@ -17,6 +17,7 @@ export class AudioUtil {
 
     constructor() {
         //The requests for microphone access. Without this we can't get the names of audio inputs and outputs
+        //TODO: can this be replaced with navigator.mediaDevices.getUserMedia
         navigator.getUserMedia({audio: true}, () => this.onUserMediaLoad(), () => this.onUserMediaError());
     }
 

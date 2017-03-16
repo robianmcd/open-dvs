@@ -45,26 +45,28 @@ export class Db {
         let oldVersion;
 
         openRequest.onupgradeneeded = function (versionEvent: IDBVersionChangeEvent) {
+            let db = versionEvent.target['result'];
+            let transaction: IDBTransaction = versionEvent.target['transaction'];
             oldVersion = versionEvent.oldVersion;
+
+
+            if (oldVersion !== undefined) {
+                if (oldVersion < 1) {
+                    dbMigration1(db);
+                }
+
+                if (oldVersion >= 1 && oldVersion < 20) {
+                    dbMigration20(db, transaction);
+                }
+
+                if (oldVersion >= 1 && oldVersion < 21) {
+                    dbMigration21(db, transaction);
+                }
+            }
         };
 
         openRequest.onsuccess = (event) => {
             this.db = event.target['result'];
-
-            if (oldVersion !== undefined) {
-                if (oldVersion < 1) {
-                    dbMigration1(this.db);
-                }
-
-                if (oldVersion >= 1 && oldVersion < 20) {
-                    dbMigration20(this.db);
-                }
-
-                if (oldVersion >= 1 && oldVersion < 21) {
-                    dbMigration21(this.db);
-                }
-            }
-
             this.resolveInitialized(this.db);
         };
 
