@@ -32,6 +32,8 @@ export class ActiveSong {
 
     private lastPlaybackDirectionIsForward = true;
     private gainNode: GainNode;
+    private scriptNode: ScriptProcessorNode;
+    private controlInputNode: MediaStreamAudioSourceNode;
 
     private controlled = false;
     private BUFFER_SIZE = 1024;
@@ -49,10 +51,12 @@ export class ActiveSong {
         this.gainNode = this.audioUtil.context.createGain();
         this.gainNode.connect(this.audioOutput.getInputForDeck(deckId));
 
+        this.scriptNode = this.audioUtil.context.createScriptProcessor(this.BUFFER_SIZE);
+        this.scriptNode.onaudioprocess = (e: AudioProcessingEvent) => this.processControlAudio(e);
     }
 
     get isPlaying() {
-        return this.buffer !== undefined && this.playbackRate !== 0;
+        return this.buffer !== undefined && this.playbackRate !== 0 && !this.isControlled;
     }
 
     get isLoaded() {
@@ -73,10 +77,13 @@ export class ActiveSong {
     }
 
     enableControl() {
-        this.controlled = true;
-
         let controlDevice = this.deckAudioSettings.getControlIn();
         if (controlDevice) {
+            if(this.isPlaying) {
+                this.pauseBuffer();
+            }
+
+            this.controlled = true;
 
             let constraints = {
                 audio: {
@@ -88,13 +95,9 @@ export class ActiveSong {
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(
                     (stream) => {
-                        let controlSource = this.audioUtil.context.createMediaStreamSource(stream);
-
-                        let scriptNode = this.audioUtil.context.createScriptProcessor(this.BUFFER_SIZE);
-                        scriptNode.onaudioprocess = (e: AudioProcessingEvent) => this.processControlAudio(e);
-
-                        controlSource.connect(scriptNode);
-                        scriptNode.connect(this.gainNode);
+                        this.controlInputNode = this.audioUtil.context.createMediaStreamSource(stream);
+                        this.controlInputNode.connect(this.scriptNode);
+                        this.scriptNode.connect(this.gainNode);
                     },
                     (error) => {
                         console.error('Could not load control device.', error);
@@ -102,14 +105,17 @@ export class ActiveSong {
                     }
                 );
 
-
         }
-
-
     }
 
     disableControl() {
+        this.controlInputNode.disconnect();
+        this.controlInputNode = undefined;
+        this.scriptNode.disconnect();
         this.controlled = false;
+
+        this.updateSongOffset();
+        this.playbackRate = 0;
     }
 
     toggleControl() {
@@ -117,6 +123,11 @@ export class ActiveSong {
     }
 
     private processControlAudio(event: AudioProcessingEvent) {
+        //This could happen once after you disable control
+        if(!this.isControlled) {
+            return;
+        }
+
         let context = this.audioUtil.context;
 
         let leftInputBuffer = event.inputBuffer.getChannelData(0);
@@ -228,7 +239,7 @@ export class ActiveSong {
         this.songOffset = time;
         this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
 
-        if (this.isPlaying) {
+        if (!this.isControlled && this.isPlaying) {
             this.pauseBuffer();
             this.playBuffer();
         }
