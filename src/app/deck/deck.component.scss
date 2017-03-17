@@ -1,6 +1,10 @@
 @import '../../globalSass/material/palettes';
 @import '../../globalSass/variables';
 
+:host {
+  overflow: hidden;
+}
+
 #deck {
   flex-grow: 1;
   margin: $gutter-size;
@@ -8,6 +12,7 @@
   background-color: $background-color;
   border-radius: $border-radius;
   position: relative;
+  overflow: hidden;
 }
 
 .waveform {
@@ -23,6 +28,8 @@
 .song-details-section {
   height: 100px;
   padding: 16px 0 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .song-labels {

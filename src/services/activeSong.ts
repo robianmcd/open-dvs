@@ -259,7 +259,7 @@ export class ActiveSong {
     }
 
     playBuffer() {
-        if (this.buffer) {
+        if (this.buffer && !this.isPlaying && !this.isControlled) {
             let context = this.audioUtil.context;
 
             if (this.source) {
