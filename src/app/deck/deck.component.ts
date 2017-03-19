@@ -27,6 +27,8 @@ export class DeckComponent implements OnInit, AfterViewInit {
 
     CueMode = CueMode;
 
+    songOffsetAtLastDraw: number;
+
     inputType: DeckInputType = DeckInputType.File;
     inputTypeOptions = [
         {label: 'File', type: DeckInputType.File},
@@ -65,6 +67,8 @@ export class DeckComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
         this.deckElem = <HTMLElement>this.elementRef.nativeElement;
         this.waveformElem = <HTMLCanvasElement>this.deckElem.querySelector('.waveform');
+        this.waveformElem.width = this.waveformElem.offsetWidth;
+        this.waveformElem.getContext('2d').translate(0.5, 0);
     }
 
     loadSong(song: Song) {
@@ -72,6 +76,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
         this.activeSong.loadSong(song)
             .then(
                 () => {
+                    this.songOffsetAtLastDraw = undefined;
                     this.loadingSong = false;
                 },
                 () => this.loadingSong = false
@@ -97,9 +102,6 @@ export class DeckComponent implements OnInit, AfterViewInit {
     }
 
     drawWaveform(songDetails: SongDetails) {
-        //Note: setting the width clears the canvas but that's ok because drawWaveform is going to clear it anyway
-        this.waveformElem.width = this.waveformElem.offsetWidth;
-
         let positiveSamples = this.waveformUtil.projectWaveform(
             songDetails.positiveSamples,
             songDetails.positiveSamples.length / songDetails.lengthSeconds,
@@ -112,15 +114,39 @@ export class DeckComponent implements OnInit, AfterViewInit {
             this.waveformElem.width
         );
 
-        let relativeSongOffset = this.activeSong.currentSongOffset / this.activeSong.song.details.lengthSeconds;
+        let currentSongOffset = this.activeSong.currentSongOffset;
+
+        let relativeSongOffset = currentSongOffset / this.activeSong.song.details.lengthSeconds;
         let curSample = Math.round(relativeSongOffset * this.waveformElem.width);
+
+        let drawFromX = 0;
+        let drawToX = this.waveformElem.width;
+
+        if (this.songOffsetAtLastDraw !== undefined) {
+            let timeElapsed = currentSongOffset - this.songOffsetAtLastDraw;
+            let redrawWidth = this.waveformElem.width * (timeElapsed / this.activeSong.song.details.lengthSeconds);
+
+            if (redrawWidth < this.waveformElem.width) {
+                if (redrawWidth > 0) {
+                    drawFromX = Math.max(curSample - Math.ceil(redrawWidth), 0);
+                    drawToX = curSample;
+                } else {
+                    drawFromX = curSample;
+                    drawToX = Math.min(curSample + Math.ceil(-redrawWidth), this.waveformElem.width);
+                }
+            }
+        }
+
+        this.songOffsetAtLastDraw = currentSongOffset;
 
         this.waveformUtil.drawWaveform({
             canvas: this.waveformElem,
             themeId: ThemeId.fromDeckId(this.deckId),
             positiveSamples,
             negativeSamples,
-            firstColorPixel: curSample
+            firstColorPixel: curSample,
+            drawFromX,
+            drawToX
         });
         this.waveformUtil.overlayCues(this.waveformElem, songDetails.cues, 0, songDetails.lengthSeconds)
     }
@@ -133,12 +159,12 @@ export class DeckComponent implements OnInit, AfterViewInit {
     }
 
     cueClicked(index) {
-        if(this.activeSong.isLoaded) {
+        if (this.activeSong.isLoaded) {
             let cues = this.activeSong.song.details.cues;
             let updateRequired = false;
 
 
-            switch(this.cueMode) {
+            switch (this.cueMode) {
                 case CueMode.Jump: {
                     if (cues[index]) {
                         this.activeSong.setSongOffset(cues[index]);
@@ -162,7 +188,7 @@ export class DeckComponent implements OnInit, AfterViewInit {
                 }
             }
 
-            if(updateRequired) {
+            if (updateRequired) {
                 this.activeSong.song.details.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
                     this.activeSong.song.details.positiveSamples,
                     this.activeSong.song.details.negativeSamples,

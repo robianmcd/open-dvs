@@ -25,6 +25,8 @@ export class CenterControlsComponent implements AfterViewInit {
     scrubOrigSongOffset: number;
     scrubOrigScreenX: number;
     resumePlayingAfterScrub: boolean;
+    song1PixelOffsetAtLastDraw: number;
+    song2PixelOffsetAtLastDraw: number;
 
     @ViewChild('deck1Canvas') deck1ElementRef: ElementRef;
     @ViewChild('deck2Canvas') deck2ElementRef: ElementRef;
@@ -61,6 +63,9 @@ export class CenterControlsComponent implements AfterViewInit {
     ngAfterViewInit() {
         this.deck1Canvas.width = this.deck1Canvas.offsetWidth;
         this.deck2Canvas.width = this.deck2Canvas.offsetWidth;
+
+        this.deck1Canvas.getContext('2d').translate(0.5, 0);
+        this.deck2Canvas.getContext('2d').translate(0.5, 0);
     }
 
     onAnimationFrame() {
@@ -74,7 +79,24 @@ export class CenterControlsComponent implements AfterViewInit {
     }
 
     onSongChange(deckId: DeckId, song: Song) {
+        this.setPixelOffsetAtLastDraw(undefined, deckId);
         this.drawSong(deckId, song);
+    }
+
+    setPixelOffsetAtLastDraw(offset: number, deckId: DeckId) {
+      if(deckId === DeckId.LEFT) {
+          this.song1PixelOffsetAtLastDraw = offset;
+      }  else {
+          this.song2PixelOffsetAtLastDraw = offset;
+      }
+    }
+
+    getPixelOffsetAtLastDraw(deckId: DeckId): number {
+        if(deckId === DeckId.LEFT) {
+            return this.song1PixelOffsetAtLastDraw;
+        }  else {
+            return this.song2PixelOffsetAtLastDraw;
+        }
     }
 
     drawSong(deckId: DeckId, song: Song) {
@@ -97,16 +119,47 @@ export class CenterControlsComponent implements AfterViewInit {
             }
         }
 
+        let currentSongOffset = activeSong.currentSongOffset;
+
         //TODO: when tempo slider is set multiple this by it
         let compressedSampleRate = this.audioUtil.context.sampleRate / 100;
-        let startTime = activeSong.currentSongOffset - 3;
-        let endTime = activeSong.currentSongOffset + 3;
+        let startTime = currentSongOffset - 3;
+        let endTime = currentSongOffset + 3;
 
+        let drawFromX = 0;
+        let drawToX = waveformCanvas.width;
+
+        let pixelOffset = Math.round(currentSongOffset * waveformCanvas.width/ 6);
+
+        if(this.getPixelOffsetAtLastDraw(deckId) !== undefined) {
+            let redrawWidth = pixelOffset - this.getPixelOffsetAtLastDraw(deckId);
+
+            if(Math.abs(redrawWidth) < waveformCanvas.width) {
+                if(redrawWidth >= 0) {
+                    drawFromX = waveformCanvas.width - redrawWidth;
+                    drawToX = waveformCanvas.width;
+                } else {
+                    drawFromX = 0;
+                    drawToX = -redrawWidth;
+                }
+
+                if(redrawWidth !== 0) {
+                    let canvasCtx = waveformCanvas.getContext('2d');
+                    let imageData = canvasCtx.getImageData(0, 0, waveformCanvas.width, waveformCanvas.height);
+                    //canvasCtx.clearRect(0,0, waveformCanvas.width, waveformCanvas.height);
+                    canvasCtx.putImageData(imageData, -redrawWidth, 0);
+                }
+            }
+        }
+
+        this.setPixelOffsetAtLastDraw(pixelOffset, deckId);
 
         drawOptions = {
             canvas: waveformCanvas,
             themeId: ThemeId.fromDeckId(deckId),
-            useGradient: false
+            useGradient: false,
+            drawFromX,
+            drawToX
         };
         drawOptions[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
 

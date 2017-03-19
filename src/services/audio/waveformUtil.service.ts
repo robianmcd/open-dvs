@@ -42,7 +42,7 @@ export class WaveformUtil {
             endTime = samples.length / sampleRate;
         }
 
-        //Tiny variations in the output length caused by the limitations of floading point percision cause the waveform
+        //Tiny variations in the output length caused by the limitations of floating point percision cause the waveform
         //to jitter so desiredOutputLength is rounded to 5 decimal places.
         let desiredOutputLength = Math.round((endTime - startTime) * 100000) / 100000;
         let samplesPerPixel = (desiredOutputLength * sampleRate) / outputSize;
@@ -81,7 +81,11 @@ export class WaveformUtil {
         return outputSamples;
     }
 
-    drawWaveform({canvas, themeId, positiveSamples, negativeSamples, firstColorPixel, useGradient = true}: DrawWaveformOptions) {
+    drawWaveform({canvas, themeId, positiveSamples, negativeSamples, firstColorPixel, useGradient = true, drawFromX = 0, drawToX}: DrawWaveformOptions) {
+        if (drawToX === undefined) {
+            drawToX = canvas.width;
+        }
+
         let mainColor;
         let highlightColor;
         switch (themeId) {
@@ -106,9 +110,10 @@ export class WaveformUtil {
         let negativeWaveform = negativeSamples;
 
         let canvasCtx = canvas.getContext('2d');
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        for (let col = 0; col < canvas.width; col++) {
+        canvasCtx.clearRect(drawFromX-1, 0, drawToX-drawFromX, canvas.height);
+
+        for (let col = drawFromX; col < drawToX; col++) {
             let topY;
             let bottomY;
             let startY;
@@ -134,7 +139,7 @@ export class WaveformUtil {
             let curPixedMainColor = mainColor;
             let curPixelHighlightColor = highlightColor;
 
-            if(firstColorPixel !== undefined && firstColorPixel > col) {
+            if (firstColorPixel !== undefined && firstColorPixel > col) {
                 curPixedMainColor = '#5b5b5b';
                 curPixelHighlightColor = '#a6a6a6';
             }
@@ -144,7 +149,7 @@ export class WaveformUtil {
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, topY);
 
-                if(useGradient) {
+                if (useGradient) {
                     let gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
                     gradient.addColorStop(0, curPixelHighlightColor);
                     gradient.addColorStop(1, curPixedMainColor);
@@ -161,7 +166,7 @@ export class WaveformUtil {
                 canvasCtx.moveTo(col, startY);
                 canvasCtx.lineTo(col, bottomY);
 
-                if(useGradient) {
+                if (useGradient) {
                     let gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
                     gradient.addColorStop(0, curPixelHighlightColor);
                     gradient.addColorStop(1, curPixedMainColor);
@@ -184,7 +189,12 @@ export class WaveformUtil {
         let projectedPositiveSamples = this.projectWaveform(positiveSamples, sampleRate, width);
         let projectedNegativeSamples = this.projectWaveform(negativeSamples, sampleRate, width);
 
-        this.drawWaveform({canvas, positiveSamples: projectedPositiveSamples, negativeSamples: projectedNegativeSamples, themeId});
+        this.drawWaveform({
+            canvas,
+            positiveSamples: projectedPositiveSamples,
+            negativeSamples: projectedNegativeSamples,
+            themeId
+        });
         this.overlayCues(canvas, cues, startTime, duration);
 
         return canvas.toDataURL();
@@ -287,13 +297,13 @@ export class WaveformUtil {
 
     overlayCues(canvas: HTMLCanvasElement, cues: number[], startTime: number, duration: number, labelAtTop: boolean = true) {
         cues.forEach((cueTime, index) => {
-            if(cueTime >= startTime && cueTime <= startTime + duration) {
+            if (cueTime >= startTime && cueTime <= startTime + duration) {
                 let cueX = (cueTime - startTime) / duration * canvas.width;
 
                 let canvasCtx = canvas.getContext('2d');
 
                 canvasCtx.fillStyle = 'white';
-                canvasCtx.fillRect(cueX, 0, 1, canvas.height);
+                canvasCtx.fillRect(cueX, 0, 0.5, canvas.height);
 
                 let textBottom = labelAtTop ? 10 : canvas.height - 4;
                 let textTop = textBottom - 10;
@@ -319,5 +329,7 @@ export interface DrawWaveformOptions {
     positiveSamples?: number[],
     negativeSamples?: number[],
     firstColorPixel?: number,
-    useGradient?: boolean
+    useGradient?: boolean,
+    drawFromX?: number,
+    drawToX?: number
 }
