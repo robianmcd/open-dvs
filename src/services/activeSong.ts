@@ -227,8 +227,12 @@ export class ActiveSong {
 
         let offsetSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
         for (let i = 0; i < size; i++) {
-            leftSongBuffer[i] = leftFullSongBuffer[i * playDirectionMultiplier + offsetSamples];
-            rightSongBuffer[i] = rightFullSongBuffer[i * playDirectionMultiplier + offsetSamples];
+            let songIndex = i * playDirectionMultiplier + offsetSamples;
+
+            let songIndexIsValid = () => songIndex >= 0 && songIndex <= leftFullSongBuffer.length;
+
+            leftSongBuffer[i] = songIndexIsValid() ? leftFullSongBuffer[songIndex] : 0;
+            rightSongBuffer[i] = songIndexIsValid() ? rightFullSongBuffer[songIndex] : 0;
         }
 
         return {leftSongBuffer, rightSongBuffer};

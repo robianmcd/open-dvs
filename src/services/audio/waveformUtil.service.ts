@@ -109,11 +109,13 @@ export class WaveformUtil {
         let positiveWaveform = positiveSamples;
         let negativeWaveform = negativeSamples;
 
+        let numSamples = positiveWaveform ? positiveWaveform.length : negativeWaveform.length;
+
         let canvasCtx = canvas.getContext('2d');
 
         canvasCtx.clearRect(drawFromX-1, 0, drawToX-drawFromX, canvas.height);
 
-        for (let col = drawFromX; col < drawToX; col++) {
+        for (let col = Math.max(drawFromX, 0); col < Math.min(drawToX, numSamples); col++) {
             let topY;
             let bottomY;
             let startY;
