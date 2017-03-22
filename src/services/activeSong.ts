@@ -194,26 +194,23 @@ export class ActiveSong {
 
     private controlIsPlayingForward(leftBuf: Float32Array, rightBuf: Float32Array, periodSamples: number): boolean {
 
-        let isPlayingForward = this.dspUtil.isPlayingForward(leftBuf, rightBuf, periodSamples);
+        let isPlayingForward = this.dspUtil.isPlayingForwardMaxMin(leftBuf, rightBuf, periodSamples);
 
         if(isPlayingForward !== undefined) {
             return isPlayingForward;
         } else {
-            return this.lastPlaybackDirectionIsForward;
+
         }
 
-        //let phaseSamples = this.dspUtil.crossCorrelate(leftBuf, rightBuf);
+        let phaseSamples = this.dspUtil.crossCorrelate(leftBuf, rightBuf);
         //This should be from 0.22 to 0.25
-        // let relPhaseSeperation = Math.min(periodSamples - phaseSamples, phaseSamples) / periodSamples;
-        // let playingForward;
-        // if (phaseSamples === -1 || relPhaseSeperation < 0.2 || relPhaseSeperation > 0.3 || phaseSamples > periodSamples) {
-        //     console.log('could not detect direction', periodSamples, phaseSamples);
-        //     playingForward = this.lastPlaybackDirectionIsForward;
-        // } else {
-        //     playingForward = phaseSamples > periodSamples - phaseSamples;
-        // }
-        //
-        // return playingForward;
+        let relPhaseSeperation = Math.min(periodSamples - phaseSamples, phaseSamples) / periodSamples;
+
+        if (phaseSamples === -1 || relPhaseSeperation < 0.2 || relPhaseSeperation > 0.3 || phaseSamples > periodSamples) {
+            return this.lastPlaybackDirectionIsForward;
+        } else {
+            return phaseSamples > periodSamples - phaseSamples;
+        }
     }
 
     private getChunkOfSongForControl(size, playingForward) {

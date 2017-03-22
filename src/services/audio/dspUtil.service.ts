@@ -10,11 +10,27 @@ export class DspUtil {
     isPlayingForward(leftBuf, rightBuf, periodSamples) {
         let seperation = Math.round(periodSamples * 0.23);
 
+        let leftDcOffset = 0;
+        let rightDcOffset = 0;
+        for (let i = 0; i < leftBuf.length; i++) {
+            leftDcOffset += leftBuf[i] / leftBuf.length;
+            rightDcOffset += rightBuf[i] / rightBuf.length;
+        }
+
+        let leftAbsTotalAmp = 0;
+        let rightAbsTotalAmp = 0;
+        for (let i = 0; i < leftBuf.length; i++) {
+            leftAbsTotalAmp += Math.abs(leftBuf[i] - leftDcOffset);
+            rightAbsTotalAmp += Math.abs(rightBuf[i] - rightDcOffset);
+        }
+
+        let leftAmpMult = rightAbsTotalAmp / leftAbsTotalAmp;
+
         let forwardSum = 0;
         let reverseSum = 0;
         for(let i = seperation; i < leftBuf.length - seperation; i++) {
-            forwardSum += Math.abs(leftBuf[i] - rightBuf[i - seperation]);
-            reverseSum += Math.abs(leftBuf[i] - rightBuf[i + seperation]);
+            forwardSum += Math.abs((leftBuf[i] - leftDcOffset) * leftAmpMult - (rightBuf[i - seperation] - rightDcOffset));
+            reverseSum += Math.abs((leftBuf[i] - leftDcOffset) * leftAmpMult - (rightBuf[i + seperation] - rightDcOffset));
         }
 
         let significance = Math.max(forwardSum, reverseSum) / Math.min(forwardSum, reverseSum);
@@ -24,6 +40,73 @@ export class DspUtil {
         } else {
             return undefined;
         }
+    }
+
+    //TODO make this code less dumb
+    isPlayingForwardMaxMin(leftBuf, rightBuf, periodSamples) {
+        let nextLeftExtreme = undefined;
+        let nextRightExtreme = undefined;
+
+        let leftMaxes = [];
+        let leftMins = [];
+        let rightMaxes = [];
+        let rightMins = [];
+
+        for (let i = 1; i < leftBuf.length-1; i++) {
+            if(nextLeftExtreme !== 'min' && leftBuf[i-1] <= leftBuf[i] && leftBuf[i] >= leftBuf[i+1]) {
+                nextLeftExtreme = 'min';
+                leftMaxes.push(i);
+            }
+
+            if(nextLeftExtreme !== 'max' && leftBuf[i-1] >= leftBuf[i] && leftBuf[i] <= leftBuf[i+1]) {
+                nextLeftExtreme = 'max';
+                leftMins.push(i);
+            }
+
+            if(nextRightExtreme !== 'min' && rightBuf[i-1] <= rightBuf[i] && rightBuf[i] >= rightBuf[i+1]) {
+                nextRightExtreme = 'min';
+                rightMaxes.push(i);
+            }
+
+            if(nextRightExtreme !== 'max' && rightBuf[i-1] >= rightBuf[i] && rightBuf[i] <= rightBuf[i+1]) {
+                nextRightExtreme = 'max';
+                rightMins.push(i);
+            }
+        }
+
+        let leftMaxI = 0;
+        let rightMaxI = 0;
+
+        let forwardCount = 0;
+        let reverseCount = 0;
+
+        while(leftMaxI < leftMaxes.length) {
+
+
+            while(rightMaxI < rightMaxes.length-1 && rightMaxes[rightMaxI+1] < leftMaxes[leftMaxI]) {
+                rightMaxI++;
+            }
+
+            if(rightMaxI <= rightMaxes.length-1) {
+                if(leftMaxes[leftMaxI] - rightMaxes[rightMaxI] < rightMaxes[rightMaxI+1] - leftMaxes[leftMaxI]) {
+                    forwardCount++;
+                } else {
+                    reverseCount++;
+                }
+            }
+
+            leftMaxI++;
+        }
+
+        //1 is best.
+        let confidence = Math.abs(forwardCount - reverseCount) / (forwardCount + reverseCount);
+
+        if(confidence < 0.12) {
+            return undefined;
+        } else {
+            return forwardCount > reverseCount;
+        }
+
     }
 
     getRms(buf) {
@@ -51,7 +134,7 @@ export class DspUtil {
 
         let rms = this.getRms(buf);
         // not enough signal
-        if (rms < 0.025) {
+        if (rms < 0.05) {
             return -1;
         }
 
