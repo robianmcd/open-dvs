@@ -23,7 +23,16 @@ export class Resampler {
      */
     resample(buffer, fromRate /* or speed */, fromFrequency /* or toRate */, toRate?, toFrequency?): Float32Array {
         let argc = arguments.length;
-        let speed = argc === 2 ? fromRate : argc === 3 ? fromRate / fromFrequency : toRate / fromRate * toFrequency / fromFrequency;
+
+        let speed;
+        if(argc === 2) {
+            speed = fromRate;
+        } else if (argc === 3) {
+            speed = fromRate / fromFrequency;
+        } else {
+            speed = toRate / fromRate * toFrequency / fromFrequency;
+        }
+
         let l = buffer.length;
         let length = Math.ceil(l / speed);
         let newBuffer = new Float32Array(length);
@@ -38,7 +47,8 @@ export class Resampler {
         let first = Math.floor(pos),
             second = first + 1,
             frac = pos - first;
-        second = second < arr.length ? second : 0;
+
+        second = second < arr.length ? second : first;
         return arr[first] * (1 - frac) + arr[second] * frac;
     }
 
