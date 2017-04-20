@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 
 @Component({
     selector: 'loading-overlay',
-    styleUrls: ['loadingOverlay.component.scss'],
+    styleUrls: ['loadingOverlay.component.css'],
     template: `
 <div class="loading-overlay">
     <div class="drop-msg" *ngIf="msg">{{msg}}</div>

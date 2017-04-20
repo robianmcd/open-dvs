@@ -22,7 +22,7 @@ export class Db {
         });
     }
 
-    static reqToPromise(req: IDBRequest): Promise<any> {
+    static reqToPromise(req: IDBRequest): Promise<Event> {
         return new Promise((resolve, reject) => {
             req.onsuccess = resolve;
             req.onerror = reject;

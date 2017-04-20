@@ -6,7 +6,7 @@ import {DeckAudioSettings, AudioSettings} from "./audioSettings.service";
 @Component({
     selector: 'deck-audio-settings',
     templateUrl: 'deckAudioSettings.component.html',
-    styleUrls: ['deckAudioSettings.component.scss']
+    styleUrls: ['deckAudioSettings.component.css']
 })
 export class DeckAudioSettingsComponent implements OnInit {
     @Input() deckId: DeckId;
