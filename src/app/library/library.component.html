@@ -1,13 +1,24 @@
 <div id="library"
      fileDrop
      (fileOver)="onFileOverDrop($event)"
-     (onFileDrop)="uploadFile($event)">
+     (onFileDrop)="uploadFiles($event)">
     <loading-overlay
-        *ngIf="fileIsOverDrop || uploadingFile"
-        [msg]="uploadingFile ? 'Loading file...' : 'Drop audio files here.'"
-        [showSpinner]="uploadingFile">
+        *ngIf="fileIsOverDrop || uploadingFiles"
+        [msg]="uploadingFiles ? getLoadingMessage() : 'Drop audio files here.'"
+        [showSpinner]="uploadingFiles">
     </loading-overlay>
-    <div class="file-list-section" fixedTableHeaderContainer>
+    <div class="library-toolbar">
+        <div class="filter-container">
+            <div class="filter-icon-container">
+                <span class="icon icon-filter"></span>
+            </div>
+            <div class="library-filter-input-container">
+                <input #filterInput class="library-filter-input" type="text" (input)="searchInput.next(filterInput.value)">
+            </div>
+            <span *ngIf="filterInput.value" (click)="filterInput.value = ''; searchInput.next('')" class="clear-filter-icon icon icon-cross"></span>
+        </div>
+    </div>
+    <div class="file-list-section" fixedTableHeaderContainer #tableContainer>
         <table class="file-list-table">
             <tr>
                 <th>Cover</th>
@@ -19,7 +30,8 @@
                 <th>Year</th>
                 <th>Length</th>
             </tr>
-            <tr *ngFor="let songDetails of allSongDetails | async" class="file-row">
+            <tr *ngFor="let songDetails of filteredSongDetails | async" class="file-row">
+            <!--<tr *lazyFor="let songDetails of filteredSongDetails | async, inContainer tableContainer" class="file-row">-->
                 <td class="cover-img-container">
                     <div class="">
                         <img *ngIf="songDetails.albumDataUrl" [src]="songDetails.albumDataUrl" alt="Album Cover" width="75px" class="cover-img">

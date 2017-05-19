@@ -1,6 +1,9 @@
 import {NgModule} from "@angular/core";
 import {BrowserModule} from "@angular/platform-browser";
-import {MaterialModule} from "@angular/material";
+import {
+    MdButtonModule, MdSliderModule, MdSidenavModule, MdTooltipModule, MdSlideToggleModule, MdRadioModule,
+    MdCheckboxModule, MdToolbarModule, MdOptionModule, MdSelectModule
+} from "@angular/material";
 import {AppComponent} from "./app.component";
 import {LibraryComponent} from "./library/library.component";
 import {FileDropDirective} from "./library/fileDrop.directive";
@@ -28,23 +31,29 @@ import {PreferencesDb} from "../services/db/preferencesDb.service";
 import {FixedTableHeaderContainerDirective} from "./library/fixedTableHeaderContainer.directive";
 import {AudioSettings} from "./sideNav/audioSettings/audioSettings.service";
 import {DeckAudioSettingsComponent} from "./sideNav/audioSettings/deckAudioSettings.component";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {DspUtil} from "../services/audio/dspUtil.service";
 import {FaderComponent} from "./fader/fader.component";
 import {Resampler} from "../services/audio/resampler.service";
 import {AudioOutput} from "../services/audioOutput.service";
 import {FormatTimePipe} from "../pipes/formatTime.pipe";
 import {LoadingOverlayComponent} from "./loadingOverlay/loadingOverlay.component";
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {LazyForModule} from 'angular-lazy-for';
+import {WorkerUtil} from '../services/workerUtil';
+import {ImageUtil} from '../services/imageUtil.service';
 
 @NgModule({
-    imports: [BrowserModule, MaterialModule, FormsModule],
+    imports: [BrowserModule, BrowserAnimationsModule, FormsModule, ReactiveFormsModule, LazyForModule,
+        MdButtonModule, MdSliderModule, MdSidenavModule, MdTooltipModule, MdSlideToggleModule, MdRadioModule, MdCheckboxModule, MdToolbarModule, MdOptionModule, MdSelectModule],
     declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
         CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
         MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent,
         FormatTimePipe, LoadingOverlayComponent],
     bootstrap: [AppComponent],
     providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
-        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput, FormatTimePipe]
+        MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput, FormatTimePipe, WorkerUtil,
+        ImageUtil]
 })
 
 export class AppModule {

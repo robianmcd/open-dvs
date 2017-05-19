@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["webworker", "es2017", "scripthost"]
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

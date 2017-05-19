@@ -13,6 +13,7 @@ let vendorUtils = require('./gulp/vendorBuildUtils');
 let uglify = require('gulp-uglify');
 let {rollupApp, rollupVendor, rollupTest} = require('./gulp/rollupTasks');
 let plumber = require('gulp-plumber');
+let ts = require('gulp-typescript');
 
 let prodMode = argv.prod;
 
@@ -73,10 +74,17 @@ let globalSass = gulp.series(
     }
 );
 
-let resourcePaths = ['src/**/*.ico', 'src/**/*.svg', 'src/**/*.eot', 'src/**/*.ttf', 'src/**/*.woff', 'workers/**/*.js'];
+let resourcePaths = ['src/**/*.ico', 'src/**/*.svg', 'src/**/*.eot', 'src/**/*.ttf', 'src/**/*.woff'];
 //Add anything that just needs to be copied into the dist folder here
 let resources = function () {
     return gulp.src(resourcePaths)
+        .pipe(gulp.dest('dist'));
+};
+
+let workerTsProject = ts.createProject('workers/tsconfig.json');
+let workers = function () {
+    return gulp.src('workers/**/*.ts')
+        .pipe(workerTsProject())
         .pipe(gulp.dest('dist'));
 };
 
@@ -101,7 +109,7 @@ function reloadBrowser(done) {
 
 function runTests() {
     let headless = jasmineBrowser.headless();
-    headless.on('error',function(){
+    headless.on('error', function () {
         headless.end();
     });
 
@@ -138,13 +146,13 @@ let build;
 if (prodMode) {
     //TODO: setup unit testing build for prod
     appJs = gulp.series(componentStyles, ngc, rollupApp);
-    build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass, resources), index);
+    build = gulp.series(clean, gulp.parallel(appJs, globalJs, globalSass, resources, workers), index);
 } else {
     appJs = gulp.series(componentStyles, rollupApp);
     build = gulp.series(
         clean,
         vendorUtils.generateVendorEntryPoint,
-        gulp.parallel(appJs, globalJs, globalSass, rollupVendor, rollupTest, resources),
+        gulp.parallel(appJs, globalJs, globalSass, rollupVendor, rollupTest, resources, workers),
         gulp.parallel(runTests, index)
     );
 }
@@ -169,10 +177,11 @@ gulp.task('default', gulp.series(build, function watch() {
     gulp.watch('src/globalSass/**/*.scss', {usePolling: true}, gulp.series(gulp.parallel(globalSass, appJs), reloadBrowser));
     gulp.watch('src/index.html', gulp.series(index, reloadBrowser));
     gulp.watch(resourcePaths, gulp.series(resources, reloadBrowser));
+    gulp.watch('workers/**/*.ts', gulp.series(workers, reloadBrowser));
 
     gulp.watch('test/**/*.spec.ts', gulp.series(rollupTest, runTests));
 
-    if(!prodMode) {
+    if (!prodMode) {
         gulp.watch('src/vendorModules.json', gulp.series(vendorUtils.generateVendorEntryPoint, rollupVendor, reloadBrowser, runTests));
     }
 

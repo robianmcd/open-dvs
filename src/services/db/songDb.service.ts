@@ -7,6 +7,7 @@ import {WaveformUtil} from "../audio/waveformUtil.service";
 import {ThemeId} from "../../app/app.component";
 import {Db} from "./db.service";
 import {AudioUtil} from "../audio/audioUtil.service";
+import {ImageUtil} from '../imageUtil.service';
 
 @Injectable()
 export class SongDb {
@@ -14,7 +15,7 @@ export class SongDb {
 
     private allSongDetails$ = new BehaviorSubject<SongDetails[]>([]);
 
-    constructor(dbService: Db, private waveformUtil: WaveformUtil, private audioUtil: AudioUtil) {
+    constructor(dbService: Db, private waveformUtil: WaveformUtil, private audioUtil: AudioUtil, private imageUtil: ImageUtil) {
         dbService.dbInitialized.then((db) => {
             this.db = db;
 
@@ -50,7 +51,10 @@ export class SongDb {
         );
     }
 
-    addSong(arrayBuffer: ArrayBuffer, audioBuffer: AudioBuffer, tags, fileName: string) {
+    //TODO: figure out why this locks up the browser
+    addSong(arrayBuffer: ArrayBuffer, audioBuffer: AudioBuffer, tags, fileName: string): Promise<void> {
+        //setInterval(() => console.log('tick'));
+        console.log('adding song', performance.now());
         let songDetails: SongDetails;
         let songDetailsDraft: SongDetailsDraft = {
             title: undefined,
@@ -61,45 +65,50 @@ export class SongDb {
             waveformDataUrl: undefined,
             cues: []
         };
-
-        let waveformData = this.waveformUtil.getWaveformData(audioBuffer);
-        songDetailsDraft.positiveSamples = waveformData.positiveSamples;
-        songDetailsDraft.negativeSamples = waveformData.negativeSamples;
-        songDetailsDraft.numSamples = waveformData.numSamples;
-
-        songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
-            waveformData.positiveSamples,
-            waveformData.negativeSamples,
-            this.audioUtil.context.sampleRate,
-            150,
-            35,
-            ThemeId.DEFAULT,
-            [],
-            0,
-            0
-        );
-
         let addTransaction: IDBTransaction;
+        let waveformData;
 
-        return Promise.resolve((() => {
-            if (tags) {
-                let parsedTrack = parseInt(tags.track);
-                let parsedYear = parseInt(tags.year);
+        return this.waveformUtil.getWaveformData(audioBuffer)
+            .then((waveformDataResult: any) => {
+                waveformData = waveformDataResult;
+                songDetailsDraft.positiveSamples = waveformData.positiveSamples;
+                songDetailsDraft.negativeSamples = waveformData.negativeSamples;
+                songDetailsDraft.numSamples = waveformData.numSamples;
 
-                songDetailsDraft.title = tags.title;
-                songDetailsDraft.album = tags.album;
-                songDetailsDraft.artist = tags.artist;
-                songDetailsDraft.genre = tags.genre;
-                !isNaN(parsedTrack) && (songDetailsDraft.track = parsedTrack);
-                !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
+                console.log('got the waveform', performance.now());
+                songDetailsDraft.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(
+                    waveformData.positiveSamples,
+                    waveformData.negativeSamples,
+                    this.audioUtil.context.sampleRate,
+                    150,
+                    35,
+                    ThemeId.DEFAULT,
+                    [],
+                    0,
+                    0
+                );
 
-                if (tags.picture) {
-                    let base64Album = Db.arrayBufferToBase64(tags.picture.data);
-                    return this.resizeBase64Img(tags.picture.format, base64Album, 100, 100)
-                        .then(albumDataUrl => (songDetailsDraft.albumDataUrl = albumDataUrl));
+
+                console.log('generated waveform dataurl', performance.now());
+
+                if (tags) {
+                    let parsedTrack = parseInt(tags.track);
+                    let parsedYear = parseInt(tags.year);
+
+                    songDetailsDraft.title = tags.title;
+                    songDetailsDraft.album = tags.album;
+                    songDetailsDraft.artist = tags.artist;
+                    songDetailsDraft.genre = tags.genre;
+                    !isNaN(parsedTrack) && (songDetailsDraft.track = parsedTrack);
+                    !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
+
+                    if (tags.picture) {
+                        return this.imageUtil.byteArrayToBase64(tags.picture.data)
+                            .then((base64Album) => this.resizeBase64Img(tags.picture.format, base64Album, 100, 100))
+                            .then(albumDataUrl => (songDetailsDraft.albumDataUrl = albumDataUrl));
+                    }
                 }
-            }
-        })())
+            })
             .then(() => {
                 if (!songDetailsDraft.title) {
                     songDetailsDraft.title = fileName;
@@ -114,6 +123,7 @@ export class SongDb {
                 )
             })
             .then((e: Event) => {
+            console.log('done adding to indexed db', performance.now());
                 let id = e.target['result'];
                 songDetails = Object.assign({}, songDetailsDraft, {id: id});
                 return id;
@@ -131,6 +141,7 @@ export class SongDb {
                 );
             })
             .then(() => {
+            console.log('done saving song buffer in indexed db', performance.now());
                 this.allSongDetails$.next([...this.allSongDetails$.getValue(), songDetails]);
             });
     }

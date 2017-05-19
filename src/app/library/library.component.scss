@@ -4,8 +4,8 @@
 #library {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   margin: 0 $gutter-size $gutter-size $gutter-size;
-  padding: 3px;
   border-radius: $border-radius;
   position: relative;
 }
@@ -34,10 +34,51 @@
   display: block;
 }
 
+.library-toolbar {
+  margin: 4px 0;
+
+  .filter-container {
+    position: relative;
+    width: 200px;
+    display: flex;
+  }
+
+  .library-filter-input-container {
+    display: flex;
+  }
+
+  .library-filter-input {
+    width: 100%;
+    padding: 3px 23px 3px 3px;
+    background-color: $background-color;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border: none;
+    color: white;
+    font-size: 14px;
+  }
+
+  .filter-icon-container {
+    background-color: $background-color;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    margin-right: 2px;
+    padding: 4px 3px 3px 3px;
+  }
+
+  .clear-filter-icon {
+    position: absolute;
+    top: 3px;
+    right: 0;
+    padding: 3px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+}
+
 .file-list-section {
   background-color: $background-color;
   flex-grow: 1;
-  margin-left: 3px;
   overflow: auto;
 
   .file-list-table {

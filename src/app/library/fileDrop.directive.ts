@@ -7,15 +7,10 @@ import {
     Output,
 } from '@angular/core';
 
-export interface Options {
-    readAs?: string;
-}
-
 @Directive({ selector: '[fileDrop]' })
 export class FileDropDirective {
-    @Output() public fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
-    @Output() public onFileDrop: EventEmitter<File> = new EventEmitter<File>();
-    @Input() public options: Options;
+    @Output() public fileOver = new EventEmitter<boolean>();
+    @Output() public onFileDrop = new EventEmitter<File[]>();
 
     private element: ElementRef;
 
@@ -27,9 +22,7 @@ export class FileDropDirective {
 
     dragLevel = 0;
 
-    @HostListener('dragover', [
-        '$event',
-    ])
+    @HostListener('dragover', ['$event'])
     public onDragOver(event: any): void {
         const transfer = this.getDataTransfer(event);
 
@@ -41,22 +34,15 @@ export class FileDropDirective {
         this.preventAndStop(event);
     }
 
-    @HostListener('dragenter', [
-        '$event',
-    ])
+    @HostListener('dragenter', ['$event'])
     public onDragEnter(event: any): void {
         this.dragLevel++;
         this.emitFileOver();
     }
 
-    @HostListener('dragleave', [
-        '$event',
-    ])
+    @HostListener('dragleave', ['$event'])
     public onDragLeave(event: any): void {
         this.dragLevel--;
-        // if (event.currentTarget === (this as any).element[0]) {
-        //     return;
-        // }
 
         this.preventAndStop(event);
         if(this.dragLevel === 0) {
@@ -64,9 +50,7 @@ export class FileDropDirective {
         }
     }
 
-    @HostListener('drop', [
-        '$event',
-    ])
+    @HostListener('drop', ['$event'])
     public onDrop(event: any): void {
         const transfer = this.getDataTransfer(event);
 
@@ -77,54 +61,11 @@ export class FileDropDirective {
         this.preventAndStop(event);
         this.dragLevel = 0;
         this.emitFileOver();
-        this.readFile(transfer.files[0]);
-    }
-
-    private readFile(file: File): void {
-        const strategy = this.pickStrategy();
-
-        if (!strategy) {
-            this.emitFileDrop(file);
-        } else {
-            // XXX Waiting for angular/zone.js#358
-            const method = `readAs${strategy}`;
-
-            let reader  = new FileReader();
-            reader[method](file, (event) => {
-                if (event.type === 'load') {
-                    this.emitFileDrop(event.result);
-                } else if (event.type === 'error') {
-                    throw new Error(`Couldn't read file '${file.name}'`);
-                }
-            });
-        }
+        this.onFileDrop.emit(Array.from(transfer.files));
     }
 
     private emitFileOver(): void {
         this.fileOver.emit(this.dragLevel > 0);
-    }
-
-    private emitFileDrop(file: any): void {
-        this.onFileDrop.emit(file);
-    }
-
-    private pickStrategy(): string | void {
-        if (!this.options) {
-            return;
-        }
-
-        if (this.hasStrategy(this.options.readAs)) {
-            return this.options.readAs;
-        }
-    }
-
-    private hasStrategy(type: string): boolean {
-        return [
-                'DataURL',
-                'BinaryString',
-                'ArrayBuffer',
-                'Text',
-            ].indexOf(type) !== -1;
     }
 
     private getDataTransfer(event: any | any): DataTransfer {

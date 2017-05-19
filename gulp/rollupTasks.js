@@ -12,6 +12,8 @@ let vendorUtils = require('./vendorBuildUtils');
 
 let prodMode = argv.prod;
 
+let commonJsLibs = ['node_modules/rxjs/**', 'node_modules/thenby/**'];
+
 //************************************************************
 //*************************** APP ****************************
 //************************************************************
@@ -27,7 +29,7 @@ let rollupApp = gulp.series(
 
         let prodPlugins = [
             nodeResolve({jsnext: true}),
-            commonjs({include: 'node_modules/rxjs/**'}),
+            commonjs({include: commonJsLibs}),
             uglify()
         ];
 
@@ -69,7 +71,7 @@ let rollupVendor = gulp.series(
             plugins: [
                 rollupTypescript({typescript: typescript}),
                 nodeResolve({jsnext: true}),
-                commonjs({include: 'node_modules/rxjs/**'})
+                commonjs({include: commonJsLibs})
             ],
             onwarn: onWarn
         };
@@ -101,7 +103,7 @@ let rollupTest = gulp.series(
             plugins: [
                 rollupTypescript({typescript: typescript}),
                 nodeResolve({jsnext: true}),
-                commonjs({include: 'node_modules/rxjs/**'})
+                commonjs({include: commonJsLibs})
             ],
             external: prodMode ? [] : vendorUtils.getModules(),
         };
