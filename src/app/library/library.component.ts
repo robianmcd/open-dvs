@@ -33,7 +33,7 @@ export class LibraryComponent {
         let allSongDetails = this.songDb.getAllSongDetails()
             .map((songDetails: SongDetails[]) => {
                 return songDetails.sort(
-                    firstBy('artist', {ignoreCase: true})
+                    (<any>firstBy)('artist', {ignoreCase: true})
                         .thenBy('year')
                         .thenBy('album', {ignoreCase: true})
                         .thenBy('track')
@@ -73,7 +73,13 @@ export class LibraryComponent {
             let readAudioBufferPromise = this.readAsArrayBuffer(file)
                 .then(buf => {
                     arrayBuffer = buf;
-                    return this.audioUtil.context.decodeAudioData(buf);
+                    //I believe calling decodeAudioData copies the array buffer into a web worker which makes it
+                    //inaccessible on the main thread so we need to make a copy of it. Although this didn't happen in
+                    //older versions of Chrome. If we don't make a copy then the following error is thrown when the
+                    //audio buffer is later saved to the DB:
+                    //Failed to execute 'add' on 'IDBObjectStore': An ArrayBuffer is neutered and could not be cloned.
+                    let bufCopyForAudioData = this.copyArrayBuffer(buf);
+                    return this.audioUtil.context.decodeAudioData(bufCopyForAudioData);
                 });
 
             return Promise.all([readAudioBufferPromise, readMediaTagsPromise])
@@ -116,6 +122,13 @@ export class LibraryComponent {
         } else {
             return 'Loading';
         }
+    }
+
+    //Taken from https://stackoverflow.com/a/22114687/373655
+    private copyArrayBuffer(src)  {
+        var dst = new ArrayBuffer(src.byteLength);
+        new Uint8Array(dst).set(new Uint8Array(src));
+        return dst;
     }
 
     private readAsArrayBuffer(file): Promise<ArrayBuffer> {
