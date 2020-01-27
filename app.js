@@ -1,4 +1,2942 @@
-!function(e,t,n,i,o,r,a,s,c,d,l){"use strict";function u(e,t,n,i){var o,r=arguments.length,a=r<3?t:null===i?i=Object.getOwnPropertyDescriptor(t,n):i;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)a=Reflect.decorate(e,t,n,i);else for(var s=e.length-1;s>=0;s--)(o=e[s])&&(a=(r<3?o(a):r>3?o(t,n,a):o(t,n))||a);return r>3&&a&&Object.defineProperty(t,n,a),a}function p(e,t){if("object"==typeof Reflect&&"function"==typeof Reflect.metadata)return Reflect.metadata(e,t)}function f(e){e.createObjectStore("songDetails",{autoIncrement:!0,keyPath:"id"}),e.createObjectStore("songBuffer"),e.createObjectStore("preferences")}function g(e,t){var n=t.objectStore("songDetails").openCursor(),i={},o=[];n.onsuccess=function(t){var n=t.target.result;if(n){var r=n.value;r.base64Pic&&o.push(h(r.picFormat,r.base64Pic,100,100).then(function(e){i[r.id]=e,delete r.picFormat,delete r.base64Pic,r.albumDataUrl=e})),n.continue()}else setTimeout(function(){v(e,i,o)})}}function v(e,t,n){Promise.all(n).then(function(){e.transaction(["songDetails"],x.READWRITE_TRANSACTION).objectStore("songDetails").openCursor().onsuccess=function(e){var n=e.target.result;if(n){var i=n.value;i.base64Pic?(delete i.picFormat,delete i.base64Pic,i.albumDataUrl=t[i.id],n.update(i),n.continue()):n.continue()}}})}function h(e,t,n,i){return new Promise(function(o){function r(){var e=s.width,t=s.height;s.width>n&&(e=n,t=s.height/(s.width/n)),t>i&&(t=i,e=s.width/(s.height/i)),o(a(s,e,t))}function a(e,t,n){var i=document.createElement("canvas"),o=i.getContext("2d");return i.width=t,i.height=n,o.drawImage(e,0,0,t,n),i.toDataURL("image/jpeg",.8)}var s=new Image;s.onload=r,s.src="data:"+e+";base64,"+t})}function m(e,t){t.objectStore("songDetails").openCursor().onsuccess=function(e){var t=e.target.result;if(t){var n=t.value;n.cues=n.cues||[],t.update(n),t.continue()}}}s="default"in s?s.default:s;var b=function(){function e(){this.workersByType=(e={},e[y.Waveform]=new Worker("webWorkers/waveformWorker.js"),e[y.Image]=new Worker("webWorkers/imageWorker.js"),e);var e}return e.prototype.run=function(e){var t=e.workerType,n=e.method,i=e.params,o=e.transferObjs,r=void 0===o?[]:o,a=this.workersByType[t];return new Promise(function(e,t){var o=Math.random();a.postMessage({method:n,params:i,msgId:o},r);var s=function(n){n.data.msgId===o&&(a.removeEventListener("message",s),n.data.error?t(n.data.error):e(n.data.result))};a.addEventListener("message",s,!1)})},e}();b=u([t.Injectable(),p("design:paramtypes",[])],b);var y;!function(e){e[e.Image=0]="Image",e[e.Waveform=1]="Waveform"}(y||(y={}));var S=function(){function e(e){this.workerUtil=e,this.WAVEFORM_BOOST=1.4}return e.prototype.getWaveformData=function(e){var t=e.getChannelData(0);return this.workerUtil.run({workerType:y.Waveform,method:"getWaveformData",params:[t.buffer],transferObjs:[t.buffer]})},e.prototype.projectWaveform=function(e,t,n,i,o){void 0===i&&(i=void 0),void 0===o&&(o=void 0);var r=[];void 0===i&&(i=0),void 0===o&&(o=e.length/t);for(var a=Math.round(1e5*(o-i))/1e5,s=a*t/n,c=s/t,d=Math.round(i/c),l=0;l<n;l++)if(d<0&&l+d<0)r.push(0);else{var u=Math.floor((d+l)*s),p=Math.floor((d+l+1)*s);u=Math.min(u,e.length),p=Math.min(p,e.length);for(var f=0,g=u;g<p;g++)f+=e[g];var v=void 0;v=p-u==0?0:f/(p-u),v=Math.min(1,v*this.WAVEFORM_BOOST),r.push(v)}return r},e.prototype.drawWaveform=function(e){var t=e.canvas,n=e.themeId,i=e.positiveSamples,o=e.negativeSamples,r=e.firstColorPixel,a=e.useGradient,s=void 0===a||a,c=e.drawFromX,d=void 0===c?0:c,l=e.drawToX;void 0===l&&(l=t.width);var u,p;switch(n){case me.DECK1:u="#632B9B",p="#9b49f2";break;case me.DECK2:u="#165eaa",p="#219bff";break;case me.DEFAULT:u="#5b5b5b",p="#a6a6a6"}var f=!!i,g=!!o,v=f&&g,h=i,m=o,b=h?h.length:m.length,y=t.getContext("2d");y.clearRect(d-1,0,l-d,t.height);for(var S=Math.max(d,0);S<Math.min(l,b);S++){var I=void 0,w=void 0,k=void 0,x=void 0;v?(I=(1-h[S])/2*t.height,w=(1-m[S])/2*t.height,k=t.height/2,x=t.height/2):f?(I=(1-h[S])*t.height,k=t.height,x=t.height):(w=m[S]*t.height,k=0,x=t.height);var O=u,D=p;if(void 0!==r&&r>S&&(O="#5b5b5b",D="#a6a6a6"),f){if(y.beginPath(),y.moveTo(S,k),y.lineTo(S,I),s){var C=y.createLinearGradient(S,I+x,S,I+(x-I)/3);C.addColorStop(0,D),C.addColorStop(1,O),y.strokeStyle=C}else y.strokeStyle=u;y.stroke()}if(g){if(y.beginPath(),y.moveTo(S,k),y.lineTo(S,w),s){var C=y.createLinearGradient(S,w-x,S,w-(w-x)/3);C.addColorStop(0,D),C.addColorStop(1,O),y.strokeStyle=C}else y.strokeStyle=u;y.stroke()}}},e.prototype.generateDataUrlWaveform=function(e,t,n,i,o,r,a,s,c){var d=document.createElement("canvas");d.width=i,d.height=o;var l=this.projectWaveform(e,n,i),u=this.projectWaveform(t,n,i);return this.drawWaveform({canvas:d,positiveSamples:l,negativeSamples:u,themeId:r}),this.overlayCues(d,a,s,c),d.toDataURL()},e.prototype.overlayCues=function(e,t,n,i,o){void 0===o&&(o=!0),t.forEach(function(t,r){if(t>=n&&t<=n+i){var a=(t-n)/i*e.width,s=e.getContext("2d");s.fillStyle="white",s.fillRect(a,0,.5,e.height);var c=o?10:e.height-4,d=c-10,l=s.strokeStyle;s.strokeStyle="white",s.clearRect(a-14,d,14,14),s.strokeRect(a-14,d,14,14),s.strokeStyle=l,s.strokeText((r+1).toString(),a-10,c)}})},e}();S=u([t.Injectable(),p("design:paramtypes",["function"==typeof(I=void 0!==b&&b)&&I||Object])],S);var I,w=function(){function e(e,t,n,i,r,a){var s=this;this.deckId=e,this.audioUtil=t,this.deckAudioSettings=n,this.dspUtil=i,this.resampler=r,this.audioOutput=a,this.song$=new o.ReplaySubject,this._playbackRate=0,this.lastPlaybackDirectionIsForward=!0,this.controlled=!1,this.BUFFER_SIZE=1024,this.song$.subscribe(function(e){return s.song=e}),this.gainNode=this.audioUtil.context.createGain(),this.gainNode.connect(this.audioOutput.getInputForDeck(e)),this.scriptNode=this.audioUtil.context.createScriptProcessor(this.BUFFER_SIZE),this.scriptNode.onaudioprocess=function(e){return s.processControlAudio(e)}}return Object.defineProperty(e.prototype,"playbackRate",{get:function(){return this._playbackRate},set:function(e){this._playbackRate=e,0!==e&&(this.lastPlaybackDirectionIsForward=e>0)},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"isPlaying",{get:function(){return void 0!==this.buffer&&0!==this.playbackRate&&!this.isControlled},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"isLoaded",{get:function(){return!!this.buffer},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"songObservable",{get:function(){return this.song$.asObservable()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"currentSongOffset",{get:function(){var e=(this.audioUtil.context.currentTime-this.songOffsetRecordedTime)*this.playbackRate;return this.songOffset+e},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"isControlled",{get:function(){return this.controlled},enumerable:!0,configurable:!0}),e.prototype.enableControl=function(){var e=this,t=this.deckAudioSettings.getControlIn();if(t){this.isPlaying&&this.pauseBuffer(),this.controlled=!0;var n={audio:{deviceId:t.deviceId,echoCancellation:{exact:!1}}};navigator.mediaDevices.getUserMedia(n).then(function(t){e.controlInputNode=e.audioUtil.context.createMediaStreamSource(t),e.controlInputNode.connect(e.scriptNode),e.scriptNode.connect(e.gainNode)},function(t){console.error("Could not load control device.",t),e.controlled=!1})}},e.prototype.disableControl=function(){this.controlInputNode.disconnect(),this.controlInputNode=void 0,this.scriptNode.disconnect(),this.controlled=!1,this.updateSongOffset(),this.playbackRate=0},e.prototype.toggleControl=function(){this.isControlled?this.disableControl():this.enableControl()},e.prototype.processControlAudio=function(e){if(this.isControlled){var t=this.audioUtil.context,n=e.inputBuffer.getChannelData(0),i=e.inputBuffer.getChannelData(1),o=e.outputBuffer.getChannelData(0),r=e.outputBuffer.getChannelData(1);try{for(var a=0;a<this.BUFFER_SIZE;a+=512){for(var s=this.audioUtil.copyBuffer(n,a,512),c=this.audioUtil.copyBuffer(i,a,512),d=this.getControlFreq(s),l=d.pilotHz,u=d.periodSamples,p=this.controlIsPlayingForward(s,c,u),f=p?1:-1,g=Math.round(l/2e3*512),v=g/512,h=t.sampleRate*v,m=this.getChunkOfSongForControl(g,p),b=m.leftSongBuffer,y=m.rightSongBuffer,S=this.resampler.resample(b,h,t.sampleRate),I=this.resampler.resample(y,h,t.sampleRate),w=0;w<512;w++)o[w+a]=S[w],r[w+a]=I[w];this.songOffset+=g*f/this.audioUtil.context.sampleRate,this.playbackRate=g*f/this.BUFFER_SIZE,this.songOffsetRecordedTime=this.audioUtil.context.currentTime}}catch(e){this.playbackRate=0,this.songOffsetRecordedTime=this.audioUtil.context.currentTime;for(var w=0;w<this.BUFFER_SIZE;w++)o[w]=0,r[w]=0}}},e.prototype.getControlFreq=function(e){var t=this.dspUtil.autoCorrelate(e,this.audioUtil.context.sampleRate),n=this.audioUtil.context.sampleRate/t;if(-1===t)throw new Error("Could not detect frequency");return{pilotHz:t,periodSamples:n}},e.prototype.controlIsPlayingForward=function(e,t,n){var i=this.dspUtil.isPlayingForwardMaxMin(e,t,n);if(void 0!==i)return i;var o=this.dspUtil.crossCorrelate(e,t),r=Math.min(n-o,o)/n;return-1===o||r<.2||r>.3||o>n?this.lastPlaybackDirectionIsForward:o>n-o},e.prototype.getChunkOfSongForControl=function(e,t){for(var n=this.buffer.getChannelData(0),i=this.buffer.getChannelData(1),o=new Float32Array(e),r=new Float32Array(e),a=t?1:-1,s=Math.round(this.songOffset*this.audioUtil.context.sampleRate),c=0;c<e;c++)!function(e){var t=e*a+s,c=function(){return t>=0&&t<=n.length};o[e]=c()?n[t]:0,r[e]=c()?i[t]:0}(c);return{leftSongBuffer:o,rightSongBuffer:r}},e.prototype.setSongOffset=function(e){this.songOffset=e,this.songOffsetRecordedTime=this.audioUtil.context.currentTime,!this.isControlled&&this.isPlaying&&(this.pauseBuffer(),this.playBuffer())},e.prototype.loadSong=function(e){var t=this,n=this.audioUtil.context;return n.decodeAudioData(e.buffer).then(function(i){t.buffer=i,t.songOffset=0,t.songOffsetRecordedTime=n.currentTime,t.playbackRate=0,t.song$.next(e)})},e.prototype.playBuffer=function(){if(this.buffer&&!this.isPlaying&&!this.isControlled){var e=this.audioUtil.context;this.source&&this.source.stop(),this.updateSongOffset(),this.playbackRate=1,this.source=e.createBufferSource(),this.source.playbackRate.value=this.playbackRate,this.source.buffer=this.buffer,this.source.connect(this.gainNode),this.source.start(e.currentTime,this.songOffset)}},e.prototype.pauseBuffer=function(){this.buffer&&(this.updateSongOffset(),this.playbackRate=0,this.source.stop(),this.source=void 0)},e.prototype.setGain=function(e){this.gainNode.gain.setValueAtTime(e,this.audioUtil.context.currentTime+.04)},e.prototype.updateSongOffset=function(){this.songOffset=this.currentSongOffset,this.songOffsetRecordedTime=this.audioUtil.context.currentTime},e}(),k=function(){function e(){var e=this;this.context=new AudioContext,this.inputDevices=new o.ReplaySubject,this.outputDevices=new o.ReplaySubject,navigator.getUserMedia({audio:!0},function(){return e.onUserMediaLoad()},function(){return e.onUserMediaError()})}return Object.defineProperty(e.prototype,"inputDevices$",{get:function(){return this.inputDevices.asObservable()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"outputDevices$",{get:function(){return this.outputDevices.asObservable()},enumerable:!0,configurable:!0}),e.prototype.copyBuffer=function(e,t,n){void 0===t&&(t=0),void 0===n&&(n=e.length);for(var i=new Float32Array(n),o=0;o<n;o++)i[o]=e[o+t];return i},e.prototype.onUserMediaLoad=function(){var e=this;navigator.mediaDevices.ondevicechange=function(){return e.updateDeviceLists()},this.updateDeviceLists()},e.prototype.onUserMediaError=function(){console.error("Could not get access to audio inputs")},e.prototype.updateDeviceLists=function(){var e=this;navigator.mediaDevices.enumerateDevices().then(function(t){var n=[],i=[];t.forEach(function(e){"Communications"!==e.label&&("audioinput"===e.kind?n.push(e):"audiooutput"===e.kind&&i.push(e))}),e.inputDevices.next(n),e.outputDevices.next(i)})},e}();k=u([t.Injectable(),p("design:paramtypes",[])],k);var x=O=function(){function e(){var e=this;this.dbInitialized=new Promise(function(t,n){e.resolveInitialized=t,e.rejectInitialized=n})}return e.reqToPromise=function(e){return new Promise(function(t,n){e.onsuccess=t,e.onerror=n})},e.prototype.initialize=function(){var e,t=this,n=indexedDB.open("dvs",O.DB_VERSION);return n.onupgradeneeded=function(t){var n=t.target.result,i=t.target.transaction;void 0!==(e=t.oldVersion)&&(e<1&&f(n),e>=1&&e<20&&g(n,i),e>=1&&e<21&&m(n,i))},n.onsuccess=function(e){t.db=e.target.result,t.resolveInitialized(t.db)},n.onerror=this.rejectInitialized,this.dbInitialized},e}();x.READONLY_TRANSACTION="readonly",x.READWRITE_TRANSACTION="readwrite",x.DB_VERSION=21,x=O=u([t.Injectable(),p("design:paramtypes",[])],x);var O,D=function(){function e(){this.crossfaderCurveSharpness=0,this.midiMappings=new Map,this.enabledMidiInputNames=new Set,this.enabledMidiOutputNames=new Set,this.audioSettings={input:{deckA:{controlDeviceId:void 0,liveDeviceId:void 0},deckB:{controlDeviceId:void 0,liveDeviceId:void 0}}}}return e}(),C=function(){function e(e){var t,n,i=this;this.initialized=new Promise(function(e,i){t=e,n=i}),e.dbInitialized.then(function(e){i.db=e,i.preferences=new D,i.db.transaction(["preferences"],x.READONLY_TRANSACTION).objectStore("preferences").openCursor().onsuccess=function(e){var n=e.target.result;n?(n.key in i.preferences||console.warn("Found preference key in DB that does not exist in preference model: "+n.key),i.preferences[n.key]=n.value,n.continue()):t()}})}return e.prototype.setCrossfaderCurveSharpness=function(e){return this.setPreference("crossfaderCurveSharpness",e)},e.prototype.getCrossfaderCurveSharpness=function(){return this.preferences.crossfaderCurveSharpness},e.prototype.getEnabledMidiInputNames=function(){return this.preferences.enabledMidiInputNames},e.prototype.setEnabledMidiInputNames=function(e){return this.setPreference("enabledMidiInputNames",e)},e.prototype.getEnabledMidiOutputNames=function(){return this.preferences.enabledMidiOutputNames},e.prototype.setEnabledMidiOutputNames=function(e){return this.setPreference("enabledMidiOutputNames",e)},e.prototype.getMidiMappings=function(){return this.preferences.midiMappings},e.prototype.setMidiMappings=function(e){return this.setPreference("midiMappings",e)},e.prototype.getAudioSettings=function(){return this.preferences.audioSettings},e.prototype.setAudioSettings=function(e){return this.setPreference("audioSettings",e)},e.prototype.setPreference=function(e,t){return this.preferences[e]=t,x.reqToPromise(this.db.transaction(["preferences"],x.READWRITE_TRANSACTION).objectStore("preferences").put(t,e))},e}();C=u([t.Injectable(),p("design:paramtypes",["function"==typeof(M=void 0!==x&&x)&&M||Object])],C);var M,T=function(){function e(e,t){var n=this;this.preferencesDb=e,this.deckSettings=new Map;var i=new A,o=new A;this.deckSettings.set(he.LEFT,i),this.deckSettings.set(he.RIGHT,o),e.initialized.then(function(){var r=e.getAudioSettings();t.inputDevices$.first().subscribe(function(e){i.setLiveIn(n.findDeviceById(e,r.input.deckA.liveDeviceId)),i.setControlIn(n.findDeviceById(e,r.input.deckA.controlDeviceId)),o.setLiveIn(n.findDeviceById(e,r.input.deckB.liveDeviceId)),o.setControlIn(n.findDeviceById(e,r.input.deckB.controlDeviceId)),i.liveIn$.subscribe(function(){return n.saveAudioSettings()}),i.controlIn$.subscribe(function(){return n.saveAudioSettings()}),o.liveIn$.subscribe(function(){return n.saveAudioSettings()}),o.controlIn$.subscribe(function(){return n.saveAudioSettings()})})})}return e.prototype.getDeckAudioSettings=function(e){return this.deckSettings.get(e)},e.prototype.saveAudioSettings=function(){var e=this.deckSettings.get(he.LEFT),t=this.deckSettings.get(he.RIGHT);this.preferencesDb.setAudioSettings({input:{deckA:{liveDeviceId:e.getLiveIn()&&e.getLiveIn().deviceId,controlDeviceId:e.getControlIn()&&e.getControlIn().deviceId},deckB:{liveDeviceId:t.getLiveIn()&&t.getLiveIn().deviceId,controlDeviceId:t.getControlIn()&&t.getControlIn().deviceId}}})},e.prototype.findDeviceById=function(e,t){var n=e.filter(function(e){return e.deviceId===t});if(n.length)return n[0]},e}();T=u([t.Injectable(),p("design:paramtypes",["function"==typeof(j=void 0!==C&&C)&&j||Object,"function"==typeof(E=void 0!==k&&k)&&E||Object])],T);var j,E,A=function(){function e(){this.liveIn=new o.BehaviorSubject(void 0),this.controlIn=new o.BehaviorSubject(void 0)}return Object.defineProperty(e.prototype,"liveIn$",{get:function(){return this.liveIn.asObservable().distinctUntilChanged()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"controlIn$",{get:function(){return this.controlIn.asObservable().distinctUntilChanged()},enumerable:!0,configurable:!0}),e.prototype.getLiveIn=function(){return this.liveIn.getValue()},e.prototype.getControlIn=function(){return this.controlIn.getValue()},e.prototype.setLiveIn=function(e){this.liveIn.next(e)},e.prototype.setControlIn=function(e){this.controlIn.next(e)},e}(),L=function(){function e(){}return e.prototype.isPlayingForward=function(e,t,n){for(var i=Math.round(.23*n),o=0,r=0,a=0;a<e.length;a++)o+=e[a]/e.length,r+=t[a]/t.length;for(var s=0,c=0,a=0;a<e.length;a++)s+=Math.abs(e[a]-o),c+=Math.abs(t[a]-r);for(var d=c/s,l=0,u=0,a=i;a<e.length-i;a++)l+=Math.abs((e[a]-o)*d-(t[a-i]-r)),u+=Math.abs((e[a]-o)*d-(t[a+i]-r));return Math.max(l,u)/Math.min(l,u)>2?l<u:void 0},e.prototype.isPlayingForwardMaxMin=function(e,t,n){for(var i=void 0,o=void 0,r=[],a=[],s=[],c=[],d=1;d<e.length-1;d++)"min"!==i&&e[d-1]<=e[d]&&e[d]>=e[d+1]&&(i="min",r.push(d)),"max"!==i&&e[d-1]>=e[d]&&e[d]<=e[d+1]&&(i="max",a.push(d)),"min"!==o&&t[d-1]<=t[d]&&t[d]>=t[d+1]&&(o="min",s.push(d)),"max"!==o&&t[d-1]>=t[d]&&t[d]<=t[d+1]&&(o="max",c.push(d));for(var l=0,u=0,p=0,f=0;l<r.length;){for(;u<s.length-1&&s[u+1]<r[l];)u++;u<=s.length-1&&(r[l]-s[u]<s[u+1]-r[l]?p++:f++),l++}return Math.abs(p-f)/(p+f)<.12?void 0:p>f},e.prototype.getRms=function(e){for(var t=0,n=0;n<e.length;n++){var i=e[n];t+=i*i}return t=Math.sqrt(t/e.length)},e.prototype.autoCorrelate=function(e,t){var n=e.length,i=Math.floor(3*n/4),o=Math.floor(n/4),r=-1,a=0,s=!1,c=new Array(i);if(this.getRms(e)<.05)return-1;for(var d=1,l=0;l<i;l++){for(var u=0,p=0;p<o;p++)u+=Math.abs(e[p]-e[p+l]);if(u=1-u/o,c[l]=u,u>.1&&u>d)s=!0,u>a&&(a=u,r=l);else if(s){var f=(c[r+1]-c[r-1])/c[r];return t/(r+8*f)}d=u}return a>.01&&r!==i-1?t/r:-1},e.prototype.crossCorrelate=function(e,t){for(var n=Math.min(e.length,t.length),i=Math.floor(n/2),o=-1,r=0,a=!1,s=new Array(i),c=1,d=0;d<i;d++){for(var l=0,u=0;u<i;u++)l+=Math.abs(e[u]-t[u+d]);if(l=1-l/i,s[d]=l,l>.9&&l>c)a=!0,l>r&&(r=l,o=d);else if(a){var p=(s[o+1]-s[o-1])/s[o];return o+8*p}c=l}return r>.01?o:-1},e}();L=u([t.Injectable(),p("design:paramtypes",[])],L);var F=function(){function e(){}return e.prototype.resample=function(e,t,n,i,o){var r,a=arguments.length;r=2===a?t:3===a?t/n:i/t*o/n;var s,c,d=e.length,l=Math.ceil(d/r),u=new Float32Array(l);for(s=0,c=0;s<d;s+=r)u[c++]=this.interpolate(e,s);return u},e.prototype.interpolate=function(e,t){var n=Math.floor(t),i=n+1,o=t-n;return i=i<e.length?i:n,e[n]*(1-o)+e[i]*o},e}();F=u([t.Injectable(),p("design:paramtypes",[])],F);var N=function(){function e(e){this.audioUtil=e,this.inputGainNodes=new Map,this.inputGainNodes.set(he.LEFT,e.context.createGain()),this.inputGainNodes.set(he.RIGHT,e.context.createGain()),this.masterGain=e.context.createGain(),this.inputGainNodes.get(he.LEFT).connect(this.masterGain),this.inputGainNodes.get(he.RIGHT).connect(this.masterGain),this.masterGain.connect(e.context.destination)}return e.prototype.getInputForDeck=function(e){return this.inputGainNodes.get(e)},e.prototype.setDeckGain=function(e,t){this.inputGainNodes.get(e).gain.value=t},e.prototype.setMasterGain=function(e){this.masterGain.gain.value=e},e.prototype.getDeckGain=function(e){return this.inputGainNodes.get(e).gain.value},e.prototype.getMasterGain=function(){return this.masterGain.gain.value},e}();N=u([t.Injectable(),p("design:paramtypes",["function"==typeof(R=void 0!==k&&k)&&R||Object])],N);var R,P=function(){function e(e,t,n,i,o){this.activeSongByDeckId=new Map,this.activeSongByDeckId.set(he.LEFT,new w(he.LEFT,e,t.getDeckAudioSettings(he.LEFT),n,i,o)),this.activeSongByDeckId.set(he.RIGHT,new w(he.RIGHT,e,t.getDeckAudioSettings(he.RIGHT),n,i,o))}return e.prototype.getActiveSong=function(e){return this.activeSongByDeckId.get(e)},e}();P=u([t.Injectable(),p("design:paramtypes",["function"==typeof(U=void 0!==k&&k)&&U||Object,"function"==typeof(B=void 0!==T&&T)&&B||Object,"function"==typeof(G=void 0!==L&&L)&&G||Object,"function"==typeof($=void 0!==F&&F)&&$||Object,"function"==typeof(z=void 0!==N&&N)&&z||Object])],P);var U,B,G,$,z,W=function(){function e(e){var t=this;this.framesSubject=new o.Subject,this.frames=this.framesSubject.asObservable(),e.runOutsideAngular(function(){requestAnimationFrame(function(e){t.onFrame(e)})})}return e.prototype.onFrame=function(e){var t=this;this.framesSubject.next(e),requestAnimationFrame(function(e){t.onFrame(e)})},e}();W=u([t.Injectable(),p("design:paramtypes",["function"==typeof(V=void 0!==t.NgZone&&t.NgZone)&&V||Object])],W);var V,H=function(){function e(){}return e.prototype.transform=function(e){var t=Math.round(e/60).toString(),n=Math.round(e%60).toString();return 1===n.length&&(n="0"+n),t+":"+n},e}();H=u([t.Pipe({name:"formatTime"})],H);var q=function(){function e(e){var t=e.details,n=e.buffer,i=e.waveformCompressed100X;this.details=t,this.buffer=n,this.waveformCompressed100x=i}return e}(),_=function(){function e(e){this.workerUtil=e}return e.prototype.byteArrayToBase64=function(e){return this.workerUtil.run({workerType:y.Image,method:"byteArrayToBase64",params:[e]})},e}();_=u([t.Injectable(),p("design:paramtypes",["function"==typeof(X=void 0!==b&&b)&&X||Object])],_);var X,J=function(){function e(e,t,n,i){var o=this;this.waveformUtil=t,this.audioUtil=n,this.imageUtil=i,this.allSongDetails$=new r.BehaviorSubject([]),e.dbInitialized.then(function(e){o.db=e;var t=o.db.transaction(["songDetails"],x.READONLY_TRANSACTION),n=t.objectStore("songDetails").openCursor(),i=[];n.onsuccess=function(e){var t=e.target.result;t&&(i.push(t.value),t.continue())},t.oncomplete=function(){o.allSongDetails$.next(i)}})}return e.prototype.getAllSongDetails=function(){return this.allSongDetails$.asObservable()},e.prototype.updateSongDetails=function(e){var t=this.db.transaction(["songDetails"],x.READWRITE_TRANSACTION);return x.reqToPromise(t.objectStore("songDetails").put(e))},e.prototype.addSong=function(e,t,n,i){var o=this;console.log("adding song",performance.now());var r,a,s,c={title:void 0,lengthSeconds:t.duration,positiveSamples:void 0,negativeSamples:void 0,numSamples:void 0,waveformDataUrl:void 0,cues:[]};return this.waveformUtil.getWaveformData(t).then(function(e){if(s=e,c.positiveSamples=s.positiveSamples,c.negativeSamples=s.negativeSamples,c.numSamples=s.numSamples,console.log("got the waveform",performance.now()),c.waveformDataUrl=o.waveformUtil.generateDataUrlWaveform(s.positiveSamples,s.negativeSamples,o.audioUtil.context.sampleRate,150,35,me.DEFAULT,[],0,0),console.log("generated waveform dataurl",performance.now()),n){var t=parseInt(n.track),i=parseInt(n.year);if(c.title=n.title,c.album=n.album,c.artist=n.artist,c.genre=n.genre,!isNaN(t)&&(c.track=t),!isNaN(i)&&(c.year=i),n.picture)return o.imageUtil.byteArrayToBase64(n.picture.data).then(function(e){return o.resizeBase64Img(n.picture.format,e,100,100)}).then(function(e){return c.albumDataUrl=e})}}).then(function(){return c.title||(c.title=i),a=o.db.transaction(["songDetails","songBuffer"],x.READWRITE_TRANSACTION),x.reqToPromise(a.objectStore("songDetails").add(c))}).then(function(e){console.log("done adding to indexed db",performance.now());var t=e.target.result;return r=Object.assign({},c,{id:t}),t}).then(function(t){var n={buffer:e,waveformCompressed100X:s.compress100X};return x.reqToPromise(a.objectStore("songBuffer").add(n,t))}).then(function(){console.log("done saving song buffer in indexed db",performance.now()),o.allSongDetails$.next(o.allSongDetails$.getValue().concat([r]))})},e.prototype.deleteSong=function(e){var t=this,n=this.db.transaction(["songDetails","songBuffer"],x.READWRITE_TRANSACTION),i=n.objectStore("songDetails").delete(e.id),o=n.objectStore("songBuffer").delete(e.id);Promise.all([x.reqToPromise(i),x.reqToPromise(o)]).then(function(){var n=t.allSongDetails$.getValue(),i=n.filter(function(t){return t.id!==e.id});t.allSongDetails$.next(i)})},e.prototype.getSong=function(e){return x.reqToPromise(this.db.transaction(["songBuffer"],x.READONLY_TRANSACTION).objectStore("songBuffer").get(e.id)).then(function(t){var n=t.target.result;return new q({details:e,buffer:n.buffer,waveformCompressed100X:n.waveformCompressed100X})})},e.prototype.resizeBase64Img=function(e,t,n,i){return new Promise(function(o){function r(){var e=s.width,t=s.height;s.width>n&&(e=n,t=s.height/(s.width/n)),t>i&&(t=i,e=s.width/(s.height/i)),o(a(s,e,t))}function a(e,t,n){var i=document.createElement("canvas"),o=i.getContext("2d");return i.width=t,i.height=n,o.drawImage(e,0,0,t,n),i.toDataURL("image/jpeg",.8)}var s=new Image;s.onload=r,s.src="data:"+e+";base64,"+t})},e}();J=u([t.Injectable(),p("design:paramtypes",["function"==typeof(K=void 0!==x&&x)&&K||Object,"function"==typeof(Z=void 0!==S&&S)&&Z||Object,"function"==typeof(Y=void 0!==k&&k)&&Y||Object,"function"==typeof(Q=void 0!==_&&_)&&Q||Object])],J);var K,Z,Y,Q,ee=function(){function e(e,t,n,i,o,r,a){var s=this;this.elementRef=e,this.waveformUtil=t,this.audioUtil=n,this.activeSongs=i,this.animationFrames=o,this.formatTime=r,this.songDb=a,this.loadingSong=!1,this.cueMode=ne.Jump,this.CueMode=ne,this.inputType=te.File,this.inputTypeOptions=[{label:"File",type:te.File},{label:"Live",type:te.Live}],o.frames.subscribe(function(e){return s.onAnimationFrame()})}return Object.defineProperty(e.prototype,"deckName",{get:function(){return he[this.deckId]},enumerable:!0,configurable:!0}),e.prototype.ngOnInit=function(){var e=this;this.activeSong=this.activeSongs.getActiveSong(this.deckId),this.formattedSongOffset$=o.Observable.interval(100).map(function(){return e.activeSong.isLoaded?e.formatTime.transform(e.activeSong.currentSongOffset):"0:00"})},e.prototype.ngAfterViewInit=function(){this.deckElem=this.elementRef.nativeElement,this.waveformElem=this.deckElem.querySelector(".waveform"),this.waveformElem.width=this.waveformElem.offsetWidth,this.waveformElem.getContext("2d").translate(.5,0)},e.prototype.loadSong=function(e){var t=this;this.loadingSong=!0,this.activeSong.loadSong(e).then(function(){t.songOffsetAtLastDraw=void 0,t.loadingSong=!1},function(){return t.loadingSong=!1})},e.prototype.play=function(){this.activeSong.isLoaded&&!this.activeSong.isPlaying&&this.activeSong.playBuffer()},e.prototype.pause=function(){this.activeSong.isLoaded&&this.activeSong.isPlaying&&this.activeSong.pauseBuffer()},e.prototype.onAnimationFrame=function(){this.activeSong.isLoaded&&this.drawWaveform(this.activeSong.song.details)},e.prototype.drawWaveform=function(e){var t=this.waveformUtil.projectWaveform(e.positiveSamples,e.positiveSamples.length/e.lengthSeconds,this.waveformElem.width),n=this.waveformUtil.projectWaveform(e.negativeSamples,e.negativeSamples.length/e.lengthSeconds,this.waveformElem.width),i=this.activeSong.currentSongOffset,o=i/this.activeSong.song.details.lengthSeconds,r=Math.round(o*this.waveformElem.width),a=0,s=this.waveformElem.width;if(void 0!==this.songOffsetAtLastDraw){var c=i-this.songOffsetAtLastDraw,d=this.waveformElem.width*(c/this.activeSong.song.details.lengthSeconds);d<this.waveformElem.width&&(d>0?(a=Math.max(r-Math.ceil(d),0),s=r):(a=r,s=Math.min(r+Math.ceil(-d),this.waveformElem.width)))}this.songOffsetAtLastDraw=i,this.waveformUtil.drawWaveform({canvas:this.waveformElem,themeId:me.fromDeckId(this.deckId),positiveSamples:t,negativeSamples:n,firstColorPixel:r,drawFromX:a,drawToX:s}),this.waveformUtil.overlayCues(this.waveformElem,e.cues,0,e.lengthSeconds)},e.prototype.onCanvasClick=function(e){if(this.activeSong.isLoaded){var t=e.offsetX/this.waveformElem.offsetWidth;this.activeSong.setSongOffset(t*this.activeSong.song.details.lengthSeconds)}},e.prototype.cueClicked=function(e){if(this.activeSong.isLoaded){var t=this.activeSong.song.details.cues,n=!1;switch(this.cueMode){case ne.Jump:t[e]?this.activeSong.setSongOffset(t[e]):(t[e]=this.activeSong.currentSongOffset,n=!0);break;case ne.Set:t[e]=this.activeSong.currentSongOffset,this.cueMode=ne.Jump,n=!0;break;case ne.Delete:t[e]=void 0,this.cueMode=ne.Jump,n=!0}n&&(this.activeSong.song.details.waveformDataUrl=this.waveformUtil.generateDataUrlWaveform(this.activeSong.song.details.positiveSamples,this.activeSong.song.details.negativeSamples,this.audioUtil.context.sampleRate,150,35,me.DEFAULT,this.activeSong.song.details.cues,0,this.activeSong.song.details.lengthSeconds),this.songDb.updateSongDetails(this.activeSong.song.details))}},e.prototype.indexArray=function(e){return Array(e).fill(0).map(function(e,t){return t})},e}();u([t.Input(),p("design:type","function"==typeof(ie=void 0!==he&&he)&&ie||Object)],ee.prototype,"deckId",void 0),ee=u([t.Component({selector:"deck",
-template:'<div id="deck">\n    <loading-overlay *ngIf="loadingSong"></loading-overlay>\n    <div>\n        Input:\n        <md-radio-group [(ngModel)]="inputType">\n            <md-radio-button disableRipple="true" class="example-radio-button" *ngFor="let inputTypeOption of inputTypeOptions" [value]="inputTypeOption.type">\n                {{inputTypeOption.label}} &nbsp;&nbsp;\n            </md-radio-button>\n        </md-radio-group>\n    </div>\n    <div class="song-details-section">\n        <div *ngIf="activeSong.song">\n            <img height="100px" [src]="activeSong.song.details.albumDataUrl" alt="Album Cover">\n            <div class="song-labels">\n                <div class="song-title">{{activeSong.song.details.title}}</div>\n                <div>{{activeSong.song.details.album}}</div>\n                <div>{{activeSong.song.details.artist}}</div>\n            </div>\n        </div>\n    </div>\n    <div>\n        <canvas height="60" width="1"\n                class="waveform" [class.clickable]="activeSong.isLoaded"\n                (click)="onCanvasClick($event)">\n        </canvas>\n    </div>\n\n    <div class="song-position-section">\n        <div class="song-time">\n            {{formattedSongOffset$ | async}}\n        </div>\n        <div class="song-time">\n            {{activeSong.isLoaded ? (activeSong.song.details.lengthSeconds | formatTime) : \'0:00\'}}\n        </div>\n    </div>\n\n    <div>\n        <button [id]="deckName + \'-play-pause\'"\n                class="align-top"\n                (click)="activeSong.isPlaying ? pause() : play()"\n                [disabled]="!activeSong.isLoaded || activeSong.isControlled"\n                md-raised-button [color]="activeSong.isPlaying ? \'accent\' : \'primary\'"\n                title="Play/Pause">\n            <span class="icon-play"></span>/<span class="icon-pause"></span>\n        </button>\n        <midi-mapping [elemId]="deckName + \'-play-pause\'" [amount]="activeSong.isPlaying ? 1 : 0" (amountChange)="$event ? play() : pause()"></midi-mapping>\n\n        <button [id]="deckName + \'-toggle-control\'"\n                class="toggleControl align-top"\n                md-raised-button\n                (click)="activeSong.toggleControl()"\n                [disabled]="!activeSong.isLoaded"\n                [color]="activeSong.isControlled ? \'accent\' : \'primary\'"\n                title="Control Vinyl">\n            <span class="icon-turntable"></span>\n        </button>\n        <midi-mapping [elemId]="deckName + \'-toggle-control\'" [amount]="activeSong.isControlled ? 1 : 0"\n                      (amountChange)="$event ? activeSong.enableControl() : activeSong.disableControl()"></midi-mapping>\n    </div>\n    <div class="cue-section">\n        <div>Cues</div>\n        <div class="cues">\n                <span *ngFor="let i of indexArray(5)">\n                    <button [id]="deckName + \'-cue-\' + i" md-raised-button [color]="activeSong.song?.details.cues[i] ? \'accent\' : \'primary\'" [disabled]="!activeSong.isLoaded" (click)="cueClicked(i)">\n                        {{i+1}}\n                    </button>\n                    <midi-mapping [elemId]="deckName + \'-cue-\' + i" [amount]="!!activeSong.song && (activeSong.song.details.cues[i] !== undefined)"\n                                  (amountChange)="$event > 0 && cueClicked(i)"></midi-mapping>\n                </span>\n        </div>\n        <div class="cue-mode-section">\n            <md-radio-group [(ngModel)]="cueMode">\n                <md-radio-button [id]="deckName + \'-cue-mode-jump\'" disableRipple="true" [value]="CueMode.Jump" [disabled]="!activeSong.isLoaded">\n                    <span class="icon-jump-to"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]="deckName + \'-cue-mode-jump\'" [amount]="(cueMode === CueMode.Jump) ? 1 : 0"\n                              (amountChange)="($event > 0) && (cueMode = CueMode.Jump)"></midi-mapping>\n\n                <md-radio-button [id]="deckName + \'-cue-mode-set\'" disableRipple="true" [value]="CueMode.Set" [disabled]="!activeSong.isLoaded">\n                    <span class="icon-plus"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]="deckName + \'-cue-mode-set\'" [amount]="(cueMode === CueMode.Set) ? 1 : 0"\n                              (amountChange)="($event > 0) && (cueMode = CueMode.Set)"></midi-mapping>\n\n                <md-radio-button [id]="deckName + \'-cue-mode-delete\'" disableRipple="true" [value]="CueMode.Delete" [disabled]="!activeSong.isLoaded">\n                    <span class="icon-bin"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]="deckName + \'-cue-mode-delete\'" [amount]="(cueMode === CueMode.Delete) ? 1 : 0"\n                              (amountChange)="($event > 0) && (cueMode = CueMode.Delete)"></midi-mapping>\n            </md-radio-group>\n        </div>\n    </div>\n</div>',styles:[":host {\n  overflow: hidden; }\n\n#deck {\n  flex-grow: 1;\n  margin: 4px;\n  padding: 3px;\n  background-color: #161616;\n  border-radius: 2px;\n  position: relative;\n  overflow: hidden; }\n\n.waveform {\n  height: 60px;\n  width: 100%;\n  user-select: none; }\n\n.clickable {\n  cursor: pointer; }\n\n.song-details-section {\n  height: 100px;\n  padding: 16px 0 8px 0;\n  white-space: nowrap;\n  overflow: hidden; }\n\n.song-labels {\n  display: inline-block;\n  vertical-align: top;\n  margin-left: 3px; }\n\n.song-title {\n  font-size: 24px; }\n\n.song-position-section {\n  display: flex;\n  justify-content: space-between;\n  margin-bottom: 8px; }\n\n.toggleControl {\n  font-size: 24px; }\n\n.align-top {\n  vertical-align: top; }\n\n.cue-section {\n  margin-top: 15px; }\n\n.cue-mode-section {\n  margin-top: 5px; }\n  .cue-mode-section md-radio-button {\n    margin-right: 12px; }\n\n.cues button {\n  min-width: 20px;\n  font-weight: bold; }\n"]}),p("design:paramtypes",["function"==typeof(oe=void 0!==t.ElementRef&&t.ElementRef)&&oe||Object,"function"==typeof(re=void 0!==S&&S)&&re||Object,"function"==typeof(ae=void 0!==k&&k)&&ae||Object,"function"==typeof(se=void 0!==P&&P)&&se||Object,"function"==typeof(ce=void 0!==W&&W)&&ce||Object,"function"==typeof(de=void 0!==H&&H)&&de||Object,"function"==typeof(le=void 0!==J&&J)&&le||Object])],ee);var te;!function(e){e[e.File=0]="File",e[e.Live=1]="Live"}(te||(te={}));var ne;!function(e){e[e.Jump=0]="Jump",e[e.Set=1]="Set",e[e.Delete=2]="Delete"}(ne||(ne={}));var ie,oe,re,ae,se,ce,de,le,ue=function(){function e(){this.state=new o.BehaviorSubject(pe.Closed)}return Object.defineProperty(e.prototype,"state$",{get:function(){return this.state.asObservable()},enumerable:!0,configurable:!0}),e.prototype.setState=function(e){this.state.next(e)},e.prototype.getState=function(){return this.state.getValue()},e}();ue=u([t.Injectable(),p("design:paramtypes",[])],ue);var pe;!function(e){e[e.Closed=0]="Closed",e[e.Audio=1]="Audio",e[e.Midi=2]="Midi"}(pe||(pe={}));var fe=function(){function e(){var e=this;this.midiInitialized=new Promise(function(t,n){e.resolveMidiInitialized=t,e.rejectMidiInitialized=n})}return e.prototype.initialize=function(){var e=this;navigator.requestMIDIAccess?navigator.requestMIDIAccess().then(function(t){e.midi=t,e.resolveMidiInitialized(t)}).catch(function(){e.rejectMidiInitialized(),console.error("No access to MIDI devices or your browser doesn't support WebMIDI API")}):(this.rejectMidiInitialized(),console.error("No MIDI support in your browser."))},e.prototype.parseRawMsg=function(e){var t,n,i=e[0],o=e[1],r=e[2],a=i>>4,s=1+(15&i);switch(a){case ge.ProgramChange:t=o,n=1;break;case ge.ChannelAfterTouch:t=0,n=o/127;break;case ge.PitchBend:t=0,n=((r<<7)+o)/16383;break;default:t=o,n=r/127}return{msgType:a,channel:s,subType:t,amount:n}},e.prototype.serializeMsg=function(e){var t,n,i=(e.msgType<<4)+(e.channel-1);switch(e.msgType){case ge.ProgramChange:t=e.subType,n=0;break;case ge.ChannelAfterTouch:t=Math.round(127*e.amount),n=0;break;case ge.PitchBend:var o=Math.round(16383*e.amount);t=127&o,n=o>>7;break;default:t=e.subType,n=Math.round(127*e.amount)}return[i,t,n]},e}();fe=u([t.Injectable(),p("design:paramtypes",[])],fe);var ge;!function(e){e[e.NoteOff=8]="NoteOff",e[e.NoteOn=9]="NoteOn",e[e.PolyAfterTouch=10]="PolyAfterTouch",e[e.CC=11]="CC",e[e.ProgramChange=12]="ProgramChange",e[e.ChannelAfterTouch=13]="ChannelAfterTouch",e[e.PitchBend=14]="PitchBend",e[e.SysEx=15]="SysEx"}(ge||(ge={}));var ve=function(){function e(e,t,n){this.sideNav=e,this.DeckId=he,this.SideNavState=pe,n.initialize(),t.initialize(),"serviceWorker"in navigator&&navigator.serviceWorker.register("./sw.js")}return e.prototype.ngAfterViewInit=function(){e=this.decksQuery.toArray(),this.deck1=e[0],this.deck2=e[1];var e},e.prototype.onLoadSong=function(e){var t=e.song;this["deck"+e.deckId].loadSong(t)},e.prototype.onCloseSideNav=function(){this.sideNav.setState(pe.Closed)},e}();u([t.ViewChildren(ee),p("design:type","function"==typeof(be=void 0!==t.QueryList&&t.QueryList)&&be||Object)],ve.prototype,"decksQuery",void 0),ve=u([t.Component({selector:"my-app",template:'<md-sidenav-container>\n    <md-sidenav [opened]="(sideNav.state$ | async) !== SideNavState.Closed" (close)="onCloseSideNav()">\n        <side-nav></side-nav>\n    </md-sidenav>\n    <div  class="main-content">\n        <md-toolbar>\n            <toolbar></toolbar>\n        </md-toolbar>\n        <div class="deck-section flex">\n            <div class="deck1 deck flex">\n                <deck class="flex flex-grow" [deckId]="DeckId.LEFT"></deck>\n            </div>\n            <div class="center-controls flex">\n                <center-controls class="flex flex-grow"></center-controls>\n            </div>\n            <div class="deck2 deck flex">\n                <deck class="flex flex-grow" [deckId]="DeckId.RIGHT"></deck>\n            </div>\n        </div>\n        <div class="flex flex-grow">\n            <library class="flex flex-grow" (onLoadSong)="onLoadSong($event)"></library>\n        </div>\n    </div>\n</md-sidenav-container>',styles:[".main-content {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  background-color: #5b5b5b; }\n\n.row {\n  margin-bottom: 4px; }\n\n.deck-section {\n  flex: 0 0 400px; }\n\n.deck {\n  width: 28.6%; }\n\n.center-controls {\n  width: 42.8%; }\n"]}),p("design:paramtypes",["function"==typeof(ye=void 0!==ue&&ue)&&ye||Object,"function"==typeof(Se=void 0!==fe&&fe)&&Se||Object,"function"==typeof(Ie=void 0!==x&&x)&&Ie||Object])],ve);var he;!function(e){e[e.LEFT=1]="LEFT",e[e.RIGHT=2]="RIGHT"}(he||(he={}));var me;!function(e){e[e.DEFAULT=0]="DEFAULT",e[e.DECK1=1]="DECK1",e[e.DECK2=2]="DECK2"}(me||(me={})),function(e){function t(t){switch(t){case he.LEFT:return e.DECK1;case he.RIGHT:return e.DECK2}}e.fromDeckId=t}(me||(me={}));var be,ye,Se,Ie,we=function(){function e(e,n,i){var o=this;this.audioUtil=e,this.songDb=n,this.formatTimePipe=i,this.fileIsOverDrop=!1,this.uploadingFiles=!1,this.DeckId=he,this.onLoadSong=new t.EventEmitter,this.searchInput=new r.BehaviorSubject("").distinctUntilChanged();var c=this.songDb.getAllSongDetails().map(function(e){return e.sort(s("artist",{ignoreCase:!0}).thenBy("year").thenBy("album",{ignoreCase:!0}).thenBy("track"))});this.filteredSongDetails=a.Observable.combineLatest(c,this.searchInput,function(e,t){return o.filterSongDetails(e,t)})}return e.prototype.onFileOverDrop=function(e){this.fileIsOverDrop=e},e.prototype.uploadFiles=function(e){var t=this;this.uploadingFiles=!0,this.totalFilesToUpload=e.length,this.numFilesUploaded=0;var n=e.map(function(e){var n,i=new Promise(function(t){jsmediatags.read(e,{onSuccess:function(e){return t(e.tags)},onError:function(e){return t(null)}})}),o=t.readAsArrayBuffer(e).then(function(e){n=e;var i=t.copyArrayBuffer(e);return t.audioUtil.context.decodeAudioData(i)});return Promise.all([o,i]).then(function(i){var o=i[0],r=i[1];return t.songDb.addSong(n,o,r,e.name)}).then(function(){t.numFilesUploaded++})}),i=function(){t.uploadingFiles=!1,t.totalFilesToUpload=void 0,t.numFilesUploaded=void 0};Promise.all(n).then(i).catch(function(e){console.error("Failed to upload songs",e),i()})},e.prototype.deleteSong=function(e){this.songDb.deleteSong(e)},e.prototype.loadSong=function(e,t){var n=this;this.songDb.getSong(e).then(function(e){n.onLoadSong.emit({song:e,deckId:t})})},e.prototype.getLoadingMessage=function(){return this.totalFilesToUpload>1?"Loading "+this.numFilesUploaded+" of "+this.totalFilesToUpload:"Loading"},e.prototype.copyArrayBuffer=function(e){var t=new ArrayBuffer(e.byteLength);return new Uint8Array(t).set(new Uint8Array(e)),t},e.prototype.readAsArrayBuffer=function(e){var t;return new Promise(function(n,i){var o=new FileReader;o.readAsArrayBuffer(e),o.onload=function(){t=o.result,n(o.result)},o.onerror=i})},e.prototype.filterSongDetails=function(e,t){var n=this;if(!(t=t.trim()))return e;var i=t.split(" ");return e.filter(function(e){var t=function(t,i){return t&&n.songDetailsMatchesToken(e,i)};return i.reduce(t,!0)})},e.prototype.songDetailsMatchesToken=function(e,t){t=t.toLowerCase();for(var n in e){var i=e[n];if(e.hasOwnProperty(n)&&void 0!==i){var o=void 0;switch(n){case"title":case"album":case"artist":case"track":case"year":case"genre":o=i.toString();break;case"lengthSeconds":o=this.formatTimePipe.transform(i)}if(o&&-1!==o.toLowerCase().indexOf(t))return!0}}return!1},e}();u([t.Output(),p("design:type",Object)],we.prototype,"onLoadSong",void 0),we=u([t.Component({selector:"library",template:'<div id="library"\n     fileDrop\n     (fileOver)="onFileOverDrop($event)"\n     (onFileDrop)="uploadFiles($event)">\n    <loading-overlay\n        *ngIf="fileIsOverDrop || uploadingFiles"\n        [msg]="uploadingFiles ? getLoadingMessage() : \'Drop audio files here.\'"\n        [showSpinner]="uploadingFiles">\n    </loading-overlay>\n    <div class="library-toolbar">\n        <div class="filter-container">\n            <div class="filter-icon-container">\n                <span class="icon icon-filter"></span>\n            </div>\n            <div class="library-filter-input-container">\n                <input #filterInput class="library-filter-input" type="text" (input)="searchInput.next(filterInput.value)">\n            </div>\n            <span *ngIf="filterInput.value" (click)="filterInput.value = \'\'; searchInput.next(\'\')" class="clear-filter-icon icon icon-cross"></span>\n        </div>\n    </div>\n    <div class="file-list-section" fixedTableHeaderContainer #tableContainer>\n        <table class="file-list-table">\n            <tr>\n                <th>Cover</th>\n                <th>Title</th>\n                <th>Artist</th>\n                <th>Album</th>\n                <th>Waveform</th>\n                <th>Genre</th>\n                <th>Year</th>\n                <th>Length</th>\n            </tr>\n            <tr *ngFor="let songDetails of filteredSongDetails | async" class="file-row">\n            \x3c!--<tr *lazyFor="let songDetails of filteredSongDetails | async, inContainer tableContainer" class="file-row">--\x3e\n                <td class="cover-img-container">\n                    <div class="">\n                        <img *ngIf="songDetails.albumDataUrl" [src]="songDetails.albumDataUrl" alt="Album Cover" width="75px" class="cover-img">\n                    </div>\n                </td>\n                <td>\n                    <div class="song-buttons-container">\n                        {{songDetails.title}}\n                        <div class="song-buttons">\n                            <span class="deck1">\n                                <button md-mini-fab (click)="loadSong(songDetails, DeckId.LEFT)">\n                                    <span class="icon-undo"></span>\n                                </button>\n                            </span>\n                            <span class="deck2">\n                                <button md-mini-fab (click)="loadSong(songDetails, DeckId.RIGHT)">\n                                    <span class="icon-redo"></span>\n                                </button>\n                            </span>\n                            <span>\n                                <button md-mini-fab (click)="deleteSong(songDetails)">\n                                    <span class="icon-bin"></span>\n                                </button>\n                            </span>\n                        </div>\n                    </div>\n                </td>\n                <td>{{songDetails.artist}}</td>\n                <td>{{songDetails.album}}</td>\n                <td>\n                    <img [src]="songDetails.waveformDataUrl" alt="waveform">\n                </td>\n\n                <td>{{songDetails.genre}}</td>\n                <td>{{songDetails.year}}</td>\n                <td>{{songDetails.lengthSeconds | formatTime}}</td>\n            </tr>\n        </table>\n    </div>\n</div>',styles:["#library {\n  flex-grow: 1;\n  display: flex;\n  flex-direction: column;\n  margin: 0 4px 4px 4px;\n  border-radius: 2px;\n  position: relative; }\n\n.dragging-overlay {\n  border: 4px dashed #b4b4b4;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  display: none;\n  z-index: 3;\n  pointer-events: none;\n  background-color: rgba(100, 100, 100, 0.7); }\n  .dragging-overlay .drop-msg {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, 35px); }\n\n.dragging-overlay.show {\n  display: block; }\n\n.library-toolbar {\n  margin: 4px 0; }\n  .library-toolbar .filter-container {\n    position: relative;\n    width: 200px;\n    display: flex; }\n  .library-toolbar .library-filter-input-container {\n    display: flex; }\n  .library-toolbar .library-filter-input {\n    width: 100%;\n    padding: 3px 23px 3px 3px;\n    background-color: #161616;\n    border-top-right-radius: 2px;\n    border-bottom-right-radius: 2px;\n    border: none;\n    color: white;\n    font-size: 14px; }\n  .library-toolbar .filter-icon-container {\n    background-color: #161616;\n    border-top-left-radius: 2px;\n    border-bottom-left-radius: 2px;\n    margin-right: 2px;\n    padding: 4px 3px 3px 3px; }\n  .library-toolbar .clear-filter-icon {\n    position: absolute;\n    top: 3px;\n    right: 0;\n    padding: 3px;\n    cursor: pointer;\n    font-size: 14px; }\n\n.file-list-section {\n  background-color: #161616;\n  flex-grow: 1;\n  overflow: auto; }\n  .file-list-section .file-list-table {\n    border-spacing: 0;\n    width: 100%; }\n  .file-list-section th {\n    background-color: #5b5b5b;\n    position: relative;\n    top: -2px;\n    padding: 2px 0;\n    z-index: 2;\n    text-align: left;\n    font-weight: normal; }\n  .file-list-section .file-row td {\n    height: 35px;\n    padding: 0 8px; }\n  .file-list-section .file-row:nth-child(odd) td {\n    background-color: #2a2a2a; }\n  .file-list-section .file-row:hover td {\n    background-color: #3a3a3a; }\n  .file-list-section .file-row:not(:hover) .song-buttons {\n    display: none; }\n  .file-list-section .song-buttons-container {\n    position: relative; }\n  .file-list-section .song-buttons {\n    position: absolute;\n    right: 0;\n    top: -11px; }\n  .file-list-section .cover-img-container {\n    overflow: hidden;\n    position: relative;\n    height: 35px;\n    width: 75px; }\n  .file-list-section .cover-img {\n    position: absolute;\n    top: -10px; }\n"]}),p("design:paramtypes",["function"==typeof(ke=void 0!==k&&k)&&ke||Object,"function"==typeof(xe=void 0!==J&&J)&&xe||Object,"function"==typeof(Oe=void 0!==H&&H)&&Oe||Object])],we);var ke,xe,Oe,De=function(){function e(e){this.fileOver=new t.EventEmitter,this.onFileDrop=new t.EventEmitter,this.dragLevel=0,this.element=e}return e.prototype.onDragOver=function(e){var t=this.getDataTransfer(e);this.haveFiles(t.types)&&(t.dropEffect="copy",this.preventAndStop(e))},e.prototype.onDragEnter=function(e){this.dragLevel++,this.emitFileOver()},e.prototype.onDragLeave=function(e){this.dragLevel--,this.preventAndStop(e),0===this.dragLevel&&this.emitFileOver()},e.prototype.onDrop=function(e){var t=this.getDataTransfer(e);t&&(this.preventAndStop(e),this.dragLevel=0,this.emitFileOver(),this.onFileDrop.emit(Array.from(t.files)))},e.prototype.emitFileOver=function(){this.fileOver.emit(this.dragLevel>0)},e.prototype.getDataTransfer=function(e){return e.dataTransfer?e.dataTransfer:e.originalEvent.dataTransfer},e.prototype.preventAndStop=function(e){e.preventDefault(),e.stopPropagation()},e.prototype.haveFiles=function(e){return!!e&&(e.indexOf?-1!==e.indexOf("Files"):!!e.contains&&e.contains("Files"))},e}();u([t.Output(),p("design:type",Object)],De.prototype,"fileOver",void 0),u([t.Output(),p("design:type",Object)],De.prototype,"onFileDrop",void 0),u([t.HostListener("dragover",["$event"]),p("design:type",Function),p("design:paramtypes",[Object]),p("design:returntype",void 0)],De.prototype,"onDragOver",null),u([t.HostListener("dragenter",["$event"]),p("design:type",Function),p("design:paramtypes",[Object]),p("design:returntype",void 0)],De.prototype,"onDragEnter",null),u([t.HostListener("dragleave",["$event"]),p("design:type",Function),p("design:paramtypes",[Object]),p("design:returntype",void 0)],De.prototype,"onDragLeave",null),u([t.HostListener("drop",["$event"]),p("design:type",Function),p("design:paramtypes",[Object]),p("design:returntype",void 0)],De.prototype,"onDrop",null),De=u([t.Directive({selector:"[fileDrop]"}),p("design:paramtypes",["function"==typeof(Ce=void 0!==t.ElementRef&&t.ElementRef)&&Ce||Object])],De);var Ce,Me=function(){function e(e,t){var n=this;this.midiUtil=e,this.preferencesDb=t,this.enabledInputNames=new Set,this.enabledOutputNames=new Set,this.msg=new o.Subject,this.midiUtil.midiInitialized.then(function(){e.midi.onstatechange=function(){n.retrieveDevices()},n.retrieveDevices()}),t.initialized.then(function(){n.enabledOutputNames=t.getEnabledMidiOutputNames(),t.getEnabledMidiInputNames().forEach(function(e){n.devicesByName[e]&&n.enableInput(e)})})}return Object.defineProperty(e.prototype,"msg$",{get:function(){return this.msg.asObservable()},enumerable:!0,configurable:!0}),e.prototype.retrieveDevices=function(){var e=this;this.devicesByName={},this.midiUtil.midi.inputs.forEach(function(t){e.devicesByName[t.name]={input:t},!1===e.inputIsEnabled(t.name)&&e.enabledInputNames.has(t.name)&&e.enableInput(t.name)}),this.midiUtil.midi.outputs.forEach(function(t){e.devicesByName[t.name]=e.devicesByName[t.name]||{},e.devicesByName[t.name].output=t}),this.devices=[];for(var t in this.devicesByName){var n=this.devicesByName[t];this.devices.push({name:t,input:n.input,output:n.output})}},e.prototype.inputIsEnabled=function(e){var t=this.getDevice(e).input;return!!t&&!!t.lastEventListener},e.prototype.enableInput=function(e){this.enabledInputNames.add(e),this.saveInputPreferences();var t=this.getDevice(e);t.input&&(t.input.lastEventListener=this.onInputMsg.bind(this),t.input.addEventListener("midimessage",t.input.lastEventListener))},e.prototype.disableInput=function(e){var t=this.getDevice(e);t.input&&(t.input.lastEventListener&&(t.input.removeEventListener("midimessage",t.input.lastEventListener),t.input.lastEventListener=void 0),t.input.close()),this.enabledInputNames.delete(e),this.saveInputPreferences()},e.prototype.toggleInput=function(e){this.inputIsEnabled(e)?this.disableInput(e):this.enableInput(e)},e.prototype.outputIsEnabled=function(e){return this.enabledOutputNames.has(e)},e.prototype.enableOutput=function(e){this.enabledOutputNames.add(e),this.saveOutputPreferences()},e.prototype.disableOutput=function(e){this.enabledOutputNames.delete(e),this.saveOutputPreferences()},e.prototype.toggleOutput=function(e){this.outputIsEnabled(e)?this.disableOutput(e):this.enableOutput(e)},e.prototype.sendMessage=function(e){var t=this;this.enabledOutputNames.forEach(function(n){var i=t.getDevice(n);i.output&&i.output.send(t.midiUtil.serializeMsg(e))})},e.prototype.saveInputPreferences=function(){this.preferencesDb.setEnabledMidiInputNames(this.enabledInputNames)},e.prototype.saveOutputPreferences=function(){this.preferencesDb.setEnabledMidiOutputNames(this.enabledOutputNames)},e.prototype.getDevice=function(e){return this.devicesByName[e]||{}},e.prototype.onInputMsg=function(e){var t=this.midiUtil.parseRawMsg(e.data);this.msg.next(t)},e}();Me=u([t.Injectable(),p("design:paramtypes",["function"==typeof(Te=void 0!==fe&&fe)&&Te||Object,"function"==typeof(je=void 0!==C&&C)&&je||Object])],Me);var Te,je,Ee=function(){function e(){var e=this;this.mouseMoveSubject=new o.Subject,this.mouseUpSubject=new o.Subject,this.dragEndSubject=new o.Subject,this.keyUpSubject=new o.Subject,document.addEventListener("mousemove",function(t){return e.mouseMoveSubject.next(t)}),document.addEventListener("mouseup",function(t){return e.mouseUpSubject.next(t)}),document.addEventListener("dragend",function(t){return e.dragEndSubject.next(t)}),document.addEventListener("keyup",function(t){return e.keyUpSubject.next(t)})}return Object.defineProperty(e.prototype,"mouseMove",{get:function(){return this.mouseMoveSubject.asObservable()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"mouseUp",{get:function(){return this.mouseUpSubject.asObservable()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"dragEnd",{get:function(){return this.dragEndSubject.asObservable()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"keyUp",{get:function(){return this.keyUpSubject.asObservable()},enumerable:!0,configurable:!0}),e}();Ee=u([t.Injectable(),p("design:paramtypes",[])],Ee);var Ae=function(){function e(e,t,n){var i=this;this.preferencesDb=t,this.learnMode=new o.BehaviorSubject(!1),this.mappings=new Map,this.mappingComps=new Map,e.msg$.subscribe(function(e){return i.onInputMsg(e)}),t.initialized.then(function(){i.mappings=t.getMidiMappings()}),n.keyUp.subscribe(function(e){i.learnMode.getValue()&&("Backspace"!==e.code&&"Delete"!==e.code||i.activeLearnMappingComp&&i.mappings.delete(i.activeLearnMappingComp.elemId))})}return Object.defineProperty(e.prototype,"learnMode$",{get:function(){return this.learnMode.asObservable()},enumerable:!0,configurable:!0}),e.prototype.setLearnMode=function(e){!e&&(this.activeLearnMappingComp=void 0),this.learnMode.next(e)},e.prototype.toggleLearnMode=function(){this.setLearnMode(!this.learnMode.getValue())},e.prototype.getLearnMode=function(){return this.learnMode.getValue()},e.prototype.registerMappingComp=function(e,t){this.mappingComps.set(e,t)},e.prototype.setMapping=function(e,t){this.mappings.set(e,t),this.preferencesDb.setMidiMappings(this.mappings)},e.prototype.getMapping=function(e){return this.mappings.get(e)},e.prototype.onInputMsg=function(e){var t=this;this.activeLearnMappingComp?this.activeLearnMappingComp.onLearnMsg(e):this.getLearnMode()||this.mappings.forEach(function(n,i){n.control.msgType===e.msgType&&n.control.channel===e.channel&&n.control.subType===e.subType&&t.mappingComps.get(i).onInputMsg(e)})},e}();Ae=u([t.Injectable(),p("design:paramtypes",["function"==typeof(Fe=void 0!==Me&&Me)&&Fe||Object,"function"==typeof(Ne=void 0!==C&&C)&&Ne||Object,"function"==typeof(Re=void 0!==Ee&&Ee)&&Re||Object])],Ae);var Le;!function(e){e[e.Amount=0]="Amount",e[e.Latch=1]="Latch"}(Le||(Le={}));var Fe,Ne,Re,Pe=function(){function e(e,t){this.sideNav=e,this.midiMapper=t}return e.prototype.toggleMidiSettings=function(){this.sideNav.getState()===pe.Midi?this.sideNav.setState(pe.Closed):this.sideNav.setState(pe.Midi)},e.prototype.toggleAudioSettings=function(){this.sideNav.getState()===pe.Audio?this.sideNav.setState(pe.Closed):this.sideNav.setState(pe.Audio)},e.prototype.toggleFullScreen=function(){var e=document;this.isFullScreen()?e.cancelFullScreen?e.cancelFullScreen():e.mozCancelFullScreen?e.mozCancelFullScreen():e.webkitCancelFullScreen&&e.webkitCancelFullScreen():e.documentElement.requestFullScreen?e.documentElement.requestFullScreen():e.documentElement.mozRequestFullScreen?e.documentElement.mozRequestFullScreen():e.documentElement.webkitRequestFullScreen&&e.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT)},e.prototype.isFullScreen=function(){var e=document;return!e.fullScreenElement&&(e.mozFullScreen||e.webkitIsFullScreen)},e}();Pe=u([t.Component({selector:"toolbar",template:'<div id="toolbar">\n    <div>\n        Open DVS<span class="subtext">βeta</span>\n    </div>\n    <div class="right-toolbar">\n        <div class="toolbar-item" md-tooltip="Learn MIDI Mapping" (click)="midiMapper.toggleLearnMode()">\n            <span class="icon-equalizer" [class.active]="midiMapper.getLearnMode()"></span>\n        </div>\n        <div class="toolbar-item" mdTooltip="MIDI settings" (click)="toggleMidiSettings()">\n            <span class="icon-midi"></span>\n        </div>\n        <div class="toolbar-item" mdTooltip="Audio settings" (click)="toggleAudioSettings()">\n            <span class="icon-speaker"></span>\n        </div>\n        <div class="toolbar-item">\n            <span *ngIf="!isFullScreen()" (click)="toggleFullScreen()" mdTooltip="Fullscreen">\n                <span class="icon-enlarge-color">\n                    <span class="path1"></span><span class="path2"></span>\n                </span>\n            </span>\n                <span *ngIf="isFullScreen()" (click)="toggleFullScreen()" mdTooltip="Exit fullscreen">\n                <span class="icon-shrink-color">\n                    <span class="path1"></span><span class="path2"></span>\n                </span>\n            </span>\n        </div>\n    </div>\n</div>',styles:[":host {\n  display: flex;\n  flex-grow: 1; }\n\n#toolbar {\n  display: flex;\n  flex-grow: 1;\n  justify-content: space-between; }\n\n.right-toolbar {\n  font-size: 25px;\n  display: flex; }\n\n.toolbar-item {\n  margin: 0 10px;\n  cursor: pointer; }\n\n.icon-enlarge-color:not(:hover) span:before,\n.icon-shrink-color:not(:hover) span:before {\n  color: inherit; }\n\n.icon-midi:hover, .icon-equalizer:hover, .icon-equalizer.active {\n  color: #165eaa; }\n\n.icon-speaker:hover {\n  color: #632B9B; }\n\n.subtext {\n  font-size: 12px; }\n"]}),p("design:paramtypes",["function"==typeof(Ue=void 0!==ue&&ue)&&Ue||Object,"function"==typeof(Be=void 0!==Ae&&Ae)&&Be||Object])],Pe);var Ue,Be,Ge=function(){function e(){}return e}();Ge=u([t.Component({selector:"spinner",template:"\n<div class=\"overlay\"></div>\n<div class='uil-ripple-css'> \n    <div></div> \n    <div></div> \n</div>",styles:["\n@keyframes uil-ripple {\n  0% {\n    width: 0;\n    height: 0;\n    opacity: 0;\n    margin: 0 0 0 0;\n  }\n  33% {\n    width: 44%;\n    height: 44%;\n    margin: -22% 0 0 -22%;\n    opacity: 1;\n  }\n  100% {\n    width: 88%;\n    height: 88%;\n    margin: -44% 0 0 -44%;\n    opacity: 0;\n  }\n}\n.uil-ripple-css {\n  position: absolute;\n  width: 64px;\n  height: 64px;\n  transform: translate(-50%, -50%);\n  top: 50%;\n  left: 50%;\n}\n.uil-ripple-css div {\n  position: absolute;\n  z-index: 2;\n  top: 50%;\n  left: 50%;\n  margin: 0;\n  width: 0;\n  height: 0;\n  opacity: 0;\n  border-radius: 50%;\n  border-width: 4px;\n  border-style: solid;\n  animation: uil-ripple 2s linear infinite;\n}\n.uil-ripple-css div:nth-of-type(1) {\n  border-color: #165eaa;\n}\n.uil-ripple-css div:nth-of-type(2) {\n  border-color: #632b9b;\n  animation-delay: 1s;\n}\n.overlay {\n    position: absolute;\n    width: 100%;\n    height: 100%;\n    background-color: rgba(255, 255, 255, 0.1);\n    z-index: 1;\n    top: 0;\n}\n"]}),p("design:paramtypes",[])],Ge);var $e=function(){function e(e,t,n,i,o,r){var a=this;this.activeSongs=e,this.waveformUtil=t,this.audioUtil=n,this.animationFrames=i,this.documentEvents=o,this.audioOutput=r,this.DeckId=he,this.deck1ActiveSong=e.getActiveSong(he.LEFT),this.deck2ActiveSong=e.getActiveSong(he.RIGHT),this.deck1ActiveSong.songObservable.subscribe(function(e){return a.onSongChange(he.LEFT,e)}),
-this.deck2ActiveSong.songObservable.subscribe(function(e){return a.onSongChange(he.RIGHT,e)}),i.frames.subscribe(function(e){return a.onAnimationFrame()}),this.documentEvents.mouseMove.subscribe(function(e){return a.onMouseMove(e)}),this.documentEvents.mouseUp.subscribe(function(e){return a.endScrub(e)}),this.documentEvents.dragEnd.subscribe(function(e){return a.endScrub(e)})}return Object.defineProperty(e.prototype,"deck1Canvas",{get:function(){return this.deck1ElementRef.nativeElement},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"deck2Canvas",{get:function(){return this.deck2ElementRef.nativeElement},enumerable:!0,configurable:!0}),e.prototype.ngAfterViewInit=function(){this.deck1Canvas.width=this.deck1Canvas.offsetWidth,this.deck2Canvas.width=this.deck2Canvas.offsetWidth,this.deck1Canvas.getContext("2d").translate(.5,0),this.deck2Canvas.getContext("2d").translate(.5,0)},e.prototype.onAnimationFrame=function(){this.deck1ActiveSong.isLoaded&&this.drawSong(he.LEFT,this.deck1ActiveSong.song),this.deck2ActiveSong.isLoaded&&this.drawSong(he.RIGHT,this.deck2ActiveSong.song)},e.prototype.onSongChange=function(e,t){this.setPixelOffsetAtLastDraw(void 0,e),this.drawSong(e,t)},e.prototype.setPixelOffsetAtLastDraw=function(e,t){t===he.LEFT?this.song1PixelOffsetAtLastDraw=e:this.song2PixelOffsetAtLastDraw=e},e.prototype.getPixelOffsetAtLastDraw=function(e){return e===he.LEFT?this.song1PixelOffsetAtLastDraw:this.song2PixelOffsetAtLastDraw},e.prototype.drawSong=function(e,t){var n,i,o,r;switch(e){case he.LEFT:n=this.deck1Canvas,o="negativeSamples",r=this.deck1ActiveSong;break;case he.RIGHT:n=this.deck2Canvas,o="positiveSamples",r=this.deck2ActiveSong}var a=r.currentSongOffset,s=this.audioUtil.context.sampleRate/100,c=a-3,d=a+3,l=0,u=n.width,p=Math.round(a*n.width/6);if(void 0!==this.getPixelOffsetAtLastDraw(e)){var f=p-this.getPixelOffsetAtLastDraw(e);if(Math.abs(f)<n.width&&(f>=0?(l=n.width-f,u=n.width):(l=0,u=-f),0!==f)){var g=n.getContext("2d"),v=g.getImageData(0,0,n.width,n.height);g.putImageData(v,-f,0)}}this.setPixelOffsetAtLastDraw(p,e),i={canvas:n,themeId:me.fromDeckId(e),useGradient:!1,drawFromX:l,drawToX:u},i[o]=this.waveformUtil.projectWaveform(t.waveformCompressed100x,s,n.width,c,d),this.waveformUtil.drawWaveform(i),this.waveformUtil.overlayCues(n,t.details.cues,c,6,e===he.RIGHT)},e.prototype.onMouseMove=function(e){if(this.activeScrubDeck){var t=this.getActiveSongFromDeckId(this.activeScrubDeck),n=this.deck1Canvas.offsetWidth/6,i=this.scrubOrigScreenX-e.screenX,o=this.scrubOrigSongOffset+i/n;o=Math.max(0,o),o=Math.min(t.song.details.lengthSeconds,o),t.setSongOffset(o)}},e.prototype.endScrub=function(e){if(void 0!==this.activeScrubDeck){var t=this.getActiveSongFromDeckId(this.activeScrubDeck);this.resumePlayingAfterScrub&&t.playBuffer(),this.activeScrubDeck=void 0,document.body.classList.remove("scrubbing")}},e.prototype.startScrub=function(e,t){var n=this.getActiveSongFromDeckId(e);n.isLoaded&&(this.activeScrubDeck=e,this.resumePlayingAfterScrub=n.isPlaying,this.scrubOrigSongOffset=n.currentSongOffset,this.scrubOrigScreenX=t.screenX,n.isPlaying&&n.pauseBuffer(),document.body.classList.add("scrubbing"))},e.prototype.getActiveSongFromDeckId=function(e){return e===he.LEFT?this.deck1ActiveSong:this.deck2ActiveSong},e.prototype.crossfaderChange=function(e){var t=e.leftGain,n=e.rightGain;this.deck1ActiveSong.setGain(t),this.deck2ActiveSong.setGain(n)},e}();u([t.ViewChild("deck1Canvas"),p("design:type","function"==typeof(ze=void 0!==t.ElementRef&&t.ElementRef)&&ze||Object)],$e.prototype,"deck1ElementRef",void 0),u([t.ViewChild("deck2Canvas"),p("design:type","function"==typeof(We=void 0!==t.ElementRef&&t.ElementRef)&&We||Object)],$e.prototype,"deck2ElementRef",void 0),$e=u([t.Component({selector:"center-controls",template:'<div id="center-controls">\n    <div class="waveform-container">\n        <div class="center-line"></div>\n        <canvas height="80" width="1" class="waveform"\n                #deck1Canvas (mousedown)="startScrub(DeckId.LEFT, $event)"\n                [class.scrubbable]="deck1ActiveSong.isLoaded">\n        </canvas>\n    </div>\n    <div class="waveform-container">\n        <div class="center-line"></div>\n        <canvas height="80" width="1" class="waveform"\n                #deck2Canvas (mousedown)="startScrub(DeckId.RIGHT, $event)"\n                [class.scrubbable]="deck2ActiveSong.isLoaded">\n        </canvas>\n    </div>\n    <div class="volume-faders">\n        <div>\n            <div class="deck1 volume-fader">\n                <fader id="deckAGain" name="deckAGain" [value]="audioOutput.getDeckGain(DeckId.LEFT)" (change)="audioOutput.setDeckGain(DeckId.LEFT, $event)"></fader>\n            </div>\n            <div class="volume-fader">\n                <fader name="masterGain" [value]="audioOutput.getMasterGain()" (change)="audioOutput.setMasterGain($event)"></fader>\n            </div>\n            <div class="deck2 volume-fader">\n                <fader name="deckBGain" [value]="audioOutput.getDeckGain(DeckId.RIGHT)" (change)="audioOutput.setDeckGain(DeckId.RIGHT, $event)"></fader>\n            </div>\n        </div>\n    </div>\n    <crossfader (change)="crossfaderChange($event)"></crossfader>\n</div>',styles:["#center-controls {\n  margin: 4px 0;\n  padding: 3px;\n  flex-grow: 1;\n  background-color: #161616;\n  border-radius: 2px; }\n\n.waveform {\n  user-select: none;\n  width: 100%;\n  height: 80px; }\n\n.volume-faders {\n  display: flex;\n  justify-content: space-around;\n  margin: 10px; }\n\n.volume-fader {\n  display: inline-block;\n  margin: 0 25px; }\n\n.scrubbable {\n  cursor: -webkit-grab;\n  cursor: -moz-grab;\n  cursor: grab; }\n\n.waveform-container {\n  position: relative; }\n\n.center-line {\n  position: absolute;\n  left: 50%;\n  height: 100%;\n  width: 1px;\n  background-color: grey; }\n"]}),p("design:paramtypes",["function"==typeof(Ve=void 0!==P&&P)&&Ve||Object,"function"==typeof(He=void 0!==S&&S)&&He||Object,"function"==typeof(qe=void 0!==k&&k)&&qe||Object,"function"==typeof(_e=void 0!==W&&W)&&_e||Object,"function"==typeof(Xe=void 0!==Ee&&Ee)&&Xe||Object,"function"==typeof(Je=void 0!==N&&N)&&Je||Object])],$e);var ze,We,Ve,He,qe,_e,Xe,Je,Ke=function(){function e(e){var n=this;this.preferencesDb=e,this.sliderValue=new o.BehaviorSubject(.5),this.crossfaderCurveSharpness=new o.BehaviorSubject(0),this.change=new t.EventEmitter,e.initialized.then(function(){n.crossfaderCurveSharpness.next(e.getCrossfaderCurveSharpness())}),this.crossfaderCurveSharpness.subscribe(function(){return n.sendCrossfaderChange()}),this.sliderValue.subscribe(function(){return n.sendCrossfaderChange()})}return e.prototype.getGain=function(e,t){var n=Math.cos(e*Math.PI/2);return Math.min(1,n*(19*t+1))},e.prototype.sendCrossfaderChange=function(){var e=this.sliderValue.getValue(),t=this.crossfaderCurveSharpness.getValue(),n=this.getGain(e,t),i=this.getGain(1-e,t);this.change.emit({leftGain:n,rightGain:i})},e.prototype.setCurveSharpness=function(e){this.preferencesDb.setCrossfaderCurveSharpness(e),this.crossfaderCurveSharpness.next(e)},e}();u([t.Output(),p("design:type",Object)],Ke.prototype,"change",void 0),Ke=u([t.Component({selector:"crossfader",template:'<div class="crossfader-comp">\n    <div class="crossfader-container">\n\n        \x3c!--<div style="position: relative; left: -3px; top: 2px;">--\x3e\n        \x3c!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 0;"></div>--\x3e\n        \x3c!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 62px;"></div>--\x3e\n        \x3c!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 125px;"></div>--\x3e\n        \x3c!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 187px;"></div>--\x3e\n        \x3c!--<div style="height:40px; width: 1px; background-color: white; position: absolute; left: 250px;"></div>--\x3e\n        \x3c!--</div>--\x3e\n\n        <md-slider id="crossfader" class="crossfader" [min]="0" [max]="1" [step]="1/128" [value]="sliderValue.getValue()" (input)="sliderValue.next($event.value)"></md-slider>\n        <midi-mapping elemId="crossfader" [amount]="sliderValue.getValue()" (amountChange)="sliderValue.next($event)"></midi-mapping>\n    </div>\n    <div class="crossfader-shape-container">\n        <img (click)="setCurveSharpness(0)" src="img/smooth-curve.svg" width="15px" title="Smooth curve" alt="Smooth curve">\n        <md-slide-toggle\n                id="crossfader-curve-toggle"\n                [checked]="crossfaderCurveSharpness.getValue() === 1"\n                (change)="setCurveSharpness($event.checked? 1 : 0)"\n                class="curveTypeToggle" style="display:inline-block; position:relative; left:3px; top:7px;">\n        </md-slide-toggle>\n        <midi-mapping elemId="crossfader-curve-toggle" [amount]="crossfaderCurveSharpness.getValue()" (amountChange)="setCurveSharpness($event? 1 : 0)"></midi-mapping>\n        <img (click)="setCurveSharpness(1)" src="img/scratch-curve.svg" width="15px" title="Smooth curve" alt="Scratch curve">\n    </div>\n</div>\n',styles:[".crossfader-comp {\n  position: relative; }\n\n.crossfader-container {\n  position: absolute;\n  left: 50%;\n  transform: translate(-50%); }\n\n.crossfader-shape-container {\n  position: absolute;\n  left: calc(50% + 170px);\n  transform: translate(-50%);\n  white-space: nowrap;\n  vertical-align: top; }\n"]}),p("design:paramtypes",["function"==typeof(Ze=void 0!==C&&C)&&Ze||Object])],Ke);var Ze,Ye=function(){function e(e){this.sideNav=e,this.SideNavState=pe}return e}();Ye=u([t.Component({selector:"side-nav",template:'\n<div id="sideNav" style="width: 350px; padding:10px">\n    <midi-settings *ngIf="(sideNav.state$ | async) === SideNavState.Midi"></midi-settings>\n    <audio-settings *ngIf="(sideNav.state$ | async) === SideNavState.Audio"></audio-settings>\n</div>\n'}),p("design:paramtypes",["function"==typeof(Qe=void 0!==ue&&ue)&&Qe||Object])],Ye);var Qe,et=function(){function e(){this.DeckId=he}return e}();et=u([t.Component({selector:"audio-settings",template:'<div id="audio-settings">\n    <h1>Audio Settings</h1>\n    <div class="deck1">\n        <deck-audio-settings [deckId]="DeckId.LEFT"></deck-audio-settings>\n    </div>\n    <div class="deck2">\n        <deck-audio-settings [deckId]="DeckId.RIGHT"></deck-audio-settings>\n    </div>\n</div>',styles:[""]}),p("design:paramtypes",[])],et);var tt=function(){function e(e){this.midiIo=e}return e.prototype.getDeviceName=function(e){return e.name},e}();tt=u([t.Component({selector:"midi-settings",template:'<div id="midi-settings">\n    <h1 style="margin-top:0;">MIDI Settings</h1>\n    <h2>Enable Devices</h2>\n    <table>\n        <tr>\n            <th>Input</th>\n            <th>Output</th>\n            <th>Name</th>\n        </tr>\n        <tr *ngFor="let device of midiIo.devices;trackBy:getDeviceName">\n            <td>\n                <div *ngIf="device.input">\n                    <md-checkbox [checked]="midiIo.inputIsEnabled(device.name)" (change)="midiIo.toggleInput(device.name)"></md-checkbox>\n                </div>\n            </td>\n            <td>\n                <div *ngIf="device.output">\n                    <md-checkbox [checked]="midiIo.outputIsEnabled(device.name)" (change)="midiIo.toggleOutput(device.name)"></md-checkbox>\n                </div>\n            </td>\n            <td>{{device.name}}</td>\n        </tr>\n    </table>\n</div>',styles:[""]}),p("design:paramtypes",["function"==typeof(nt=void 0!==Me&&Me)&&nt||Object])],tt);var nt,it=function(){function e(e,n){this.midiMapper=e,this.midiIo=n,this.ctrl=this,this.amountChange=new t.EventEmitter,this.shortMidiTypeNames=(i={},i[ge.NoteOff]="Note Off",i[ge.NoteOn]="Note On",i[ge.PolyAfterTouch]="AfTo",i[ge.CC]="CC",i[ge.ProgramChange]="Prog",i[ge.ChannelAfterTouch]="Chan AfTo",i[ge.PitchBend]="Pitch Bend",i[ge.SysEx]="SysEx",i);var i}return Object.defineProperty(e.prototype,"amount",{set:function(e){this._amount=e;var t=this.midiMapper.getMapping(this.elemId);if(t){var n={msgType:t.control.msgType,channel:t.control.channel,subType:t.control.subType,amount:e};this.midiIo.sendMessage(n)}},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"inputElem",{get:function(){return document.getElementById(this.elemId)},enumerable:!0,configurable:!0}),e.prototype.ngOnInit=function(){this.midiMapper.registerMappingComp(this.elemId,this)},e.prototype.onLearnMsg=function(e){if(e.msgType!==ge.NoteOff){var t=e.msgType===ge.NoteOn?Le.Latch:Le.Amount;this.midiMapper.setMapping(this.elemId,{control:{msgType:e.msgType,channel:e.channel,subType:e.subType},type:t})}},e.prototype.onInputMsg=function(e){var t=this.midiMapper.getMapping(this.elemId);if(t.type===Le.Amount)this.amountChange.next(e.amount);else if(t.type===Le.Latch){if(0===e.amount)return;1===this._amount?this.amountChange.next(0):this.amountChange.next(1)}},e.prototype.getMappedControlMessage=function(){var e=this.midiMapper.getMapping(this.elemId);if(e)return this.shortMidiTypeNames[e.control.msgType]+": "+e.control.subType},e}();u([t.Input(),p("design:type",String)],it.prototype,"elemId",void 0),u([t.Input(),p("design:type",Number),p("design:paramtypes",[Number])],it.prototype,"amount",null),u([t.Output(),p("design:type",Object)],it.prototype,"amountChange",void 0),it=u([t.Component({selector:"midi-mapping",template:'<div id="midi-mapping" *ngIf="midiMapper.getLearnMode()" (click)="midiMapper.activeLearnMappingComp=ctrl"\n     [class.active]="midiMapper.activeLearnMappingComp === ctrl"\n     [style.top]="inputElem.offsetTop + \'px\'" [style.left]="inputElem.offsetLeft + \'px\'"\n     [style.width]="inputElem.offsetWidth + \'px\'" [style.height]="inputElem.offsetHeight + \'px\'">\n    {{getMappedControlMessage()}}\n</div>',styles:["#midi-mapping {\n  position: absolute;\n  background-color: rgba(148, 192, 214, 0.65);\n  z-index: 500;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap; }\n  #midi-mapping.active {\n    background-color: rgba(64, 123, 185, 0.65); }\n"]}),p("design:paramtypes",["function"==typeof(ot=void 0!==Ae&&Ae)&&ot||Object,"function"==typeof(rt=void 0!==Me&&Me)&&rt||Object])],it);var ot,rt,at=function(){function e(){}return e.prototype.onScroll=function(e){for(var t=e.target,n="translate(0,"+t.scrollTop+"px)",i=t.querySelectorAll("th"),o=0;o<i.length;o++)i[o].style.transform=n},e}();u([t.HostListener("scroll",["$event"]),p("design:type",Function),p("design:paramtypes",[Object]),p("design:returntype",void 0)],at.prototype,"onScroll",null),at=u([t.Directive({selector:"[fixedTableHeaderContainer]"})],at);var st=function(){function e(e,t){this.audioUtil=e,this.audioSettings=t,this.deckNames=(n={},n[he.LEFT]="A",n[he.RIGHT]="B",n);var n}return e.prototype.ngOnInit=function(){this.deckAudioSettings=this.audioSettings.getDeckAudioSettings(this.deckId)},e}();u([t.Input(),p("design:type","function"==typeof(ct=void 0!==he&&he)&&ct||Object)],st.prototype,"deckId",void 0),st=u([t.Component({selector:"deck-audio-settings",template:'<div>\n    <h2>Deck {{deckNames[deckId]}}</h2>\n\n    <div>\n        <md-select placeholder="Live Input" [ngModel]="deckAudioSettings.liveIn$ | async" (change)="deckAudioSettings.setLiveIn($event.value)">\n            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>\n        </md-select>\n    </div>\n\n    <div>\n        <md-select placeholder="Control Input" [ngModel]="deckAudioSettings.controlIn$ | async" (change)="deckAudioSettings.setControlIn($event.value)">\n            <md-option *ngFor="let device of (audioUtil.inputDevices$ | async)" [value]="device">{{ device.label }}</md-option>\n        </md-select>\n    </div>\n\n</div>\n\n',styles:["h2 {\n  margin-bottom: 0; }\n\n.mat-select {\n  margin-top: 25px;\n  margin-left: 10px;\n  width: calc(100% - 20px); }\n"]}),p("design:paramtypes",["function"==typeof(dt=void 0!==k&&k)&&dt||Object,"function"==typeof(lt=void 0!==T&&T)&&lt||Object])],st);var ct,dt,lt,ut=function(){function e(){this.change=new t.EventEmitter,this.maxValue=1.2}return e}();u([t.Input(),p("design:type",Object)],ut.prototype,"name",void 0),u([t.Input(),p("design:type",Object)],ut.prototype,"value",void 0),u([t.Output(),p("design:type",Object)],ut.prototype,"change",void 0),ut=u([t.Component({selector:"fader",template:'<div>\n    <md-slider class="fader" [id]="\'fader-\' + name" [min]="0" [max]="maxValue" [step]="maxValue/128" [value]="value" (input)="change.next($event.value)" [vertical]="true"></md-slider>\n    <midi-mapping [elemId]="\'fader-\' + name" [amount]="value/maxValue" (amountChange)="change.next($event * maxValue)"></midi-mapping>\n</div>',styles:[""]}),p("design:paramtypes",[])],ut);var pt=function(){function e(){this.showSpinner=!0}return e}();u([t.Input(),p("design:type",String)],pt.prototype,"msg",void 0),u([t.Input(),p("design:type",Boolean)],pt.prototype,"showSpinner",void 0),pt=u([t.Component({selector:"loading-overlay",styles:[".loading-overlay {\n  border: 4px dashed #b4b4b4;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  z-index: 3;\n  background-color: rgba(29, 29, 29, 0.8); }\n\n.drop-msg {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, 35px); }\n"],template:'\n<div class="loading-overlay">\n    <div class="drop-msg" *ngIf="msg">{{msg}}</div>\n    <spinner *ngIf="showSpinner"></spinner>\n</div>\n'})],pt);var ft=function(){function e(){}return e}();ft=u([t.NgModule({imports:[n.BrowserModule,d.BrowserAnimationsModule,c.FormsModule,c.ReactiveFormsModule,l.LazyForModule,i.MdButtonModule,i.MdSliderModule,i.MdSidenavModule,i.MdTooltipModule,i.MdSlideToggleModule,i.MdRadioModule,i.MdCheckboxModule,i.MdToolbarModule,i.MdOptionModule,i.MdSelectModule],declarations:[ve,we,Pe,De,Ge,ee,$e,Ke,Ye,et,tt,it,at,st,ut,H,pt],bootstrap:[ve],providers:[k,S,J,P,W,Ee,ue,Me,fe,Ae,x,C,T,L,F,N,H,b,_]})],ft),e.platformBrowserDynamic().bootstrapModule(ft)}(vendor.angularPlatformBrowserDynamic,vendor.angularCore,vendor.angularPlatformBrowser,vendor.angularMaterial,vendor.rxjs,vendor.rxjsBehaviorsubject,vendor.rxjsObservable,vendor.thenby,vendor.angularForms,vendor.angularPlatformBrowserAnimations,vendor.angularLazyFor);
+(function (_angular_platformBrowserDynamic,_angular_core,_angular_platformBrowser,_angular_material,rxjs,rxjs_BehaviorSubject,rxjs_Observable,firstBy,_angular_forms,_angular_platformBrowser_animations,angularLazyFor) {
+'use strict';
+
+firstBy = 'default' in firstBy ? firstBy['default'] : firstBy;
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __metadata(k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+}
+
+var WorkerUtil = (function () {
+    function WorkerUtil() {
+        this.workersByType = (_a = {},
+            _a[WorkerType.Waveform] = new Worker('webWorkers/waveformWorker.js'),
+            _a[WorkerType.Image] = new Worker('webWorkers/imageWorker.js'),
+            _a);
+        var _a;
+    }
+    WorkerUtil.prototype.run = function (_a) {
+        var workerType = _a.workerType, method = _a.method, params = _a.params, _b = _a.transferObjs, transferObjs = _b === void 0 ? [] : _b;
+        var worker = this.workersByType[workerType];
+        return new Promise(function (resolve, reject) {
+            var msgId = Math.random();
+            worker.postMessage({ method: method, params: params, msgId: msgId }, transferObjs);
+            var handler = function (e) {
+                if (e.data.msgId === msgId) {
+                    worker.removeEventListener('message', handler);
+                    if (e.data.error) {
+                        reject(e.data.error);
+                    }
+                    else {
+                        resolve(e.data.result);
+                    }
+                }
+            };
+            worker.addEventListener('message', handler, false);
+        });
+    };
+    return WorkerUtil;
+}());
+WorkerUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], WorkerUtil);
+var WorkerType;
+(function (WorkerType) {
+    WorkerType[WorkerType["Image"] = 0] = "Image";
+    WorkerType[WorkerType["Waveform"] = 1] = "Waveform";
+})(WorkerType || (WorkerType = {}));
+
+var WaveformUtil = (function () {
+    function WaveformUtil(workerUtil) {
+        this.workerUtil = workerUtil;
+        //Give the waveform a bit of a boost to make up for what gets lost from taking averages.
+        this.WAVEFORM_BOOST = 1.4;
+    }
+    //Side effect: Clears the data from the buffer.
+    WaveformUtil.prototype.getWaveformData = function (buffer) {
+        var samples = buffer.getChannelData(0);
+        return this.workerUtil.run({
+            workerType: WorkerType.Waveform,
+            method: 'getWaveformData',
+            params: [samples.buffer],
+            transferObjs: [samples.buffer]
+        });
+    };
+    WaveformUtil.prototype.projectWaveform = function (samples, sampleRate, outputSize, startTime, endTime) {
+        if (startTime === void 0) { startTime = undefined; }
+        if (endTime === void 0) { endTime = undefined; }
+        var outputSamples = [];
+        if (startTime === undefined) {
+            startTime = 0;
+        }
+        if (endTime === undefined) {
+            endTime = samples.length / sampleRate;
+        }
+        //Tiny variations in the output length caused by the limitations of floating point percision cause the waveform
+        //to jitter so desiredOutputLength is rounded to 5 decimal places.
+        var desiredOutputLength = Math.round((endTime - startTime) * 100000) / 100000;
+        var samplesPerPixel = (desiredOutputLength * sampleRate) / outputSize;
+        var timePerPixel = samplesPerPixel / sampleRate;
+        var pixelOffset = Math.round(startTime / timePerPixel);
+        for (var col = 0; col < outputSize; col++) {
+            if (pixelOffset < 0 && col + pixelOffset < 0) {
+                outputSamples.push(0);
+                continue;
+            }
+            var firstSampleInBucketIndex = Math.floor((pixelOffset + col) * samplesPerPixel);
+            var lastSampleInBucketIndex = Math.floor((pixelOffset + col + 1) * samplesPerPixel);
+            //Make sure the samples for the current column are not outside of the samples array
+            firstSampleInBucketIndex = Math.min(firstSampleInBucketIndex, samples.length);
+            lastSampleInBucketIndex = Math.min(lastSampleInBucketIndex, samples.length);
+            var sum = 0;
+            for (var sampleI = firstSampleInBucketIndex; sampleI < lastSampleInBucketIndex; sampleI++) {
+                sum += samples[sampleI];
+            }
+            var mean = void 0;
+            if (lastSampleInBucketIndex - firstSampleInBucketIndex === 0) {
+                mean = 0;
+            }
+            else {
+                mean = sum / (lastSampleInBucketIndex - firstSampleInBucketIndex);
+            }
+            mean = Math.min(1, mean * this.WAVEFORM_BOOST);
+            outputSamples.push(mean);
+        }
+        return outputSamples;
+    };
+    WaveformUtil.prototype.drawWaveform = function (_a) {
+        var canvas = _a.canvas, themeId = _a.themeId, positiveSamples = _a.positiveSamples, negativeSamples = _a.negativeSamples, firstColorPixel = _a.firstColorPixel, _b = _a.useGradient, useGradient = _b === void 0 ? true : _b, _c = _a.drawFromX, drawFromX = _c === void 0 ? 0 : _c, drawToX = _a.drawToX;
+        if (drawToX === undefined) {
+            drawToX = canvas.width;
+        }
+        var mainColor;
+        var highlightColor;
+        switch (themeId) {
+            case ThemeId.DECK1:
+                mainColor = '#632B9B';
+                highlightColor = '#9b49f2';
+                break;
+            case ThemeId.DECK2:
+                mainColor = '#165eaa';
+                highlightColor = '#219bff';
+                break;
+            case ThemeId.DEFAULT:
+                mainColor = '#5b5b5b';
+                highlightColor = '#a6a6a6';
+                break;
+        }
+        var showPositive = !!positiveSamples;
+        var showNegative = !!negativeSamples;
+        var showBoth = showPositive && showNegative;
+        var positiveWaveform = positiveSamples;
+        var negativeWaveform = negativeSamples;
+        var numSamples = positiveWaveform ? positiveWaveform.length : negativeWaveform.length;
+        var canvasCtx = canvas.getContext('2d');
+        canvasCtx.clearRect(drawFromX - 1, 0, drawToX - drawFromX, canvas.height);
+        for (var col = Math.max(drawFromX, 0); col < Math.min(drawToX, numSamples); col++) {
+            var topY = void 0;
+            var bottomY = void 0;
+            var startY = void 0;
+            var halfWaveformHeight = void 0;
+            if (showBoth) {
+                topY = (1 - positiveWaveform[col]) / 2 * canvas.height;
+                bottomY = (1 - negativeWaveform[col]) / 2 * canvas.height;
+                startY = canvas.height / 2;
+                halfWaveformHeight = canvas.height / 2;
+            }
+            else if (showPositive) {
+                topY = (1 - positiveWaveform[col]) * canvas.height;
+                startY = canvas.height;
+                halfWaveformHeight = canvas.height;
+            }
+            else {
+                //This is a bit of a hack. Right now if showNegative is true all the values are actually positive.
+                //This is why the equation isn't (1 - negativeMean) * canvas.height
+                //Should find a better way of handling this
+                bottomY = negativeWaveform[col] * canvas.height;
+                startY = 0;
+                halfWaveformHeight = canvas.height;
+            }
+            var curPixedMainColor = mainColor;
+            var curPixelHighlightColor = highlightColor;
+            if (firstColorPixel !== undefined && firstColorPixel > col) {
+                curPixedMainColor = '#5b5b5b';
+                curPixelHighlightColor = '#a6a6a6';
+            }
+            if (showPositive) {
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(col, startY);
+                canvasCtx.lineTo(col, topY);
+                if (useGradient) {
+                    var gradient = canvasCtx.createLinearGradient(col, topY + halfWaveformHeight, col, topY + (halfWaveformHeight - topY) / 3);
+                    gradient.addColorStop(0, curPixelHighlightColor);
+                    gradient.addColorStop(1, curPixedMainColor);
+                    canvasCtx.strokeStyle = gradient;
+                }
+                else {
+                    canvasCtx.strokeStyle = mainColor;
+                }
+                canvasCtx.stroke();
+            }
+            if (showNegative) {
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(col, startY);
+                canvasCtx.lineTo(col, bottomY);
+                if (useGradient) {
+                    var gradient = canvasCtx.createLinearGradient(col, bottomY - halfWaveformHeight, col, bottomY - (bottomY - halfWaveformHeight) / 3);
+                    gradient.addColorStop(0, curPixelHighlightColor);
+                    gradient.addColorStop(1, curPixedMainColor);
+                    canvasCtx.strokeStyle = gradient;
+                }
+                else {
+                    canvasCtx.strokeStyle = mainColor;
+                }
+                canvasCtx.stroke();
+            }
+        }
+    };
+    WaveformUtil.prototype.generateDataUrlWaveform = function (positiveSamples, negativeSamples, sampleRate, width, height, themeId, cues, startTime, duration) {
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        var projectedPositiveSamples = this.projectWaveform(positiveSamples, sampleRate, width);
+        var projectedNegativeSamples = this.projectWaveform(negativeSamples, sampleRate, width);
+        this.drawWaveform({
+            canvas: canvas,
+            positiveSamples: projectedPositiveSamples,
+            negativeSamples: projectedNegativeSamples,
+            themeId: themeId
+        });
+        this.overlayCues(canvas, cues, startTime, duration);
+        return canvas.toDataURL();
+    };
+    WaveformUtil.prototype.overlayCues = function (canvas, cues, startTime, duration, labelAtTop) {
+        if (labelAtTop === void 0) { labelAtTop = true; }
+        cues.forEach(function (cueTime, index) {
+            if (cueTime >= startTime && cueTime <= startTime + duration) {
+                var cueX = (cueTime - startTime) / duration * canvas.width;
+                var canvasCtx = canvas.getContext('2d');
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.fillRect(cueX, 0, 0.5, canvas.height);
+                var textBottom = labelAtTop ? 10 : canvas.height - 4;
+                var textTop = textBottom - 10;
+                var lastStrokeStyle = canvasCtx.strokeStyle;
+                canvasCtx.strokeStyle = 'white';
+                canvasCtx.clearRect(cueX - 14, textTop, 14, 14);
+                canvasCtx.strokeRect(cueX - 14, textTop, 14, 14);
+                canvasCtx.strokeStyle = lastStrokeStyle;
+                canvasCtx.strokeText((index + 1).toString(), cueX - 10, textBottom);
+            }
+        });
+    };
+    return WaveformUtil;
+}());
+WaveformUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$2 = typeof WorkerUtil !== "undefined" && WorkerUtil) === "function" && _a$2 || Object])
+], WaveformUtil);
+var _a$2;
+
+var ActiveSong = (function () {
+    function ActiveSong(deckId, audioUtil, deckAudioSettings, dspUtil, resampler, audioOutput) {
+        var _this = this;
+        this.deckId = deckId;
+        this.audioUtil = audioUtil;
+        this.deckAudioSettings = deckAudioSettings;
+        this.dspUtil = dspUtil;
+        this.resampler = resampler;
+        this.audioOutput = audioOutput;
+        this.song$ = new rxjs.ReplaySubject();
+        this._playbackRate = 0;
+        this.lastPlaybackDirectionIsForward = true;
+        this.controlled = false;
+        this.BUFFER_SIZE = 1024;
+        this.song$.subscribe(function (song) { return _this.song = song; });
+        this.gainNode = this.audioUtil.context.createGain();
+        this.gainNode.connect(this.audioOutput.getInputForDeck(deckId));
+        this.scriptNode = this.audioUtil.context.createScriptProcessor(this.BUFFER_SIZE);
+        this.scriptNode.onaudioprocess = function (e) { return _this.processControlAudio(e); };
+    }
+    Object.defineProperty(ActiveSong.prototype, "playbackRate", {
+        get: function () {
+            return this._playbackRate;
+        },
+        set: function (value) {
+            this._playbackRate = value;
+            if (value !== 0) {
+                this.lastPlaybackDirectionIsForward = (value > 0);
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ActiveSong.prototype, "isPlaying", {
+        get: function () {
+            return this.buffer !== undefined && this.playbackRate !== 0 && !this.isControlled;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ActiveSong.prototype, "isLoaded", {
+        get: function () {
+            return !!this.buffer;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ActiveSong.prototype, "songObservable", {
+        get: function () {
+            return this.song$.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ActiveSong.prototype, "currentSongOffset", {
+        get: function () {
+            var songOffsetSinceLastRecording = (this.audioUtil.context.currentTime - this.songOffsetRecordedTime) * this.playbackRate;
+            return this.songOffset + songOffsetSinceLastRecording;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ActiveSong.prototype, "isControlled", {
+        get: function () {
+            return this.controlled;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    ActiveSong.prototype.enableControl = function () {
+        var _this = this;
+        var controlDevice = this.deckAudioSettings.getControlIn();
+        if (controlDevice) {
+            if (this.isPlaying) {
+                this.pauseBuffer();
+            }
+            this.controlled = true;
+            var constraints = {
+                audio: {
+                    deviceId: controlDevice.deviceId,
+                    echoCancellation: { exact: false }
+                }
+            };
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function (stream) {
+                _this.controlInputNode = _this.audioUtil.context.createMediaStreamSource(stream);
+                _this.controlInputNode.connect(_this.scriptNode);
+                _this.scriptNode.connect(_this.gainNode);
+            }, function (error) {
+                console.error('Could not load control device.', error);
+                _this.controlled = false;
+            });
+        }
+    };
+    ActiveSong.prototype.disableControl = function () {
+        this.controlInputNode.disconnect();
+        this.controlInputNode = undefined;
+        this.scriptNode.disconnect();
+        this.controlled = false;
+        this.updateSongOffset();
+        this.playbackRate = 0;
+    };
+    ActiveSong.prototype.toggleControl = function () {
+        this.isControlled ? this.disableControl() : this.enableControl();
+    };
+    ActiveSong.prototype.processControlAudio = function (event) {
+        //This could happen once after you disable control
+        if (!this.isControlled) {
+            return;
+        }
+        var context = this.audioUtil.context;
+        var leftInputBuffer = event.inputBuffer.getChannelData(0);
+        var rightInputBuffer = event.inputBuffer.getChannelData(1);
+        var leftScriptOutputBuffer = event.outputBuffer.getChannelData(0);
+        var rightScriptOutputBuffer = event.outputBuffer.getChannelData(1);
+        var subChunkSize = 512;
+        var defaultPilotHz = 2000;
+        try {
+            for (var subChunkOffset = 0; subChunkOffset < this.BUFFER_SIZE; subChunkOffset += subChunkSize) {
+                var leftSubInputBuffer = this.audioUtil.copyBuffer(leftInputBuffer, subChunkOffset, subChunkSize);
+                var rightSubInputBuffer = this.audioUtil.copyBuffer(rightInputBuffer, subChunkOffset, subChunkSize);
+                var _a = this.getControlFreq(leftSubInputBuffer), pilotHz = _a.pilotHz, periodSamples = _a.periodSamples;
+                var playingForward = this.controlIsPlayingForward(leftSubInputBuffer, rightSubInputBuffer, periodSamples);
+                var playDirectionMultiplier = playingForward ? 1 : -1;
+                var songSize = Math.round(subChunkSize * (pilotHz / defaultPilotHz));
+                var songPlaybackRate = songSize / subChunkSize;
+                var songSampleRate = context.sampleRate * songPlaybackRate;
+                var _b = this.getChunkOfSongForControl(songSize, playingForward), leftSongBuffer = _b.leftSongBuffer, rightSongBuffer = _b.rightSongBuffer;
+                var leftRenderedBuffer = this.resampler.resample(leftSongBuffer, songSampleRate, context.sampleRate);
+                var rightRenderedBuffer = this.resampler.resample(rightSongBuffer, songSampleRate, context.sampleRate);
+                for (var i = 0; i < subChunkSize; i++) {
+                    leftScriptOutputBuffer[i + subChunkOffset] = leftRenderedBuffer[i];
+                    rightScriptOutputBuffer[i + subChunkOffset] = rightRenderedBuffer[i];
+                }
+                this.songOffset += songSize * playDirectionMultiplier / this.audioUtil.context.sampleRate;
+                this.playbackRate = songSize * playDirectionMultiplier / this.BUFFER_SIZE;
+                this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+            }
+        }
+        catch (e) {
+            this.playbackRate = 0;
+            this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+            for (var i = 0; i < this.BUFFER_SIZE; i++) {
+                leftScriptOutputBuffer[i] = 0;
+                rightScriptOutputBuffer[i] = 0;
+            }
+        }
+    };
+    ActiveSong.prototype.getControlFreq = function (buf) {
+        var pilotHz = this.dspUtil.autoCorrelate(buf, this.audioUtil.context.sampleRate);
+        var periodSamples = this.audioUtil.context.sampleRate / pilotHz;
+        //Not enough of a signal to detect/too quiet or too slow
+        if (pilotHz === -1) {
+            throw new Error('Could not detect frequency');
+        }
+        else {
+            return { pilotHz: pilotHz, periodSamples: periodSamples };
+        }
+    };
+    ActiveSong.prototype.controlIsPlayingForward = function (leftBuf, rightBuf, periodSamples) {
+        var isPlayingForward = this.dspUtil.isPlayingForwardMaxMin(leftBuf, rightBuf, periodSamples);
+        if (isPlayingForward !== undefined) {
+            return isPlayingForward;
+        }
+        else {
+        }
+        var phaseSamples = this.dspUtil.crossCorrelate(leftBuf, rightBuf);
+        //This should be from 0.22 to 0.25
+        var relPhaseSeperation = Math.min(periodSamples - phaseSamples, phaseSamples) / periodSamples;
+        if (phaseSamples === -1 || relPhaseSeperation < 0.2 || relPhaseSeperation > 0.3 || phaseSamples > periodSamples) {
+            return this.lastPlaybackDirectionIsForward;
+        }
+        else {
+            return phaseSamples > periodSamples - phaseSamples;
+        }
+    };
+    ActiveSong.prototype.getChunkOfSongForControl = function (size, playingForward) {
+        var leftFullSongBuffer = this.buffer.getChannelData(0);
+        var rightFullSongBuffer = this.buffer.getChannelData(1);
+        var leftSongBuffer = new Float32Array(size);
+        var rightSongBuffer = new Float32Array(size);
+        var playDirectionMultiplier = playingForward ? 1 : -1;
+        var offsetSamples = Math.round(this.songOffset * this.audioUtil.context.sampleRate);
+        var _loop_1 = function (i) {
+            var songIndex = i * playDirectionMultiplier + offsetSamples;
+            var songIndexIsValid = function () { return songIndex >= 0 && songIndex <= leftFullSongBuffer.length; };
+            leftSongBuffer[i] = songIndexIsValid() ? leftFullSongBuffer[songIndex] : 0;
+            rightSongBuffer[i] = songIndexIsValid() ? rightFullSongBuffer[songIndex] : 0;
+        };
+        for (var i = 0; i < size; i++) {
+            _loop_1(i);
+        }
+        return { leftSongBuffer: leftSongBuffer, rightSongBuffer: rightSongBuffer };
+    };
+    ActiveSong.prototype.setSongOffset = function (time) {
+        this.songOffset = time;
+        this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+        if (!this.isControlled && this.isPlaying) {
+            this.pauseBuffer();
+            this.playBuffer();
+        }
+    };
+    ActiveSong.prototype.loadSong = function (song) {
+        var _this = this;
+        var context = this.audioUtil.context;
+        return context.decodeAudioData(song.buffer)
+            .then(function (audioBuffer) {
+            _this.buffer = audioBuffer;
+            _this.songOffset = 0;
+            _this.songOffsetRecordedTime = context.currentTime;
+            _this.playbackRate = 0;
+            _this.song$.next(song);
+        });
+    };
+    ActiveSong.prototype.playBuffer = function () {
+        if (this.buffer && !this.isPlaying && !this.isControlled) {
+            var context = this.audioUtil.context;
+            if (this.source) {
+                this.source.stop();
+            }
+            this.updateSongOffset();
+            //todo: replace 1 with value of the tempo slider
+            this.playbackRate = 1;
+            this.source = context.createBufferSource();
+            this.source.playbackRate.value = this.playbackRate;
+            this.source.buffer = this.buffer;
+            this.source.connect(this.gainNode);
+            this.source.start(context.currentTime, this.songOffset);
+        }
+    };
+    ActiveSong.prototype.pauseBuffer = function () {
+        if (this.buffer) {
+            this.updateSongOffset();
+            this.playbackRate = 0;
+            this.source.stop();
+            this.source = undefined;
+        }
+    };
+    ActiveSong.prototype.setGain = function (gain) {
+        //delay when gain is set to make up for audio latency. Maybe set this to 40ms in OSX and 170ms on windows
+        this.gainNode.gain.setValueAtTime(gain, this.audioUtil.context.currentTime + 40 / 1000);
+        //this.gainNode.gain.value = gain;
+    };
+    ActiveSong.prototype.updateSongOffset = function () {
+        this.songOffset = this.currentSongOffset;
+        this.songOffsetRecordedTime = this.audioUtil.context.currentTime;
+    };
+    return ActiveSong;
+}());
+
+var AudioUtil = (function () {
+    function AudioUtil() {
+        var _this = this;
+        this.context = new AudioContext();
+        this.inputDevices = new rxjs.ReplaySubject();
+        this.outputDevices = new rxjs.ReplaySubject();
+        //The requests for microphone access. Without this we can't get the names of audio inputs and outputs
+        //TODO: can this be replaced with navigator.mediaDevices.getUserMedia
+        navigator.getUserMedia({ audio: true }, function () { return _this.onUserMediaLoad(); }, function () { return _this.onUserMediaError(); });
+    }
+    Object.defineProperty(AudioUtil.prototype, "inputDevices$", {
+        get: function () {
+            return this.inputDevices.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AudioUtil.prototype, "outputDevices$", {
+        get: function () {
+            return this.outputDevices.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    AudioUtil.prototype.copyBuffer = function (buf, start, size) {
+        if (start === undefined) {
+            start = 0;
+        }
+        if (size === undefined) {
+            size = buf.length;
+        }
+        var output = new Float32Array(size);
+        for (var i = 0; i < size; i++) {
+            output[i] = buf[i + start];
+        }
+        return output;
+    };
+    AudioUtil.prototype.onUserMediaLoad = function () {
+        var _this = this;
+        //TODO: check if this event actually triggers change detection. Might have issues with zone.js
+        navigator.mediaDevices.ondevicechange = function () { return _this.updateDeviceLists(); };
+        this.updateDeviceLists();
+    };
+    AudioUtil.prototype.onUserMediaError = function () {
+        console.error('Could not get access to audio inputs');
+    };
+    AudioUtil.prototype.updateDeviceLists = function () {
+        var _this = this;
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            var inputDevices = [];
+            var outputDevices = [];
+            devices.forEach(function (device) {
+                //Not sure what the 'Communications' device is...
+                if (device.label !== 'Communications') {
+                    if (device.kind === 'audioinput') {
+                        inputDevices.push(device);
+                    }
+                    else if (device.kind === 'audiooutput') {
+                        outputDevices.push(device);
+                    }
+                }
+            });
+            _this.inputDevices.next(inputDevices);
+            _this.outputDevices.next(outputDevices);
+        });
+    };
+    return AudioUtil;
+}());
+AudioUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], AudioUtil);
+
+function dbMigration1(db) {
+    db.createObjectStore('songDetails', { autoIncrement: true, keyPath: 'id' });
+    db.createObjectStore('songBuffer');
+    db.createObjectStore('preferences');
+}
+
+function dbMigration20(db, upgradeTransaction) {
+    var getSongCursor = upgradeTransaction.objectStore('songDetails').openCursor();
+    var albumDataUrlById = {};
+    var resizingImagesPromises = [];
+    getSongCursor.onsuccess = function (e) {
+        var cursor = e.target['result'];
+        if (cursor) {
+            var details_1 = cursor.value;
+            if (details_1['base64Pic']) {
+                resizingImagesPromises.push(resizeBase64Img(details_1['picFormat'], details_1['base64Pic'], 100, 100)
+                    .then(function (albumDataUrl) {
+                    albumDataUrlById[details_1.id] = albumDataUrl;
+                    delete details_1['picFormat'];
+                    delete details_1['base64Pic'];
+                    details_1.albumDataUrl = albumDataUrl;
+                }));
+            }
+            cursor.continue();
+        }
+        else {
+            //ლ(ಠ_ಠლ)
+            setTimeout(function () {
+                updateAlbumPics(db, albumDataUrlById, resizingImagesPromises);
+            });
+        }
+    };
+}
+function updateAlbumPics(db, albumDataUrlById, resizingImagesPromises) {
+    Promise.all(resizingImagesPromises)
+        .then(function () {
+        var updateAlbumCoversTransaction = db.transaction(['songDetails'], Db.READWRITE_TRANSACTION);
+        var getSongCursor = updateAlbumCoversTransaction.objectStore('songDetails').openCursor();
+        getSongCursor.onsuccess = function (e) {
+            var cursor = e.target['result'];
+            if (cursor) {
+                var details = cursor.value;
+                if (details['base64Pic']) {
+                    delete details['picFormat'];
+                    delete details['base64Pic'];
+                    details.albumDataUrl = albumDataUrlById[details.id];
+                    cursor.update(details);
+                    cursor.continue();
+                }
+                else {
+                    cursor.continue();
+                }
+            }
+        };
+    });
+}
+//based on http://stackoverflow.com/a/20965997/373655
+function resizeBase64Img(type, base64, maxWidth, maxHeight) {
+    return new Promise(function (resolve) {
+        var img = new Image;
+        img.onload = resizeImage;
+        img.src = "data:" + type + ";base64," + base64;
+        function resizeImage() {
+            var targetWidth = img.width;
+            var targetHeight = img.height;
+            if (img.width > maxWidth) {
+                targetWidth = maxWidth;
+                targetHeight = img.height / (img.width / maxWidth);
+            }
+            if (targetHeight > maxHeight) {
+                targetHeight = maxHeight;
+                targetWidth = img.width / (img.height / maxHeight);
+            }
+            resolve(imageToDataUri(img, targetWidth, targetHeight));
+        }
+        function imageToDataUri(img, width, height) {
+            // create an off-screen canvas
+            var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+            // set its dimension to target size
+            canvas.width = width;
+            canvas.height = height;
+            // draw source image into the off-screen canvas:
+            ctx.drawImage(img, 0, 0, width, height);
+            // encode image to data-uri with base64 version of compressed image
+            return canvas.toDataURL('image/jpeg', 0.8);
+        }
+    });
+}
+
+function dbMigration21(db, transaction) {
+    var getSongCursor = transaction.objectStore('songDetails').openCursor();
+    getSongCursor.onsuccess = function (e) {
+        var cursor = e.target['result'];
+        if (cursor) {
+            var details = cursor.value;
+            details.cues = details.cues || [];
+            cursor.update(details);
+            cursor.continue();
+        }
+    };
+}
+
+var Db = Db_1 = (function () {
+    function Db() {
+        var _this = this;
+        this.dbInitialized = new Promise(function (resolve, reject) {
+            _this.resolveInitialized = resolve;
+            _this.rejectInitialized = reject;
+        });
+    }
+    Db.reqToPromise = function (req) {
+        return new Promise(function (resolve, reject) {
+            req.onsuccess = resolve;
+            req.onerror = reject;
+        });
+    };
+    Db.prototype.initialize = function () {
+        var _this = this;
+        var openRequest = indexedDB.open('dvs', Db_1.DB_VERSION);
+        var oldVersion;
+        openRequest.onupgradeneeded = function (versionEvent) {
+            var db = versionEvent.target['result'];
+            var transaction = versionEvent.target['transaction'];
+            oldVersion = versionEvent.oldVersion;
+            if (oldVersion !== undefined) {
+                if (oldVersion < 1) {
+                    dbMigration1(db);
+                }
+                if (oldVersion >= 1 && oldVersion < 20) {
+                    dbMigration20(db, transaction);
+                }
+                if (oldVersion >= 1 && oldVersion < 21) {
+                    dbMigration21(db, transaction);
+                }
+            }
+        };
+        openRequest.onsuccess = function (event) {
+            _this.db = event.target['result'];
+            _this.resolveInitialized(_this.db);
+        };
+        openRequest.onerror = this.rejectInitialized;
+        return this.dbInitialized;
+    };
+    return Db;
+}());
+Db.READONLY_TRANSACTION = 'readonly';
+Db.READWRITE_TRANSACTION = 'readwrite';
+Db.DB_VERSION = 21;
+Db = Db_1 = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], Db);
+var Db_1;
+
+var Preferences = (function () {
+    function Preferences() {
+        this.crossfaderCurveSharpness = 0;
+        this.midiMappings = new Map();
+        this.enabledMidiInputNames = new Set();
+        this.enabledMidiOutputNames = new Set();
+        this.audioSettings = {
+            input: {
+                deckA: { controlDeviceId: undefined, liveDeviceId: undefined },
+                deckB: { controlDeviceId: undefined, liveDeviceId: undefined }
+            }
+        };
+    }
+    return Preferences;
+}());
+
+var PreferencesDb = (function () {
+    function PreferencesDb(dbService) {
+        var _this = this;
+        var resolveInitialized;
+        var rejectInitialized;
+        this.initialized = new Promise(function (resolve, reject) {
+            resolveInitialized = resolve;
+            rejectInitialized = reject;
+        });
+        dbService.dbInitialized.then(function (db) {
+            _this.db = db;
+            _this.preferences = new Preferences();
+            var prefCursor = _this.db.transaction(['preferences'], Db.READONLY_TRANSACTION)
+                .objectStore('preferences')
+                .openCursor();
+            prefCursor.onsuccess = function (e) {
+                var cursor = e.target['result'];
+                if (cursor) {
+                    if (!(cursor.key in _this.preferences)) {
+                        console.warn('Found preference key in DB that does not exist in preference model: ' + cursor.key);
+                    }
+                    _this.preferences[cursor.key] = cursor.value;
+                    cursor.continue();
+                    //Called after all entries have been processed
+                }
+                else {
+                    resolveInitialized();
+                }
+            };
+        });
+    }
+    PreferencesDb.prototype.setCrossfaderCurveSharpness = function (value) {
+        return this.setPreference('crossfaderCurveSharpness', value);
+    };
+    PreferencesDb.prototype.getCrossfaderCurveSharpness = function () {
+        return this.preferences.crossfaderCurveSharpness;
+    };
+    PreferencesDb.prototype.getEnabledMidiInputNames = function () {
+        return this.preferences.enabledMidiInputNames;
+    };
+    PreferencesDb.prototype.setEnabledMidiInputNames = function (inputs) {
+        return this.setPreference('enabledMidiInputNames', inputs);
+    };
+    PreferencesDb.prototype.getEnabledMidiOutputNames = function () {
+        return this.preferences.enabledMidiOutputNames;
+    };
+    PreferencesDb.prototype.setEnabledMidiOutputNames = function (outputs) {
+        return this.setPreference('enabledMidiOutputNames', outputs);
+    };
+    PreferencesDb.prototype.getMidiMappings = function () {
+        return this.preferences.midiMappings;
+    };
+    PreferencesDb.prototype.setMidiMappings = function (mappings) {
+        return this.setPreference('midiMappings', mappings);
+    };
+    PreferencesDb.prototype.getAudioSettings = function () {
+        return this.preferences.audioSettings;
+    };
+    PreferencesDb.prototype.setAudioSettings = function (settings) {
+        return this.setPreference('audioSettings', settings);
+    };
+    PreferencesDb.prototype.setPreference = function (key, value) {
+        this.preferences[key] = value;
+        return Db.reqToPromise(this.db.transaction(['preferences'], Db.READWRITE_TRANSACTION)
+            .objectStore('preferences')
+            .put(value, key));
+    };
+    return PreferencesDb;
+}());
+PreferencesDb = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$5 = typeof Db !== "undefined" && Db) === "function" && _a$5 || Object])
+], PreferencesDb);
+var _a$5;
+
+var AudioSettings = (function () {
+    function AudioSettings(preferencesDb, audioUtil) {
+        var _this = this;
+        this.preferencesDb = preferencesDb;
+        this.deckSettings = new Map();
+        var deckASettings = new DeckAudioSettings();
+        var deckBSettings = new DeckAudioSettings();
+        this.deckSettings.set(DeckId.LEFT, deckASettings);
+        this.deckSettings.set(DeckId.RIGHT, deckBSettings);
+        preferencesDb.initialized.then(function () {
+            var audioSettings = preferencesDb.getAudioSettings();
+            audioUtil.inputDevices$.first().subscribe(function (inputDevices) {
+                deckASettings.setLiveIn(_this.findDeviceById(inputDevices, audioSettings.input.deckA.liveDeviceId));
+                deckASettings.setControlIn(_this.findDeviceById(inputDevices, audioSettings.input.deckA.controlDeviceId));
+                deckBSettings.setLiveIn(_this.findDeviceById(inputDevices, audioSettings.input.deckB.liveDeviceId));
+                deckBSettings.setControlIn(_this.findDeviceById(inputDevices, audioSettings.input.deckB.controlDeviceId));
+                deckASettings.liveIn$.subscribe(function () { return _this.saveAudioSettings(); });
+                deckASettings.controlIn$.subscribe(function () { return _this.saveAudioSettings(); });
+                deckBSettings.liveIn$.subscribe(function () { return _this.saveAudioSettings(); });
+                deckBSettings.controlIn$.subscribe(function () { return _this.saveAudioSettings(); });
+            });
+        });
+    }
+    AudioSettings.prototype.getDeckAudioSettings = function (deckId) {
+        return this.deckSettings.get(deckId);
+    };
+    AudioSettings.prototype.saveAudioSettings = function () {
+        var deckAAudioSettings = this.deckSettings.get(DeckId.LEFT);
+        var deckBAudioSettings = this.deckSettings.get(DeckId.RIGHT);
+        this.preferencesDb.setAudioSettings({
+            input: {
+                deckA: {
+                    liveDeviceId: deckAAudioSettings.getLiveIn() && deckAAudioSettings.getLiveIn().deviceId,
+                    controlDeviceId: deckAAudioSettings.getControlIn() && deckAAudioSettings.getControlIn().deviceId
+                },
+                deckB: {
+                    liveDeviceId: deckBAudioSettings.getLiveIn() && deckBAudioSettings.getLiveIn().deviceId,
+                    controlDeviceId: deckBAudioSettings.getControlIn() && deckBAudioSettings.getControlIn().deviceId
+                }
+            }
+        });
+    };
+    AudioSettings.prototype.findDeviceById = function (deviceList, id) {
+        var matchingDevices = deviceList.filter(function (device) { return device.deviceId === id; });
+        if (matchingDevices.length) {
+            return matchingDevices[0];
+        }
+    };
+    return AudioSettings;
+}());
+AudioSettings = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$4 = typeof PreferencesDb !== "undefined" && PreferencesDb) === "function" && _a$4 || Object, typeof (_b$3 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _b$3 || Object])
+], AudioSettings);
+var DeckAudioSettings = (function () {
+    function DeckAudioSettings() {
+        this.liveIn = new rxjs.BehaviorSubject(undefined);
+        this.controlIn = new rxjs.BehaviorSubject(undefined);
+    }
+    Object.defineProperty(DeckAudioSettings.prototype, "liveIn$", {
+        get: function () {
+            return this.liveIn.asObservable().distinctUntilChanged();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DeckAudioSettings.prototype, "controlIn$", {
+        get: function () {
+            return this.controlIn.asObservable().distinctUntilChanged();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    DeckAudioSettings.prototype.getLiveIn = function () {
+        return this.liveIn.getValue();
+    };
+    DeckAudioSettings.prototype.getControlIn = function () {
+        return this.controlIn.getValue();
+    };
+    DeckAudioSettings.prototype.setLiveIn = function (device) {
+        this.liveIn.next(device);
+    };
+    DeckAudioSettings.prototype.setControlIn = function (device) {
+        this.controlIn.next(device);
+    };
+    return DeckAudioSettings;
+}());
+var _a$4;
+var _b$3;
+
+var DspUtil = (function () {
+    function DspUtil() {
+    }
+    DspUtil.prototype.isPlayingForward = function (leftBuf, rightBuf, periodSamples) {
+        var seperation = Math.round(periodSamples * 0.23);
+        var leftDcOffset = 0;
+        var rightDcOffset = 0;
+        for (var i = 0; i < leftBuf.length; i++) {
+            leftDcOffset += leftBuf[i] / leftBuf.length;
+            rightDcOffset += rightBuf[i] / rightBuf.length;
+        }
+        var leftAbsTotalAmp = 0;
+        var rightAbsTotalAmp = 0;
+        for (var i = 0; i < leftBuf.length; i++) {
+            leftAbsTotalAmp += Math.abs(leftBuf[i] - leftDcOffset);
+            rightAbsTotalAmp += Math.abs(rightBuf[i] - rightDcOffset);
+        }
+        var leftAmpMult = rightAbsTotalAmp / leftAbsTotalAmp;
+        var forwardSum = 0;
+        var reverseSum = 0;
+        for (var i = seperation; i < leftBuf.length - seperation; i++) {
+            forwardSum += Math.abs((leftBuf[i] - leftDcOffset) * leftAmpMult - (rightBuf[i - seperation] - rightDcOffset));
+            reverseSum += Math.abs((leftBuf[i] - leftDcOffset) * leftAmpMult - (rightBuf[i + seperation] - rightDcOffset));
+        }
+        var significance = Math.max(forwardSum, reverseSum) / Math.min(forwardSum, reverseSum);
+        if (significance > 2) {
+            return forwardSum < reverseSum;
+        }
+        else {
+            return undefined;
+        }
+    };
+    //TODO make this code less dumb
+    DspUtil.prototype.isPlayingForwardMaxMin = function (leftBuf, rightBuf, periodSamples) {
+        var nextLeftExtreme = undefined;
+        var nextRightExtreme = undefined;
+        var leftMaxes = [];
+        var leftMins = [];
+        var rightMaxes = [];
+        var rightMins = [];
+        for (var i = 1; i < leftBuf.length - 1; i++) {
+            if (nextLeftExtreme !== 'min' && leftBuf[i - 1] <= leftBuf[i] && leftBuf[i] >= leftBuf[i + 1]) {
+                nextLeftExtreme = 'min';
+                leftMaxes.push(i);
+            }
+            if (nextLeftExtreme !== 'max' && leftBuf[i - 1] >= leftBuf[i] && leftBuf[i] <= leftBuf[i + 1]) {
+                nextLeftExtreme = 'max';
+                leftMins.push(i);
+            }
+            if (nextRightExtreme !== 'min' && rightBuf[i - 1] <= rightBuf[i] && rightBuf[i] >= rightBuf[i + 1]) {
+                nextRightExtreme = 'min';
+                rightMaxes.push(i);
+            }
+            if (nextRightExtreme !== 'max' && rightBuf[i - 1] >= rightBuf[i] && rightBuf[i] <= rightBuf[i + 1]) {
+                nextRightExtreme = 'max';
+                rightMins.push(i);
+            }
+        }
+        var leftMaxI = 0;
+        var rightMaxI = 0;
+        var forwardCount = 0;
+        var reverseCount = 0;
+        while (leftMaxI < leftMaxes.length) {
+            while (rightMaxI < rightMaxes.length - 1 && rightMaxes[rightMaxI + 1] < leftMaxes[leftMaxI]) {
+                rightMaxI++;
+            }
+            if (rightMaxI <= rightMaxes.length - 1) {
+                if (leftMaxes[leftMaxI] - rightMaxes[rightMaxI] < rightMaxes[rightMaxI + 1] - leftMaxes[leftMaxI]) {
+                    forwardCount++;
+                }
+                else {
+                    reverseCount++;
+                }
+            }
+            leftMaxI++;
+        }
+        //1 is best.
+        var confidence = Math.abs(forwardCount - reverseCount) / (forwardCount + reverseCount);
+        if (confidence < 0.12) {
+            return undefined;
+        }
+        else {
+            return forwardCount > reverseCount;
+        }
+    };
+    DspUtil.prototype.getRms = function (buf) {
+        var rms = 0;
+        for (var i = 0; i < buf.length; i++) {
+            var val = buf[i];
+            rms += val * val;
+        }
+        rms = Math.sqrt(rms / buf.length);
+        return rms;
+    };
+    DspUtil.prototype.autoCorrelate = function (buf, sampleRate) {
+        var MIN_SAMPLES = 0; // will be initialized when AudioContext is created.
+        var GOOD_ENOUGH_CORRELATION = 0.1; // this is the "bar" for how close a correlation needs to be
+        var SIZE = buf.length;
+        var offsetIterations = Math.floor(SIZE * 3 / 4);
+        var compareChunkSize = Math.floor(SIZE / 4);
+        var best_offset = -1;
+        var best_correlation = 0;
+        var foundGoodCorrelation = false;
+        var correlations = new Array(offsetIterations);
+        var rms = this.getRms(buf);
+        // not enough signal
+        if (rms < 0.05) {
+            return -1;
+        }
+        var lastCorrelation = 1;
+        for (var offset = MIN_SAMPLES; offset < offsetIterations; offset++) {
+            var correlation = 0;
+            for (var i = 0; i < compareChunkSize; i++) {
+                correlation += Math.abs((buf[i]) - (buf[i + offset]));
+            }
+            correlation = 1 - (correlation / compareChunkSize);
+            correlations[offset] = correlation; // store it, for the tweaking we need to do below.
+            if ((correlation > GOOD_ENOUGH_CORRELATION) && (correlation > lastCorrelation)) {
+                foundGoodCorrelation = true;
+                if (correlation > best_correlation) {
+                    best_correlation = correlation;
+                    best_offset = offset;
+                }
+            }
+            else if (foundGoodCorrelation) {
+                // short-circuit - we found a good correlation, then a bad one, so we'd just be seeing copies from here.
+                // Now we need to tweak the offset - by interpolating between the values to the left and right of the
+                // best offset, and shifting it a bit.  This is complex, and HACKY in this code (happy to take PRs!) -
+                // we need to do a curve fit on correlations[] around best_offset in order to better determine precise
+                // (anti-aliased) offset.
+                // we know best_offset >=1,
+                // since foundGoodCorrelation cannot go to true until the second pass (offset=1), and
+                // we can't drop into this clause until the following pass (else if).
+                var shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
+                return sampleRate / (best_offset + (8 * shift));
+            }
+            lastCorrelation = correlation;
+        }
+        if (best_correlation > 0.01 && best_offset !== offsetIterations - 1) {
+            // console.log("f = " + sampleRate/best_offset + "Hz (rms: " + rms + " confidence: " + best_correlation + ")")
+            return sampleRate / best_offset;
+        }
+        return -1;
+    };
+    //Returns phase difference in samples between buf1 and buf2
+    //TODO: don't need to wait for correlation > lastCorrelation to set foundGoodCorrelation
+    DspUtil.prototype.crossCorrelate = function (buf1, buf2) {
+        var MIN_SAMPLES = 0; // will be initialized when AudioContext is created.
+        var GOOD_ENOUGH_CORRELATION = 0.9; // this is the "bar" for how close a correlation needs to be
+        var SIZE = Math.min(buf1.length, buf2.length);
+        var MAX_SAMPLES = Math.floor(SIZE / 2);
+        var best_offset = -1;
+        var best_correlation = 0;
+        var foundGoodCorrelation = false;
+        var correlations = new Array(MAX_SAMPLES);
+        var lastCorrelation = 1;
+        for (var offset = MIN_SAMPLES; offset < MAX_SAMPLES; offset++) {
+            var correlation = 0;
+            for (var i = 0; i < MAX_SAMPLES; i++) {
+                correlation += Math.abs((buf1[i]) - (buf2[i + offset]));
+            }
+            correlation = 1 - (correlation / MAX_SAMPLES);
+            correlations[offset] = correlation; // store it, for the tweaking we need to do below.
+            if ((correlation > GOOD_ENOUGH_CORRELATION) && (correlation > lastCorrelation)) {
+                foundGoodCorrelation = true;
+                if (correlation > best_correlation) {
+                    best_correlation = correlation;
+                    best_offset = offset;
+                }
+            }
+            else if (foundGoodCorrelation) {
+                // short-circuit - we found a good correlation, then a bad one, so we'd just be seeing copies from here.
+                // Now we need to tweak the offset - by interpolating between the values to the left and right of the
+                // best offset, and shifting it a bit.  This is complex, and HACKY in this code (happy to take PRs!) -
+                // we need to do a curve fit on correlations[] around best_offset in order to better determine precise
+                // (anti-aliased) offset.
+                // we know best_offset >=1,
+                // since foundGoodCorrelation cannot go to true until the second pass (offset=1), and
+                // we can't drop into this clause until the following pass (else if).
+                var shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
+                return best_offset + (8 * shift);
+            }
+            lastCorrelation = correlation;
+        }
+        if (best_correlation > 0.01) {
+            return best_offset;
+        }
+        return -1;
+    };
+    return DspUtil;
+}());
+DspUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], DspUtil);
+
+//Based on https://github.com/jussi-kalliokoski/sink.js/blob/master/src/utils/resample.js
+var Resampler = (function () {
+    function Resampler() {
+    }
+    /**
+     * Resamples a sample buffer from a frequency to a frequency and / or from a sample rate to a sample rate.
+     *
+     * @static Sink
+     * @name resample
+     *
+     * @arg {Buffer} buffer The sample buffer to resample.
+     * @arg {Number} fromRate The original sample rate of the buffer, or if the last argument, the speed ratio to convert with.
+     * @arg {Number} fromFrequency The original frequency of the buffer, or if the last argument, used as toRate and the secondary comparison will not be made.
+     * @arg {Number} toRate The sample rate of the created buffer.
+     * @arg {Number} toFrequency The frequency of the created buffer.
+     *
+     * @return The new resampled buffer.
+     */
+    Resampler.prototype.resample = function (buffer, fromRate /* or speed */, fromFrequency /* or toRate */, toRate, toFrequency) {
+        var argc = arguments.length;
+        var speed;
+        if (argc === 2) {
+            speed = fromRate;
+        }
+        else if (argc === 3) {
+            speed = fromRate / fromFrequency;
+        }
+        else {
+            speed = toRate / fromRate * toFrequency / fromFrequency;
+        }
+        var l = buffer.length;
+        var length = Math.ceil(l / speed);
+        var newBuffer = new Float32Array(length);
+        var i, n;
+        for (i = 0, n = 0; i < l; i += speed) {
+            newBuffer[n++] = this.interpolate(buffer, i);
+        }
+        return newBuffer;
+    };
+    
+    Resampler.prototype.interpolate = function (arr, pos) {
+        var first = Math.floor(pos), second = first + 1, frac = pos - first;
+        second = second < arr.length ? second : first;
+        return arr[first] * (1 - frac) + arr[second] * frac;
+    };
+    return Resampler;
+}());
+Resampler = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], Resampler);
+
+var AudioOutput = (function () {
+    function AudioOutput(audioUtil) {
+        this.audioUtil = audioUtil;
+        this.inputGainNodes = new Map();
+        this.inputGainNodes.set(DeckId.LEFT, audioUtil.context.createGain());
+        this.inputGainNodes.set(DeckId.RIGHT, audioUtil.context.createGain());
+        this.masterGain = audioUtil.context.createGain();
+        this.inputGainNodes.get(DeckId.LEFT).connect(this.masterGain);
+        this.inputGainNodes.get(DeckId.RIGHT).connect(this.masterGain);
+        this.masterGain.connect(audioUtil.context.destination);
+    }
+    AudioOutput.prototype.getInputForDeck = function (deckId) {
+        return this.inputGainNodes.get(deckId);
+    };
+    AudioOutput.prototype.setDeckGain = function (deckId, gain) {
+        this.inputGainNodes.get(deckId).gain.value = gain;
+    };
+    AudioOutput.prototype.setMasterGain = function (gain) {
+        this.masterGain.gain.value = gain;
+    };
+    AudioOutput.prototype.getDeckGain = function (deckId) {
+        return this.inputGainNodes.get(deckId).gain.value;
+    };
+    AudioOutput.prototype.getMasterGain = function () {
+        return this.masterGain.gain.value;
+    };
+    return AudioOutput;
+}());
+AudioOutput = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$6 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _a$6 || Object])
+], AudioOutput);
+var _a$6;
+
+var ActiveSongs = (function () {
+    function ActiveSongs(audioUtil, audioSettings, dspUtil, resampler, audioOutput) {
+        this.activeSongByDeckId = new Map();
+        this.activeSongByDeckId.set(DeckId.LEFT, new ActiveSong(DeckId.LEFT, audioUtil, audioSettings.getDeckAudioSettings(DeckId.LEFT), dspUtil, resampler, audioOutput));
+        this.activeSongByDeckId.set(DeckId.RIGHT, new ActiveSong(DeckId.RIGHT, audioUtil, audioSettings.getDeckAudioSettings(DeckId.RIGHT), dspUtil, resampler, audioOutput));
+    }
+    ActiveSongs.prototype.getActiveSong = function (deckId) {
+        return this.activeSongByDeckId.get(deckId);
+    };
+    return ActiveSongs;
+}());
+ActiveSongs = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$3 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _a$3 || Object, typeof (_b$2 = typeof AudioSettings !== "undefined" && AudioSettings) === "function" && _b$2 || Object, typeof (_c$2 = typeof DspUtil !== "undefined" && DspUtil) === "function" && _c$2 || Object, typeof (_d$2 = typeof Resampler !== "undefined" && Resampler) === "function" && _d$2 || Object, typeof (_e$1 = typeof AudioOutput !== "undefined" && AudioOutput) === "function" && _e$1 || Object])
+], ActiveSongs);
+var _a$3;
+var _b$2;
+var _c$2;
+var _d$2;
+var _e$1;
+
+var AnimationFrames = (function () {
+    function AnimationFrames(ngZone) {
+        var _this = this;
+        this.framesSubject = new rxjs.Subject();
+        this.frames = this.framesSubject.asObservable();
+        ngZone.runOutsideAngular(function () {
+            requestAnimationFrame(function (time) {
+                _this.onFrame(time);
+            });
+        });
+    }
+    AnimationFrames.prototype.onFrame = function (time) {
+        var _this = this;
+        this.framesSubject.next(time);
+        requestAnimationFrame(function (time) {
+            _this.onFrame(time);
+        });
+    };
+    return AnimationFrames;
+}());
+AnimationFrames = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$7 = typeof _angular_core.NgZone !== "undefined" && _angular_core.NgZone) === "function" && _a$7 || Object])
+], AnimationFrames);
+var _a$7;
+
+var FormatTimePipe = (function () {
+    function FormatTimePipe() {
+    }
+    FormatTimePipe.prototype.transform = function (timeInSeconds) {
+        var minutes = Math.round(timeInSeconds / 60).toString();
+        var seconds = Math.round(timeInSeconds % 60).toString();
+        seconds.length === 1 && (seconds = '0' + seconds);
+        return minutes + ":" + seconds;
+    };
+    return FormatTimePipe;
+}());
+FormatTimePipe = __decorate([
+    _angular_core.Pipe({ name: 'formatTime' })
+], FormatTimePipe);
+
+var Song = (function () {
+    function Song(_a) {
+        var details = _a.details, buffer = _a.buffer, waveformCompressed100X = _a.waveformCompressed100X;
+        this.details = details;
+        this.buffer = buffer;
+        this.waveformCompressed100x = waveformCompressed100X;
+    }
+    return Song;
+}());
+
+var ImageUtil = (function () {
+    function ImageUtil(workerUtil) {
+        this.workerUtil = workerUtil;
+    }
+    ImageUtil.prototype.byteArrayToBase64 = function (byteArr) {
+        return this.workerUtil.run({
+            workerType: WorkerType.Image,
+            method: 'byteArrayToBase64',
+            params: [byteArr]
+        });
+    };
+    return ImageUtil;
+}());
+ImageUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$9 = typeof WorkerUtil !== "undefined" && WorkerUtil) === "function" && _a$9 || Object])
+], ImageUtil);
+var _a$9;
+
+var SongDb = (function () {
+    function SongDb(dbService, waveformUtil, audioUtil, imageUtil) {
+        var _this = this;
+        this.waveformUtil = waveformUtil;
+        this.audioUtil = audioUtil;
+        this.imageUtil = imageUtil;
+        this.allSongDetails$ = new rxjs_BehaviorSubject.BehaviorSubject([]);
+        dbService.dbInitialized.then(function (db) {
+            _this.db = db;
+            var getMetadataTransaction = _this.db.transaction(['songDetails'], Db.READONLY_TRANSACTION);
+            var getMetadataCursor = getMetadataTransaction.objectStore('songDetails').openCursor();
+            var allMetadata = [];
+            getMetadataCursor.onsuccess = function (e) {
+                var cursor = e.target['result'];
+                if (cursor) {
+                    allMetadata.push(cursor.value);
+                    cursor.continue();
+                }
+            };
+            getMetadataTransaction.oncomplete = function () {
+                _this.allSongDetails$.next(allMetadata);
+            };
+        });
+    }
+    SongDb.prototype.getAllSongDetails = function () {
+        return this.allSongDetails$.asObservable();
+    };
+    SongDb.prototype.updateSongDetails = function (details) {
+        var updateTransaction = this.db.transaction(['songDetails'], Db.READWRITE_TRANSACTION);
+        return Db.reqToPromise(updateTransaction
+            .objectStore('songDetails')
+            .put(details));
+    };
+    //TODO: figure out why this locks up the browser
+    SongDb.prototype.addSong = function (arrayBuffer, audioBuffer, tags, fileName) {
+        var _this = this;
+        //setInterval(() => console.log('tick'));
+        console.log('adding song', performance.now());
+        var songDetails;
+        var songDetailsDraft = {
+            title: undefined,
+            lengthSeconds: audioBuffer.duration,
+            positiveSamples: undefined,
+            negativeSamples: undefined,
+            numSamples: undefined,
+            waveformDataUrl: undefined,
+            cues: []
+        };
+        var addTransaction;
+        var waveformData;
+        return this.waveformUtil.getWaveformData(audioBuffer)
+            .then(function (waveformDataResult) {
+            waveformData = waveformDataResult;
+            songDetailsDraft.positiveSamples = waveformData.positiveSamples;
+            songDetailsDraft.negativeSamples = waveformData.negativeSamples;
+            songDetailsDraft.numSamples = waveformData.numSamples;
+            console.log('got the waveform', performance.now());
+            songDetailsDraft.waveformDataUrl = _this.waveformUtil.generateDataUrlWaveform(waveformData.positiveSamples, waveformData.negativeSamples, _this.audioUtil.context.sampleRate, 150, 35, ThemeId.DEFAULT, [], 0, 0);
+            console.log('generated waveform dataurl', performance.now());
+            if (tags) {
+                var parsedTrack = parseInt(tags.track);
+                var parsedYear = parseInt(tags.year);
+                songDetailsDraft.title = tags.title;
+                songDetailsDraft.album = tags.album;
+                songDetailsDraft.artist = tags.artist;
+                songDetailsDraft.genre = tags.genre;
+                !isNaN(parsedTrack) && (songDetailsDraft.track = parsedTrack);
+                !isNaN(parsedYear) && (songDetailsDraft.year = parsedYear);
+                if (tags.picture) {
+                    return _this.imageUtil.byteArrayToBase64(tags.picture.data)
+                        .then(function (base64Album) { return _this.resizeBase64Img(tags.picture.format, base64Album, 100, 100); })
+                        .then(function (albumDataUrl) { return (songDetailsDraft.albumDataUrl = albumDataUrl); });
+                }
+            }
+        })
+            .then(function () {
+            if (!songDetailsDraft.title) {
+                songDetailsDraft.title = fileName;
+            }
+            addTransaction = _this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
+            return Db.reqToPromise(addTransaction
+                .objectStore('songDetails')
+                .add(songDetailsDraft));
+        })
+            .then(function (e) {
+            console.log('done adding to indexed db', performance.now());
+            var id = e.target['result'];
+            songDetails = Object.assign({}, songDetailsDraft, { id: id });
+            return id;
+        })
+            .then(function (id) {
+            var songBuffer = {
+                buffer: arrayBuffer,
+                waveformCompressed100X: waveformData.compress100X
+            };
+            return Db.reqToPromise(addTransaction
+                .objectStore('songBuffer')
+                .add(songBuffer, id));
+        })
+            .then(function () {
+            console.log('done saving song buffer in indexed db', performance.now());
+            _this.allSongDetails$.next(_this.allSongDetails$.getValue().concat([songDetails]));
+        });
+    };
+    SongDb.prototype.deleteSong = function (songDetails) {
+        var _this = this;
+        var deleteTransaction = this.db.transaction(['songDetails', 'songBuffer'], Db.READWRITE_TRANSACTION);
+        var deleteDetailsReq = deleteTransaction.objectStore('songDetails').delete(songDetails.id);
+        var deleteBufferReq = deleteTransaction.objectStore('songBuffer').delete(songDetails.id);
+        Promise.all([Db.reqToPromise(deleteDetailsReq), Db.reqToPromise(deleteBufferReq)])
+            .then(function () {
+            var currentDetails = _this.allSongDetails$.getValue();
+            var filteredDetails = currentDetails.filter(function (d) { return d.id !== songDetails.id; });
+            _this.allSongDetails$.next(filteredDetails);
+        });
+    };
+    SongDb.prototype.getSong = function (songDetails) {
+        return Db.reqToPromise(this.db.transaction(['songBuffer'], Db.READONLY_TRANSACTION)
+            .objectStore('songBuffer')
+            .get(songDetails.id))
+            .then(function (bufferEvent) {
+            var songBuffer = bufferEvent.target['result'];
+            return new Song({
+                details: songDetails,
+                buffer: songBuffer.buffer,
+                waveformCompressed100X: songBuffer.waveformCompressed100X
+            });
+        });
+    };
+    //based on http://stackoverflow.com/a/20965997/373655
+    SongDb.prototype.resizeBase64Img = function (type, base64, maxWidth, maxHeight) {
+        return new Promise(function (resolve) {
+            var img = new Image;
+            img.onload = resizeImage;
+            img.src = "data:" + type + ";base64," + base64;
+            function resizeImage() {
+                var targetWidth = img.width;
+                var targetHeight = img.height;
+                if (img.width > maxWidth) {
+                    targetWidth = maxWidth;
+                    targetHeight = img.height / (img.width / maxWidth);
+                }
+                if (targetHeight > maxHeight) {
+                    targetHeight = maxHeight;
+                    targetWidth = img.width / (img.height / maxHeight);
+                }
+                resolve(imageToDataUri(img, targetWidth, targetHeight));
+            }
+            function imageToDataUri(img, width, height) {
+                // create an off-screen canvas
+                var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+                // set its dimension to target size
+                canvas.width = width;
+                canvas.height = height;
+                // draw source image into the off-screen canvas:
+                ctx.drawImage(img, 0, 0, width, height);
+                // encode image to data-uri with base64 version of compressed image
+                return canvas.toDataURL('image/jpeg', 0.8);
+            }
+        });
+    };
+    return SongDb;
+}());
+SongDb = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$8 = typeof Db !== "undefined" && Db) === "function" && _a$8 || Object, typeof (_b$4 = typeof WaveformUtil !== "undefined" && WaveformUtil) === "function" && _b$4 || Object, typeof (_c$3 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _c$3 || Object, typeof (_d$3 = typeof ImageUtil !== "undefined" && ImageUtil) === "function" && _d$3 || Object])
+], SongDb);
+var _a$8;
+var _b$4;
+var _c$3;
+var _d$3;
+
+var DeckComponent = (function () {
+    function DeckComponent(elementRef, waveformUtil, audioUtil, activeSongs, animationFrames, formatTime, songDb) {
+        var _this = this;
+        this.elementRef = elementRef;
+        this.waveformUtil = waveformUtil;
+        this.audioUtil = audioUtil;
+        this.activeSongs = activeSongs;
+        this.animationFrames = animationFrames;
+        this.formatTime = formatTime;
+        this.songDb = songDb;
+        this.loadingSong = false;
+        this.cueMode = CueMode.Jump;
+        this.CueMode = CueMode;
+        this.inputType = DeckInputType.File;
+        this.inputTypeOptions = [
+            { label: 'File', type: DeckInputType.File },
+            { label: 'Live', type: DeckInputType.Live }
+        ];
+        animationFrames.frames.subscribe(function (time) { return _this.onAnimationFrame(); });
+    }
+    Object.defineProperty(DeckComponent.prototype, "deckName", {
+        get: function () {
+            return DeckId[this.deckId];
+        },
+        enumerable: true,
+        configurable: true
+    });
+    DeckComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.activeSong = this.activeSongs.getActiveSong(this.deckId);
+        this.formattedSongOffset$ = rxjs.Observable.interval(100)
+            .map(function () {
+            if (_this.activeSong.isLoaded) {
+                return _this.formatTime.transform(_this.activeSong.currentSongOffset);
+            }
+            else {
+                return '0:00';
+            }
+        });
+    };
+    DeckComponent.prototype.ngAfterViewInit = function () {
+        this.deckElem = this.elementRef.nativeElement;
+        this.waveformElem = this.deckElem.querySelector('.waveform');
+        this.waveformElem.width = this.waveformElem.offsetWidth;
+        this.waveformElem.getContext('2d').translate(0.5, 0);
+    };
+    DeckComponent.prototype.loadSong = function (song) {
+        var _this = this;
+        this.loadingSong = true;
+        this.activeSong.loadSong(song)
+            .then(function () {
+            _this.songOffsetAtLastDraw = undefined;
+            _this.loadingSong = false;
+        }, function () { return _this.loadingSong = false; });
+    };
+    DeckComponent.prototype.play = function () {
+        if (this.activeSong.isLoaded && !this.activeSong.isPlaying) {
+            this.activeSong.playBuffer();
+        }
+    };
+    DeckComponent.prototype.pause = function () {
+        if (this.activeSong.isLoaded && this.activeSong.isPlaying) {
+            this.activeSong.pauseBuffer();
+        }
+    };
+    DeckComponent.prototype.onAnimationFrame = function () {
+        if (this.activeSong.isLoaded) {
+            this.drawWaveform(this.activeSong.song.details);
+        }
+    };
+    DeckComponent.prototype.drawWaveform = function (songDetails) {
+        var positiveSamples = this.waveformUtil.projectWaveform(songDetails.positiveSamples, songDetails.positiveSamples.length / songDetails.lengthSeconds, this.waveformElem.width);
+        var negativeSamples = this.waveformUtil.projectWaveform(songDetails.negativeSamples, songDetails.negativeSamples.length / songDetails.lengthSeconds, this.waveformElem.width);
+        var currentSongOffset = this.activeSong.currentSongOffset;
+        var relativeSongOffset = currentSongOffset / this.activeSong.song.details.lengthSeconds;
+        var curSample = Math.round(relativeSongOffset * this.waveformElem.width);
+        var drawFromX = 0;
+        var drawToX = this.waveformElem.width;
+        if (this.songOffsetAtLastDraw !== undefined) {
+            var timeElapsed = currentSongOffset - this.songOffsetAtLastDraw;
+            var redrawWidth = this.waveformElem.width * (timeElapsed / this.activeSong.song.details.lengthSeconds);
+            if (redrawWidth < this.waveformElem.width) {
+                if (redrawWidth > 0) {
+                    drawFromX = Math.max(curSample - Math.ceil(redrawWidth), 0);
+                    drawToX = curSample;
+                }
+                else {
+                    drawFromX = curSample;
+                    drawToX = Math.min(curSample + Math.ceil(-redrawWidth), this.waveformElem.width);
+                }
+            }
+        }
+        this.songOffsetAtLastDraw = currentSongOffset;
+        this.waveformUtil.drawWaveform({
+            canvas: this.waveformElem,
+            themeId: ThemeId.fromDeckId(this.deckId),
+            positiveSamples: positiveSamples,
+            negativeSamples: negativeSamples,
+            firstColorPixel: curSample,
+            drawFromX: drawFromX,
+            drawToX: drawToX
+        });
+        this.waveformUtil.overlayCues(this.waveformElem, songDetails.cues, 0, songDetails.lengthSeconds);
+    };
+    DeckComponent.prototype.onCanvasClick = function (event) {
+        if (this.activeSong.isLoaded) {
+            var relativeSongOffse = event.offsetX / this.waveformElem.offsetWidth;
+            this.activeSong.setSongOffset(relativeSongOffse * this.activeSong.song.details.lengthSeconds);
+        }
+    };
+    DeckComponent.prototype.cueClicked = function (index) {
+        if (this.activeSong.isLoaded) {
+            var cues = this.activeSong.song.details.cues;
+            var updateRequired = false;
+            switch (this.cueMode) {
+                case CueMode.Jump: {
+                    if (cues[index]) {
+                        this.activeSong.setSongOffset(cues[index]);
+                    }
+                    else {
+                        cues[index] = this.activeSong.currentSongOffset;
+                        updateRequired = true;
+                    }
+                    break;
+                }
+                case CueMode.Set: {
+                    cues[index] = this.activeSong.currentSongOffset;
+                    this.cueMode = CueMode.Jump;
+                    updateRequired = true;
+                    break;
+                }
+                case CueMode.Delete: {
+                    cues[index] = undefined;
+                    this.cueMode = CueMode.Jump;
+                    updateRequired = true;
+                    break;
+                }
+            }
+            if (updateRequired) {
+                this.activeSong.song.details.waveformDataUrl = this.waveformUtil.generateDataUrlWaveform(this.activeSong.song.details.positiveSamples, this.activeSong.song.details.negativeSamples, this.audioUtil.context.sampleRate, 150, 35, ThemeId.DEFAULT, this.activeSong.song.details.cues, 0, this.activeSong.song.details.lengthSeconds);
+                this.songDb.updateSongDetails(this.activeSong.song.details);
+            }
+        }
+    };
+    DeckComponent.prototype.indexArray = function (num) {
+        return Array(num).fill(0).map(function (x, i) { return i; });
+    };
+    return DeckComponent;
+}());
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", typeof (_a$1 = typeof DeckId !== "undefined" && DeckId) === "function" && _a$1 || Object)
+], DeckComponent.prototype, "deckId", void 0);
+DeckComponent = __decorate([
+    _angular_core.Component({
+        selector: 'deck',
+        template: "<div id=\"deck\">\n    <loading-overlay *ngIf=\"loadingSong\"></loading-overlay>\n    <div>\n        Input:\n        <md-radio-group [(ngModel)]=\"inputType\">\n            <md-radio-button disableRipple=\"true\" class=\"example-radio-button\" *ngFor=\"let inputTypeOption of inputTypeOptions\" [value]=\"inputTypeOption.type\">\n                {{inputTypeOption.label}} &nbsp;&nbsp;\n            </md-radio-button>\n        </md-radio-group>\n    </div>\n    <div class=\"song-details-section\">\n        <div *ngIf=\"activeSong.song\">\n            <img height=\"100px\" [src]=\"activeSong.song.details.albumDataUrl\" alt=\"Album Cover\">\n            <div class=\"song-labels\">\n                <div class=\"song-title\">{{activeSong.song.details.title}}</div>\n                <div>{{activeSong.song.details.album}}</div>\n                <div>{{activeSong.song.details.artist}}</div>\n            </div>\n        </div>\n    </div>\n    <div>\n        <canvas height=\"60\" width=\"1\"\n                class=\"waveform\" [class.clickable]=\"activeSong.isLoaded\"\n                (click)=\"onCanvasClick($event)\">\n        </canvas>\n    </div>\n\n    <div class=\"song-position-section\">\n        <div class=\"song-time\">\n            {{formattedSongOffset$ | async}}\n        </div>\n        <div class=\"song-time\">\n            {{activeSong.isLoaded ? (activeSong.song.details.lengthSeconds | formatTime) : '0:00'}}\n        </div>\n    </div>\n\n    <div>\n        <button [id]=\"deckName + '-play-pause'\"\n                class=\"align-top\"\n                (click)=\"activeSong.isPlaying ? pause() : play()\"\n                [disabled]=\"!activeSong.isLoaded || activeSong.isControlled\"\n                md-raised-button [color]=\"activeSong.isPlaying ? 'accent' : 'primary'\"\n                title=\"Play/Pause\">\n            <span class=\"icon-play\"></span>/<span class=\"icon-pause\"></span>\n        </button>\n        <midi-mapping [elemId]=\"deckName + '-play-pause'\" [amount]=\"activeSong.isPlaying ? 1 : 0\" (amountChange)=\"$event ? play() : pause()\"></midi-mapping>\n\n        <button [id]=\"deckName + '-toggle-control'\"\n                class=\"toggleControl align-top\"\n                md-raised-button\n                (click)=\"activeSong.toggleControl()\"\n                [disabled]=\"!activeSong.isLoaded\"\n                [color]=\"activeSong.isControlled ? 'accent' : 'primary'\"\n                title=\"Control Vinyl\">\n            <span class=\"icon-turntable\"></span>\n        </button>\n        <midi-mapping [elemId]=\"deckName + '-toggle-control'\" [amount]=\"activeSong.isControlled ? 1 : 0\"\n                      (amountChange)=\"$event ? activeSong.enableControl() : activeSong.disableControl()\"></midi-mapping>\n    </div>\n    <div class=\"cue-section\">\n        <div>Cues</div>\n        <div class=\"cues\">\n                <span *ngFor=\"let i of indexArray(5)\">\n                    <button [id]=\"deckName + '-cue-' + i\" md-raised-button [color]=\"activeSong.song?.details.cues[i] ? 'accent' : 'primary'\" [disabled]=\"!activeSong.isLoaded\" (click)=\"cueClicked(i)\">\n                        {{i+1}}\n                    </button>\n                    <midi-mapping [elemId]=\"deckName + '-cue-' + i\" [amount]=\"!!activeSong.song && (activeSong.song.details.cues[i] !== undefined)\"\n                                  (amountChange)=\"$event > 0 && cueClicked(i)\"></midi-mapping>\n                </span>\n        </div>\n        <div class=\"cue-mode-section\">\n            <md-radio-group [(ngModel)]=\"cueMode\">\n                <md-radio-button [id]=\"deckName + '-cue-mode-jump'\" disableRipple=\"true\" [value]=\"CueMode.Jump\" [disabled]=\"!activeSong.isLoaded\">\n                    <span class=\"icon-jump-to\"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]=\"deckName + '-cue-mode-jump'\" [amount]=\"(cueMode === CueMode.Jump) ? 1 : 0\"\n                              (amountChange)=\"($event > 0) && (cueMode = CueMode.Jump)\"></midi-mapping>\n\n                <md-radio-button [id]=\"deckName + '-cue-mode-set'\" disableRipple=\"true\" [value]=\"CueMode.Set\" [disabled]=\"!activeSong.isLoaded\">\n                    <span class=\"icon-plus\"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]=\"deckName + '-cue-mode-set'\" [amount]=\"(cueMode === CueMode.Set) ? 1 : 0\"\n                              (amountChange)=\"($event > 0) && (cueMode = CueMode.Set)\"></midi-mapping>\n\n                <md-radio-button [id]=\"deckName + '-cue-mode-delete'\" disableRipple=\"true\" [value]=\"CueMode.Delete\" [disabled]=\"!activeSong.isLoaded\">\n                    <span class=\"icon-bin\"></span>\n                </md-radio-button>\n                <midi-mapping [elemId]=\"deckName + '-cue-mode-delete'\" [amount]=\"(cueMode === CueMode.Delete) ? 1 : 0\"\n                              (amountChange)=\"($event > 0) && (cueMode = CueMode.Delete)\"></midi-mapping>\n            </md-radio-group>\n        </div>\n    </div>\n</div>",
+        styles: [":host {\n  overflow: hidden; }\n\n#deck {\n  flex-grow: 1;\n  margin: 4px;\n  padding: 3px;\n  background-color: #161616;\n  border-radius: 2px;\n  position: relative;\n  overflow: hidden; }\n\n.waveform {\n  height: 60px;\n  width: 100%;\n  user-select: none; }\n\n.clickable {\n  cursor: pointer; }\n\n.song-details-section {\n  height: 100px;\n  padding: 16px 0 8px 0;\n  white-space: nowrap;\n  overflow: hidden; }\n\n.song-labels {\n  display: inline-block;\n  vertical-align: top;\n  margin-left: 3px; }\n\n.song-title {\n  font-size: 24px; }\n\n.song-position-section {\n  display: flex;\n  justify-content: space-between;\n  margin-bottom: 8px; }\n\n.toggleControl {\n  font-size: 24px; }\n\n.align-top {\n  vertical-align: top; }\n\n.cue-section {\n  margin-top: 15px; }\n\n.cue-mode-section {\n  margin-top: 5px; }\n  .cue-mode-section md-radio-button {\n    margin-right: 12px; }\n\n.cues button {\n  min-width: 20px;\n  font-weight: bold; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_b$1 = typeof _angular_core.ElementRef !== "undefined" && _angular_core.ElementRef) === "function" && _b$1 || Object, typeof (_c$1 = typeof WaveformUtil !== "undefined" && WaveformUtil) === "function" && _c$1 || Object, typeof (_d$1 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _d$1 || Object, typeof (_e = typeof ActiveSongs !== "undefined" && ActiveSongs) === "function" && _e || Object, typeof (_f = typeof AnimationFrames !== "undefined" && AnimationFrames) === "function" && _f || Object, typeof (_g = typeof FormatTimePipe !== "undefined" && FormatTimePipe) === "function" && _g || Object, typeof (_h = typeof SongDb !== "undefined" && SongDb) === "function" && _h || Object])
+], DeckComponent);
+var DeckInputType;
+(function (DeckInputType) {
+    DeckInputType[DeckInputType["File"] = 0] = "File";
+    DeckInputType[DeckInputType["Live"] = 1] = "Live";
+})(DeckInputType || (DeckInputType = {}));
+var CueMode;
+(function (CueMode) {
+    CueMode[CueMode["Jump"] = 0] = "Jump";
+    CueMode[CueMode["Set"] = 1] = "Set";
+    CueMode[CueMode["Delete"] = 2] = "Delete";
+})(CueMode || (CueMode = {}));
+var _a$1;
+var _b$1;
+var _c$1;
+var _d$1;
+var _e;
+var _f;
+var _g;
+var _h;
+
+var SideNav = (function () {
+    function SideNav() {
+        this.state = new rxjs.BehaviorSubject(SideNavState.Closed);
+    }
+    Object.defineProperty(SideNav.prototype, "state$", {
+        get: function () {
+            return this.state.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    SideNav.prototype.setState = function (state) {
+        this.state.next(state);
+    };
+    SideNav.prototype.getState = function () {
+        return this.state.getValue();
+    };
+    return SideNav;
+}());
+SideNav = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], SideNav);
+var SideNavState;
+(function (SideNavState) {
+    SideNavState[SideNavState["Closed"] = 0] = "Closed";
+    SideNavState[SideNavState["Audio"] = 1] = "Audio";
+    SideNavState[SideNavState["Midi"] = 2] = "Midi";
+})(SideNavState || (SideNavState = {}));
+
+var MidiUtil = (function () {
+    function MidiUtil() {
+        var _this = this;
+        this.midiInitialized = new Promise(function (resolve, reject) {
+            _this.resolveMidiInitialized = resolve;
+            _this.rejectMidiInitialized = reject;
+        });
+    }
+    MidiUtil.prototype.initialize = function () {
+        var _this = this;
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess()
+                .then(function (midiAccess) {
+                _this.midi = midiAccess;
+                _this.resolveMidiInitialized(midiAccess);
+            })
+                .catch(function () {
+                _this.rejectMidiInitialized();
+                console.error("No access to MIDI devices or your browser doesn't support WebMIDI API");
+            });
+        }
+        else {
+            this.rejectMidiInitialized();
+            console.error("No MIDI support in your browser.");
+        }
+    };
+    MidiUtil.prototype.parseRawMsg = function (rawMessage) {
+        var byte1 = rawMessage[0];
+        var byte2 = rawMessage[1];
+        var byte3 = rawMessage[2];
+        var msgType = byte1 >> 4;
+        var channel = (byte1 & 15) + 1;
+        var subType;
+        var amount;
+        switch (msgType) {
+            case MidiMsgType.ProgramChange: {
+                subType = byte2;
+                amount = 1;
+                break;
+            }
+            case MidiMsgType.ChannelAfterTouch: {
+                subType = 0;
+                amount = byte2 / 127;
+                break;
+            }
+            case MidiMsgType.PitchBend: {
+                subType = 0;
+                amount = ((byte3 << 7) + byte2) / ((1 << 14) - 1);
+                break;
+            }
+            default: {
+                subType = byte2;
+                amount = byte3 / 127;
+            }
+        }
+        return { msgType: msgType, channel: channel, subType: subType, amount: amount };
+    };
+    MidiUtil.prototype.serializeMsg = function (msg) {
+        var byte1 = (msg.msgType << 4) + (msg.channel - 1);
+        var byte2;
+        var byte3;
+        switch (msg.msgType) {
+            case MidiMsgType.ProgramChange: {
+                byte2 = msg.subType;
+                byte3 = 0;
+                break;
+            }
+            case MidiMsgType.ChannelAfterTouch: {
+                byte2 = Math.round(msg.amount * 127);
+                byte3 = 0;
+                break;
+            }
+            case MidiMsgType.PitchBend: {
+                var integerAmount = Math.round(msg.amount * ((1 << 14) - 1));
+                byte2 = integerAmount & 127;
+                byte3 = integerAmount >> 7;
+                break;
+            }
+            default: {
+                byte2 = msg.subType;
+                byte3 = Math.round(msg.amount * 127);
+            }
+        }
+        return [byte1, byte2, byte3];
+    };
+    return MidiUtil;
+}());
+MidiUtil = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], MidiUtil);
+var MidiMsgType;
+(function (MidiMsgType) {
+    MidiMsgType[MidiMsgType["NoteOff"] = 8] = "NoteOff";
+    MidiMsgType[MidiMsgType["NoteOn"] = 9] = "NoteOn";
+    MidiMsgType[MidiMsgType["PolyAfterTouch"] = 10] = "PolyAfterTouch";
+    MidiMsgType[MidiMsgType["CC"] = 11] = "CC";
+    MidiMsgType[MidiMsgType["ProgramChange"] = 12] = "ProgramChange";
+    MidiMsgType[MidiMsgType["ChannelAfterTouch"] = 13] = "ChannelAfterTouch";
+    MidiMsgType[MidiMsgType["PitchBend"] = 14] = "PitchBend";
+    MidiMsgType[MidiMsgType["SysEx"] = 15] = "SysEx";
+})(MidiMsgType || (MidiMsgType = {}));
+
+var AppComponent = (function () {
+    function AppComponent(sideNav, midiUtil, db) {
+        this.sideNav = sideNav;
+        this.DeckId = DeckId;
+        this.SideNavState = SideNavState;
+        db.initialize();
+        midiUtil.initialize();
+        if ('serviceWorker' in navigator) {
+            navigator['serviceWorker'].register('./sw.js');
+        }
+    }
+    AppComponent.prototype.ngAfterViewInit = function () {
+        _a = this.decksQuery.toArray(), this.deck1 = _a[0], this.deck2 = _a[1];
+        var _a;
+    };
+    AppComponent.prototype.onLoadSong = function (_a) {
+        var song = _a.song, deckId = _a.deckId;
+        var deck = this["deck" + deckId];
+        deck.loadSong(song);
+    };
+    AppComponent.prototype.onCloseSideNav = function () {
+        this.sideNav.setState(SideNavState.Closed);
+    };
+    return AppComponent;
+}());
+__decorate([
+    _angular_core.ViewChildren(DeckComponent),
+    __metadata("design:type", typeof (_a = typeof _angular_core.QueryList !== "undefined" && _angular_core.QueryList) === "function" && _a || Object)
+], AppComponent.prototype, "decksQuery", void 0);
+AppComponent = __decorate([
+    _angular_core.Component({
+        selector: 'my-app',
+        template: "<md-sidenav-container>\n    <md-sidenav [opened]=\"(sideNav.state$ | async) !== SideNavState.Closed\" (close)=\"onCloseSideNav()\">\n        <side-nav></side-nav>\n    </md-sidenav>\n    <div  class=\"main-content\">\n        <md-toolbar>\n            <toolbar></toolbar>\n        </md-toolbar>\n        <div class=\"deck-section flex\">\n            <div class=\"deck1 deck flex\">\n                <deck class=\"flex flex-grow\" [deckId]=\"DeckId.LEFT\"></deck>\n            </div>\n            <div class=\"center-controls flex\">\n                <center-controls class=\"flex flex-grow\"></center-controls>\n            </div>\n            <div class=\"deck2 deck flex\">\n                <deck class=\"flex flex-grow\" [deckId]=\"DeckId.RIGHT\"></deck>\n            </div>\n        </div>\n        <div class=\"library-section flex flex-grow\">\n            <library class=\"flex flex-grow\" (onLoadSong)=\"onLoadSong($event)\"></library>\n        </div>\n    </div>\n</md-sidenav-container>\n",
+        styles: [".main-content {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  background-color: #5b5b5b; }\n\n.row {\n  margin-bottom: 4px; }\n\n.deck-section {\n  flex: 0 0 400px; }\n\n.deck {\n  width: 28.6%; }\n\n.center-controls {\n  width: 42.8%; }\n\n.library-section {\n  overflow: auto; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_b = typeof SideNav !== "undefined" && SideNav) === "function" && _b || Object, typeof (_c = typeof MidiUtil !== "undefined" && MidiUtil) === "function" && _c || Object, typeof (_d = typeof Db !== "undefined" && Db) === "function" && _d || Object])
+], AppComponent);
+var DeckId;
+(function (DeckId) {
+    DeckId[DeckId["LEFT"] = 1] = "LEFT";
+    DeckId[DeckId["RIGHT"] = 2] = "RIGHT";
+})(DeckId || (DeckId = {}));
+var ThemeId;
+(function (ThemeId) {
+    ThemeId[ThemeId["DEFAULT"] = 0] = "DEFAULT";
+    ThemeId[ThemeId["DECK1"] = 1] = "DECK1";
+    ThemeId[ThemeId["DECK2"] = 2] = "DECK2";
+})(ThemeId || (ThemeId = {}));
+(function (ThemeId) {
+    function fromDeckId(deckId) {
+        switch (deckId) {
+            case DeckId.LEFT:
+                return ThemeId.DECK1;
+            case DeckId.RIGHT:
+                return ThemeId.DECK2;
+        }
+    }
+    ThemeId.fromDeckId = fromDeckId;
+})(ThemeId || (ThemeId = {}));
+var _a;
+var _b;
+var _c;
+var _d;
+
+var LibraryComponent = (function () {
+    function LibraryComponent(audioUtil, songDb, formatTimePipe) {
+        var _this = this;
+        this.audioUtil = audioUtil;
+        this.songDb = songDb;
+        this.formatTimePipe = formatTimePipe;
+        this.fileIsOverDrop = false;
+        this.uploadingFiles = false;
+        this.DeckId = DeckId;
+        this.onLoadSong = new _angular_core.EventEmitter();
+        this.searchInput = new rxjs_BehaviorSubject.BehaviorSubject('').distinctUntilChanged();
+        var allSongDetails = this.songDb.getAllSongDetails()
+            .map(function (songDetails) {
+            return songDetails.sort(firstBy('artist', { ignoreCase: true })
+                .thenBy('year')
+                .thenBy('album', { ignoreCase: true })
+                .thenBy('track'));
+        });
+        this.filteredSongDetails = rxjs_Observable.Observable.combineLatest(allSongDetails, this.searchInput, function (details, input) { return _this.filterSongDetails(details, input); });
+    }
+    LibraryComponent.prototype.onFileOverDrop = function (fileIsOver) {
+        this.fileIsOverDrop = fileIsOver;
+    };
+    LibraryComponent.prototype.uploadFiles = function (files) {
+        var _this = this;
+        this.uploadingFiles = true;
+        this.totalFilesToUpload = files.length;
+        this.numFilesUploaded = 0;
+        var loadFilePromises = files.map(function (file) {
+            var readMediaTagsPromise = new Promise(function (resolve) {
+                jsmediatags.read(file, {
+                    onSuccess: function (result) { return resolve(result.tags); },
+                    onError: function (error) { return resolve(null); }
+                });
+            });
+            var arrayBuffer;
+            var readAudioBufferPromise = _this.readAsArrayBuffer(file)
+                .then(function (buf) {
+                arrayBuffer = buf;
+                var bufCopyForAudioData = _this.copyArrayBuffer(buf);
+                return _this.audioUtil.context.decodeAudioData(bufCopyForAudioData);
+            });
+            return Promise.all([readAudioBufferPromise, readMediaTagsPromise])
+                .then(function (_a) {
+                var audioBuffer = _a[0], tags = _a[1];
+                return _this.songDb.addSong(arrayBuffer, audioBuffer, tags, file.name);
+            })
+                .then(function () {
+                _this.numFilesUploaded++;
+            });
+        });
+        var onUploadingFinished = function () {
+            _this.uploadingFiles = false;
+            _this.totalFilesToUpload = undefined;
+            _this.numFilesUploaded = undefined;
+        };
+        Promise.all(loadFilePromises)
+            .then(onUploadingFinished)
+            .catch(function (error) {
+            console.error('Failed to upload songs', error);
+            onUploadingFinished();
+        });
+    };
+    LibraryComponent.prototype.deleteSong = function (songDetails) {
+        this.songDb.deleteSong(songDetails);
+    };
+    LibraryComponent.prototype.loadSong = function (songDetails, deckId) {
+        var _this = this;
+        this.songDb.getSong(songDetails)
+            .then(function (song) {
+            _this.onLoadSong.emit({ song: song, deckId: deckId });
+        });
+    };
+    LibraryComponent.prototype.getLoadingMessage = function () {
+        if (this.totalFilesToUpload > 1) {
+            return "Loading " + this.numFilesUploaded + " of " + this.totalFilesToUpload;
+        }
+        else {
+            return 'Loading';
+        }
+    };
+    LibraryComponent.prototype.copyArrayBuffer = function (src) {
+        var dst = new ArrayBuffer(src.byteLength);
+        new Uint8Array(dst).set(new Uint8Array(src));
+        return dst;
+    };
+    LibraryComponent.prototype.readAsArrayBuffer = function (file) {
+        var arrayBuffer;
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onload = function () {
+                arrayBuffer = reader.result;
+                resolve(reader.result);
+            };
+            reader.onerror = reject;
+        });
+    };
+    LibraryComponent.prototype.filterSongDetails = function (allSongDetails, searchInput) {
+        var _this = this;
+        searchInput = searchInput.trim();
+        if (!searchInput) {
+            return allSongDetails;
+        }
+        var searchTokens = searchInput.split(' ');
+        return allSongDetails.filter(function (songDetails) {
+            var allTokensMatchReducer = function (previousTokensMatch, token) { return previousTokensMatch && _this.songDetailsMatchesToken(songDetails, token); };
+            return searchTokens.reduce(allTokensMatchReducer, true);
+        });
+    };
+    LibraryComponent.prototype.songDetailsMatchesToken = function (songDetails, token) {
+        token = token.toLowerCase();
+        for (var fieldKey in songDetails) {
+            var field = songDetails[fieldKey];
+            if (songDetails.hasOwnProperty(fieldKey) && field !== undefined) {
+                var cmpStr = void 0;
+                switch (fieldKey) {
+                    case 'title':
+                    case 'album':
+                    case 'artist':
+                    case 'track':
+                    case 'year':
+                    case 'genre':
+                        cmpStr = field.toString();
+                        break;
+                    case 'lengthSeconds':
+                        cmpStr = this.formatTimePipe.transform(field);
+                        break;
+                }
+                if (cmpStr && cmpStr.toLowerCase().indexOf(token) !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    return LibraryComponent;
+}());
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], LibraryComponent.prototype, "onLoadSong", void 0);
+LibraryComponent = __decorate([
+    _angular_core.Component({
+        selector: 'library',
+        template: "<div id=\"library\"\n     fileDrop\n     (fileOver)=\"onFileOverDrop($event)\"\n     (onFileDrop)=\"uploadFiles($event)\">\n    <loading-overlay\n        *ngIf=\"fileIsOverDrop || uploadingFiles\"\n        [msg]=\"uploadingFiles ? getLoadingMessage() : 'Drop audio files here.'\"\n        [showSpinner]=\"uploadingFiles\">\n    </loading-overlay>\n    <div class=\"library-toolbar\">\n        <div class=\"filter-container\">\n            <div class=\"filter-icon-container\">\n                <span class=\"icon icon-filter\"></span>\n            </div>\n            <div class=\"library-filter-input-container\">\n                <input #filterInput class=\"library-filter-input\" type=\"text\" (input)=\"searchInput.next(filterInput.value)\">\n            </div>\n            <span *ngIf=\"filterInput.value\" (click)=\"filterInput.value = ''; searchInput.next('')\" class=\"clear-filter-icon icon icon-cross\"></span>\n        </div>\n    </div>\n    <div class=\"file-list-section\" fixedTableHeaderContainer #tableContainer>\n        <table class=\"file-list-table\">\n            <tr>\n                <th>Cover</th>\n                <th>Title</th>\n                <th>Artist</th>\n                <th>Album</th>\n                <th>Waveform</th>\n                <th>Genre</th>\n                <th>Year</th>\n                <th>Length</th>\n            </tr>\n            <tr *ngFor=\"let songDetails of filteredSongDetails | async\" class=\"file-row\">\n            <!--<tr *lazyFor=\"let songDetails of filteredSongDetails | async, inContainer tableContainer\" class=\"file-row\">-->\n                <td class=\"cover-img-container\">\n                    <div class=\"\">\n                        <img *ngIf=\"songDetails.albumDataUrl\" [src]=\"songDetails.albumDataUrl\" alt=\"Album Cover\" width=\"75px\" class=\"cover-img\">\n                    </div>\n                </td>\n                <td>\n                    <div class=\"song-buttons-container\">\n                        {{songDetails.title}}\n                        <div class=\"song-buttons\">\n                            <span class=\"deck1\">\n                                <button md-mini-fab (click)=\"loadSong(songDetails, DeckId.LEFT)\">\n                                    <span class=\"icon-undo\"></span>\n                                </button>\n                            </span>\n                            <span class=\"deck2\">\n                                <button md-mini-fab (click)=\"loadSong(songDetails, DeckId.RIGHT)\">\n                                    <span class=\"icon-redo\"></span>\n                                </button>\n                            </span>\n                            <span>\n                                <button md-mini-fab (click)=\"deleteSong(songDetails)\">\n                                    <span class=\"icon-bin\"></span>\n                                </button>\n                            </span>\n                        </div>\n                    </div>\n                </td>\n                <td>{{songDetails.artist}}</td>\n                <td>{{songDetails.album}}</td>\n                <td>\n                    <img [src]=\"songDetails.waveformDataUrl\" alt=\"waveform\">\n                </td>\n\n                <td>{{songDetails.genre}}</td>\n                <td>{{songDetails.year}}</td>\n                <td>{{songDetails.lengthSeconds | formatTime}}</td>\n            </tr>\n        </table>\n    </div>\n</div>",
+        styles: ["#library {\n  flex-grow: 1;\n  display: flex;\n  flex-direction: column;\n  margin: 0 4px 4px 4px;\n  border-radius: 2px;\n  position: relative; }\n\n.dragging-overlay {\n  border: 4px dashed #b4b4b4;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  display: none;\n  z-index: 3;\n  pointer-events: none;\n  background-color: rgba(100, 100, 100, 0.7); }\n  .dragging-overlay .drop-msg {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, 35px); }\n\n.dragging-overlay.show {\n  display: block; }\n\n.library-toolbar {\n  margin: 4px 0; }\n  .library-toolbar .filter-container {\n    position: relative;\n    width: 200px;\n    display: flex; }\n  .library-toolbar .library-filter-input-container {\n    display: flex; }\n  .library-toolbar .library-filter-input {\n    width: 100%;\n    padding: 3px 23px 3px 3px;\n    background-color: #161616;\n    border-top-right-radius: 2px;\n    border-bottom-right-radius: 2px;\n    border: none;\n    color: white;\n    font-size: 14px; }\n  .library-toolbar .filter-icon-container {\n    background-color: #161616;\n    border-top-left-radius: 2px;\n    border-bottom-left-radius: 2px;\n    margin-right: 2px;\n    padding: 4px 3px 3px 3px; }\n  .library-toolbar .clear-filter-icon {\n    position: absolute;\n    top: 3px;\n    right: 0;\n    padding: 3px;\n    cursor: pointer;\n    font-size: 14px; }\n\n.file-list-section {\n  background-color: #161616;\n  flex-grow: 1;\n  overflow: auto; }\n  .file-list-section .file-list-table {\n    border-spacing: 0;\n    width: 100%; }\n  .file-list-section th {\n    background-color: #5b5b5b;\n    position: relative;\n    top: -2px;\n    padding: 2px 0;\n    z-index: 2;\n    text-align: left;\n    font-weight: normal; }\n  .file-list-section .file-row td {\n    height: 35px;\n    padding: 0 8px; }\n  .file-list-section .file-row:nth-child(odd) td {\n    background-color: #2a2a2a; }\n  .file-list-section .file-row:hover td {\n    background-color: #3a3a3a; }\n  .file-list-section .file-row:not(:hover) .song-buttons {\n    display: none; }\n  .file-list-section .song-buttons-container {\n    position: relative; }\n  .file-list-section .song-buttons {\n    position: absolute;\n    right: 0;\n    top: -11px; }\n  .file-list-section .cover-img-container {\n    overflow: hidden;\n    position: relative;\n    height: 35px;\n    width: 75px; }\n  .file-list-section .cover-img {\n    position: absolute;\n    top: -10px; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_a$10 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _a$10 || Object, typeof (_b$5 = typeof SongDb !== "undefined" && SongDb) === "function" && _b$5 || Object, typeof (_c$4 = typeof FormatTimePipe !== "undefined" && FormatTimePipe) === "function" && _c$4 || Object])
+], LibraryComponent);
+var _a$10;
+var _b$5;
+var _c$4;
+
+var FileDropDirective = (function () {
+    function FileDropDirective(element) {
+        this.fileOver = new _angular_core.EventEmitter();
+        this.onFileDrop = new _angular_core.EventEmitter();
+        this.dragLevel = 0;
+        this.element = element;
+    }
+    FileDropDirective.prototype.onDragOver = function (event) {
+        var transfer = this.getDataTransfer(event);
+        if (!this.haveFiles(transfer.types)) {
+            return;
+        }
+        transfer.dropEffect = 'copy';
+        this.preventAndStop(event);
+    };
+    FileDropDirective.prototype.onDragEnter = function (event) {
+        this.dragLevel++;
+        this.emitFileOver();
+    };
+    FileDropDirective.prototype.onDragLeave = function (event) {
+        this.dragLevel--;
+        this.preventAndStop(event);
+        if (this.dragLevel === 0) {
+            this.emitFileOver();
+        }
+    };
+    FileDropDirective.prototype.onDrop = function (event) {
+        var transfer = this.getDataTransfer(event);
+        if (!transfer) {
+            return;
+        }
+        this.preventAndStop(event);
+        this.dragLevel = 0;
+        this.emitFileOver();
+        this.onFileDrop.emit(Array.from(transfer.files));
+    };
+    FileDropDirective.prototype.emitFileOver = function () {
+        this.fileOver.emit(this.dragLevel > 0);
+    };
+    FileDropDirective.prototype.getDataTransfer = function (event) {
+        return event.dataTransfer ? event.dataTransfer : event.originalEvent.dataTransfer;
+    };
+    FileDropDirective.prototype.preventAndStop = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    FileDropDirective.prototype.haveFiles = function (types) {
+        if (!types) {
+            return false;
+        }
+        if (types.indexOf) {
+            return types.indexOf('Files') !== -1;
+        }
+        if (types.contains) {
+            return types.contains('Files');
+        }
+        return false;
+    };
+    return FileDropDirective;
+}());
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], FileDropDirective.prototype, "fileOver", void 0);
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], FileDropDirective.prototype, "onFileDrop", void 0);
+__decorate([
+    _angular_core.HostListener('dragover', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FileDropDirective.prototype, "onDragOver", null);
+__decorate([
+    _angular_core.HostListener('dragenter', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FileDropDirective.prototype, "onDragEnter", null);
+__decorate([
+    _angular_core.HostListener('dragleave', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FileDropDirective.prototype, "onDragLeave", null);
+__decorate([
+    _angular_core.HostListener('drop', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FileDropDirective.prototype, "onDrop", null);
+FileDropDirective = __decorate([
+    _angular_core.Directive({ selector: '[fileDrop]' }),
+    __metadata("design:paramtypes", [typeof (_a$11 = typeof _angular_core.ElementRef !== "undefined" && _angular_core.ElementRef) === "function" && _a$11 || Object])
+], FileDropDirective);
+var _a$11;
+
+var MidiIo = (function () {
+    function MidiIo(midiUtil, preferencesDb) {
+        var _this = this;
+        this.midiUtil = midiUtil;
+        this.preferencesDb = preferencesDb;
+        this.enabledInputNames = new Set();
+        this.enabledOutputNames = new Set();
+        this.msg = new rxjs.Subject();
+        this.midiUtil.midiInitialized.then(function () {
+            midiUtil.midi.onstatechange = function () {
+                _this.retrieveDevices();
+            };
+            _this.retrieveDevices();
+        });
+        preferencesDb.initialized.then(function () {
+            _this.enabledOutputNames = preferencesDb.getEnabledMidiOutputNames();
+            preferencesDb.getEnabledMidiInputNames().forEach(function (name) {
+                if (_this.devicesByName[name]) {
+                    _this.enableInput(name);
+                }
+            });
+        });
+    }
+    Object.defineProperty(MidiIo.prototype, "msg$", {
+        get: function () {
+            return this.msg.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MidiIo.prototype.retrieveDevices = function () {
+        var _this = this;
+        this.devicesByName = {};
+        this.midiUtil.midi.inputs.forEach(function (input) {
+            _this.devicesByName[input.name] = { input: input };
+            //This could occur if an input was saved as enabled in the preferences but the diver was not connected to
+            //the computer until after the app started.
+            if (_this.inputIsEnabled(input.name) === false && _this.enabledInputNames.has(input.name)) {
+                _this.enableInput(input.name);
+            }
+        });
+        this.midiUtil.midi.outputs.forEach(function (output) {
+            _this.devicesByName[output.name] = _this.devicesByName[output.name] || {};
+            _this.devicesByName[output.name].output = output;
+        });
+        this.devices = [];
+        for (var name in this.devicesByName) {
+            var device = this.devicesByName[name];
+            this.devices.push({ name: name, input: device.input, output: device.output });
+        }
+    };
+    MidiIo.prototype.inputIsEnabled = function (deviceName) {
+        var input = this.getDevice(deviceName).input;
+        return !!input && !!input['lastEventListener'];
+    };
+    MidiIo.prototype.enableInput = function (deviceName) {
+        this.enabledInputNames.add(deviceName);
+        this.saveInputPreferences();
+        var device = this.getDevice(deviceName);
+        if (device.input) {
+            device.input['lastEventListener'] = this.onInputMsg.bind(this);
+            device.input.addEventListener('midimessage', device.input['lastEventListener']);
+        }
+    };
+    MidiIo.prototype.disableInput = function (deviceName) {
+        var device = this.getDevice(deviceName);
+        if (device.input) {
+            if (device.input['lastEventListener']) {
+                device.input.removeEventListener('midimessage', device.input['lastEventListener']);
+                device.input['lastEventListener'] = undefined;
+            }
+            device.input.close();
+        }
+        this.enabledInputNames.delete(deviceName);
+        this.saveInputPreferences();
+    };
+    MidiIo.prototype.toggleInput = function (deviceName) {
+        if (this.inputIsEnabled(deviceName)) {
+            this.disableInput(deviceName);
+        }
+        else {
+            this.enableInput(deviceName);
+        }
+    };
+    MidiIo.prototype.outputIsEnabled = function (deviceName) {
+        return this.enabledOutputNames.has(deviceName);
+    };
+    MidiIo.prototype.enableOutput = function (deviceName) {
+        this.enabledOutputNames.add(deviceName);
+        this.saveOutputPreferences();
+    };
+    MidiIo.prototype.disableOutput = function (deviceName) {
+        this.enabledOutputNames.delete(deviceName);
+        this.saveOutputPreferences();
+    };
+    MidiIo.prototype.toggleOutput = function (deviceName) {
+        if (this.outputIsEnabled(deviceName)) {
+            this.disableOutput(deviceName);
+        }
+        else {
+            this.enableOutput(deviceName);
+        }
+    };
+    MidiIo.prototype.sendMessage = function (msg) {
+        var _this = this;
+        this.enabledOutputNames.forEach(function (name) {
+            var device = _this.getDevice(name);
+            if (device.output) {
+                device.output.send(_this.midiUtil.serializeMsg(msg));
+            }
+        });
+    };
+    MidiIo.prototype.saveInputPreferences = function () {
+        this.preferencesDb.setEnabledMidiInputNames(this.enabledInputNames);
+    };
+    MidiIo.prototype.saveOutputPreferences = function () {
+        this.preferencesDb.setEnabledMidiOutputNames(this.enabledOutputNames);
+    };
+    //Always returns an object even if the device doesn't exist
+    MidiIo.prototype.getDevice = function (name) {
+        return this.devicesByName[name] || {};
+    };
+    MidiIo.prototype.onInputMsg = function (msgEvent) {
+        var msg = this.midiUtil.parseRawMsg(msgEvent.data);
+        this.msg.next(msg);
+    };
+    return MidiIo;
+}());
+MidiIo = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$14 = typeof MidiUtil !== "undefined" && MidiUtil) === "function" && _a$14 || Object, typeof (_b$8 = typeof PreferencesDb !== "undefined" && PreferencesDb) === "function" && _b$8 || Object])
+], MidiIo);
+var _a$14;
+var _b$8;
+
+var DocumentEvents = (function () {
+    function DocumentEvents() {
+        var _this = this;
+        this.mouseMoveSubject = new rxjs.Subject();
+        this.mouseUpSubject = new rxjs.Subject();
+        this.dragEndSubject = new rxjs.Subject();
+        this.keyUpSubject = new rxjs.Subject();
+        document.addEventListener('mousemove', function (event) { return _this.mouseMoveSubject.next(event); });
+        document.addEventListener('mouseup', function (event) { return _this.mouseUpSubject.next(event); });
+        document.addEventListener('dragend', function (event) { return _this.dragEndSubject.next(event); });
+        document.addEventListener('keyup', function (event) { return _this.keyUpSubject.next(event); });
+    }
+    Object.defineProperty(DocumentEvents.prototype, "mouseMove", {
+        get: function () {
+            return this.mouseMoveSubject.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DocumentEvents.prototype, "mouseUp", {
+        get: function () {
+            return this.mouseUpSubject.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DocumentEvents.prototype, "dragEnd", {
+        get: function () {
+            return this.dragEndSubject.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DocumentEvents.prototype, "keyUp", {
+        get: function () {
+            return this.keyUpSubject.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return DocumentEvents;
+}());
+DocumentEvents = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [])
+], DocumentEvents);
+
+var MidiMapper = (function () {
+    function MidiMapper(midiIo, preferencesDb, documentEvents) {
+        var _this = this;
+        this.preferencesDb = preferencesDb;
+        this.learnMode = new rxjs.BehaviorSubject(false);
+        this.mappings = new Map();
+        this.mappingComps = new Map();
+        midiIo.msg$.subscribe(function (msg) { return _this.onInputMsg(msg); });
+        preferencesDb.initialized.then(function () {
+            _this.mappings = preferencesDb.getMidiMappings();
+        });
+        documentEvents.keyUp.subscribe(function (event) {
+            if (_this.learnMode.getValue()) {
+                if (event.code === 'Backspace' || event.code === 'Delete') {
+                    if (_this.activeLearnMappingComp) {
+                        _this.mappings.delete(_this.activeLearnMappingComp.elemId);
+                    }
+                }
+            }
+        });
+    }
+    Object.defineProperty(MidiMapper.prototype, "learnMode$", {
+        get: function () {
+            return this.learnMode.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MidiMapper.prototype.setLearnMode = function (value) {
+        !value && (this.activeLearnMappingComp = undefined);
+        this.learnMode.next(value);
+    };
+    MidiMapper.prototype.toggleLearnMode = function () {
+        this.setLearnMode(!this.learnMode.getValue());
+    };
+    MidiMapper.prototype.getLearnMode = function () {
+        return this.learnMode.getValue();
+    };
+    MidiMapper.prototype.registerMappingComp = function (id, comp) {
+        this.mappingComps.set(id, comp);
+    };
+    MidiMapper.prototype.setMapping = function (id, mapping) {
+        this.mappings.set(id, mapping);
+        this.preferencesDb.setMidiMappings(this.mappings);
+    };
+    MidiMapper.prototype.getMapping = function (id) {
+        return this.mappings.get(id);
+    };
+    MidiMapper.prototype.onInputMsg = function (msg) {
+        var _this = this;
+        if (this.activeLearnMappingComp) {
+            this.activeLearnMappingComp.onLearnMsg(msg);
+        }
+        else if (!this.getLearnMode()) {
+            this.mappings.forEach(function (mapping, id) {
+                if (mapping.control.msgType === msg.msgType &&
+                    mapping.control.channel === msg.channel &&
+                    mapping.control.subType === msg.subType) {
+                    _this.mappingComps.get(id).onInputMsg(msg);
+                }
+            });
+        }
+    };
+    return MidiMapper;
+}());
+MidiMapper = __decorate([
+    _angular_core.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a$13 = typeof MidiIo !== "undefined" && MidiIo) === "function" && _a$13 || Object, typeof (_b$7 = typeof PreferencesDb !== "undefined" && PreferencesDb) === "function" && _b$7 || Object, typeof (_c$5 = typeof DocumentEvents !== "undefined" && DocumentEvents) === "function" && _c$5 || Object])
+], MidiMapper);
+var MappingType;
+(function (MappingType) {
+    //Map the amount directly to the control
+    MappingType[MappingType["Amount"] = 0] = "Amount";
+    //Toggle the control whenever a non-zero midi amount is sent
+    //TODO use latch by default for note messages
+    MappingType[MappingType["Latch"] = 1] = "Latch";
+})(MappingType || (MappingType = {}));
+var _a$13;
+var _b$7;
+var _c$5;
+
+var ToolbarComponent = (function () {
+    function ToolbarComponent(sideNav, midiMapper) {
+        this.sideNav = sideNav;
+        this.midiMapper = midiMapper;
+    }
+    ToolbarComponent.prototype.toggleMidiSettings = function () {
+        if (this.sideNav.getState() === SideNavState.Midi) {
+            this.sideNav.setState(SideNavState.Closed);
+        }
+        else {
+            this.sideNav.setState(SideNavState.Midi);
+        }
+    };
+    ToolbarComponent.prototype.toggleAudioSettings = function () {
+        if (this.sideNav.getState() === SideNavState.Audio) {
+            this.sideNav.setState(SideNavState.Closed);
+        }
+        else {
+            this.sideNav.setState(SideNavState.Audio);
+        }
+    };
+    ToolbarComponent.prototype.toggleFullScreen = function () {
+        var doc = document;
+        if (!this.isFullScreen()) {
+            if (doc.documentElement.requestFullScreen) {
+                doc.documentElement.requestFullScreen();
+            }
+            else if (doc.documentElement.mozRequestFullScreen) {
+                doc.documentElement.mozRequestFullScreen();
+            }
+            else if (doc.documentElement.webkitRequestFullScreen) {
+                doc.documentElement.webkitRequestFullScreen(Element['ALLOW_KEYBOARD_INPUT']);
+            }
+        }
+        else {
+            if (doc.cancelFullScreen) {
+                doc.cancelFullScreen();
+            }
+            else if (doc.mozCancelFullScreen) {
+                doc.mozCancelFullScreen();
+            }
+            else if (doc.webkitCancelFullScreen) {
+                doc.webkitCancelFullScreen();
+            }
+        }
+    };
+    ToolbarComponent.prototype.isFullScreen = function () {
+        var doc = document;
+        return !doc.fullScreenElement && (doc.mozFullScreen || doc.webkitIsFullScreen);
+    };
+    return ToolbarComponent;
+}());
+ToolbarComponent = __decorate([
+    _angular_core.Component({
+        selector: 'toolbar',
+        template: "<div id=\"toolbar\">\n    <div>\n        Open DVS<span class=\"subtext\">\u03B2eta</span>\n    </div>\n    <div class=\"right-toolbar\">\n        <div class=\"toolbar-item\" md-tooltip=\"Learn MIDI Mapping\" (click)=\"midiMapper.toggleLearnMode()\">\n            <span class=\"icon-equalizer\" [class.active]=\"midiMapper.getLearnMode()\"></span>\n        </div>\n        <div class=\"toolbar-item\" mdTooltip=\"MIDI settings\" (click)=\"toggleMidiSettings()\">\n            <span class=\"icon-midi\"></span>\n        </div>\n        <div class=\"toolbar-item\" mdTooltip=\"Audio settings\" (click)=\"toggleAudioSettings()\">\n            <span class=\"icon-speaker\"></span>\n        </div>\n        <div class=\"toolbar-item\">\n            <span *ngIf=\"!isFullScreen()\" (click)=\"toggleFullScreen()\" mdTooltip=\"Fullscreen\">\n                <span class=\"icon-enlarge-color\">\n                    <span class=\"path1\"></span><span class=\"path2\"></span>\n                </span>\n            </span>\n                <span *ngIf=\"isFullScreen()\" (click)=\"toggleFullScreen()\" mdTooltip=\"Exit fullscreen\">\n                <span class=\"icon-shrink-color\">\n                    <span class=\"path1\"></span><span class=\"path2\"></span>\n                </span>\n            </span>\n        </div>\n    </div>\n</div>",
+        styles: [":host {\n  display: flex;\n  flex-grow: 1; }\n\n#toolbar {\n  display: flex;\n  flex-grow: 1;\n  justify-content: space-between; }\n\n.right-toolbar {\n  font-size: 25px;\n  display: flex; }\n\n.toolbar-item {\n  margin: 0 10px;\n  cursor: pointer; }\n\n.icon-enlarge-color:not(:hover) span:before,\n.icon-shrink-color:not(:hover) span:before {\n  color: inherit; }\n\n.icon-midi:hover, .icon-equalizer:hover, .icon-equalizer.active {\n  color: #165eaa; }\n\n.icon-speaker:hover {\n  color: #632B9B; }\n\n.subtext {\n  font-size: 12px; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_a$12 = typeof SideNav !== "undefined" && SideNav) === "function" && _a$12 || Object, typeof (_b$6 = typeof MidiMapper !== "undefined" && MidiMapper) === "function" && _b$6 || Object])
+], ToolbarComponent);
+var _a$12;
+var _b$6;
+
+var SpinnerComponent = (function () {
+    function SpinnerComponent() {
+    }
+    return SpinnerComponent;
+}());
+SpinnerComponent = __decorate([
+    _angular_core.Component({
+        selector: 'spinner',
+        template: "\n<div class=\"overlay\"></div>\n<div class='uil-ripple-css'> \n    <div></div> \n    <div></div> \n</div>",
+        styles: ["\n@keyframes uil-ripple {\n  0% {\n    width: 0;\n    height: 0;\n    opacity: 0;\n    margin: 0 0 0 0;\n  }\n  33% {\n    width: 44%;\n    height: 44%;\n    margin: -22% 0 0 -22%;\n    opacity: 1;\n  }\n  100% {\n    width: 88%;\n    height: 88%;\n    margin: -44% 0 0 -44%;\n    opacity: 0;\n  }\n}\n.uil-ripple-css {\n  position: absolute;\n  width: 64px;\n  height: 64px;\n  transform: translate(-50%, -50%);\n  top: 50%;\n  left: 50%;\n}\n.uil-ripple-css div {\n  position: absolute;\n  z-index: 2;\n  top: 50%;\n  left: 50%;\n  margin: 0;\n  width: 0;\n  height: 0;\n  opacity: 0;\n  border-radius: 50%;\n  border-width: 4px;\n  border-style: solid;\n  animation: uil-ripple 2s linear infinite;\n}\n.uil-ripple-css div:nth-of-type(1) {\n  border-color: #165eaa;\n}\n.uil-ripple-css div:nth-of-type(2) {\n  border-color: #632b9b;\n  animation-delay: 1s;\n}\n.overlay {\n    position: absolute;\n    width: 100%;\n    height: 100%;\n    background-color: rgba(255, 255, 255, 0.1);\n    z-index: 1;\n    top: 0;\n}\n"]
+    }),
+    __metadata("design:paramtypes", [])
+], SpinnerComponent);
+
+var CenterControlsComponent = (function () {
+    function CenterControlsComponent(activeSongs, waveformUtil, audioUtil, animationFrames, documentEvents, audioOutput) {
+        var _this = this;
+        this.activeSongs = activeSongs;
+        this.waveformUtil = waveformUtil;
+        this.audioUtil = audioUtil;
+        this.animationFrames = animationFrames;
+        this.documentEvents = documentEvents;
+        this.audioOutput = audioOutput;
+        this.DeckId = DeckId;
+        this.deck1ActiveSong = activeSongs.getActiveSong(DeckId.LEFT);
+        this.deck2ActiveSong = activeSongs.getActiveSong(DeckId.RIGHT);
+        this.deck1ActiveSong.songObservable.subscribe(function (song) { return _this.onSongChange(DeckId.LEFT, song); });
+        this.deck2ActiveSong.songObservable.subscribe(function (song) { return _this.onSongChange(DeckId.RIGHT, song); });
+        animationFrames.frames.subscribe(function (time) { return _this.onAnimationFrame(); });
+        this.documentEvents.mouseMove.subscribe(function (event) { return _this.onMouseMove(event); });
+        this.documentEvents.mouseUp.subscribe(function (event) { return _this.endScrub(event); });
+        this.documentEvents.dragEnd.subscribe(function (event) { return _this.endScrub(event); });
+    }
+    Object.defineProperty(CenterControlsComponent.prototype, "deck1Canvas", {
+        get: function () {
+            return this.deck1ElementRef.nativeElement;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CenterControlsComponent.prototype, "deck2Canvas", {
+        get: function () {
+            return this.deck2ElementRef.nativeElement;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CenterControlsComponent.prototype.ngAfterViewInit = function () {
+        this.deck1Canvas.width = this.deck1Canvas.offsetWidth;
+        this.deck2Canvas.width = this.deck2Canvas.offsetWidth;
+        this.deck1Canvas.getContext('2d').translate(0.5, 0);
+        this.deck2Canvas.getContext('2d').translate(0.5, 0);
+    };
+    CenterControlsComponent.prototype.onAnimationFrame = function () {
+        if (this.deck1ActiveSong.isLoaded) {
+            this.drawSong(DeckId.LEFT, this.deck1ActiveSong.song);
+        }
+        if (this.deck2ActiveSong.isLoaded) {
+            this.drawSong(DeckId.RIGHT, this.deck2ActiveSong.song);
+        }
+    };
+    CenterControlsComponent.prototype.onSongChange = function (deckId, song) {
+        this.setPixelOffsetAtLastDraw(undefined, deckId);
+        this.drawSong(deckId, song);
+    };
+    CenterControlsComponent.prototype.setPixelOffsetAtLastDraw = function (offset, deckId) {
+        if (deckId === DeckId.LEFT) {
+            this.song1PixelOffsetAtLastDraw = offset;
+        }
+        else {
+            this.song2PixelOffsetAtLastDraw = offset;
+        }
+    };
+    CenterControlsComponent.prototype.getPixelOffsetAtLastDraw = function (deckId) {
+        if (deckId === DeckId.LEFT) {
+            return this.song1PixelOffsetAtLastDraw;
+        }
+        else {
+            return this.song2PixelOffsetAtLastDraw;
+        }
+    };
+    CenterControlsComponent.prototype.drawSong = function (deckId, song) {
+        var waveformCanvas;
+        var drawOptions;
+        var waveformName;
+        var activeSong;
+        switch (deckId) {
+            case DeckId.LEFT: {
+                waveformCanvas = this.deck1Canvas;
+                waveformName = 'negativeSamples';
+                activeSong = this.deck1ActiveSong;
+                break;
+            }
+            case DeckId.RIGHT: {
+                waveformCanvas = this.deck2Canvas;
+                waveformName = 'positiveSamples';
+                activeSong = this.deck2ActiveSong;
+            }
+        }
+        var currentSongOffset = activeSong.currentSongOffset;
+        var compressedSampleRate = this.audioUtil.context.sampleRate / 100;
+        var startTime = currentSongOffset - 3;
+        var endTime = currentSongOffset + 3;
+        var drawFromX = 0;
+        var drawToX = waveformCanvas.width;
+        var pixelOffset = Math.round(currentSongOffset * waveformCanvas.width / 6);
+        if (this.getPixelOffsetAtLastDraw(deckId) !== undefined) {
+            var redrawWidth = pixelOffset - this.getPixelOffsetAtLastDraw(deckId);
+            if (Math.abs(redrawWidth) < waveformCanvas.width) {
+                if (redrawWidth >= 0) {
+                    drawFromX = waveformCanvas.width - redrawWidth;
+                    drawToX = waveformCanvas.width;
+                }
+                else {
+                    drawFromX = 0;
+                    drawToX = -redrawWidth;
+                }
+                if (redrawWidth !== 0) {
+                    var canvasCtx = waveformCanvas.getContext('2d');
+                    var imageData = canvasCtx.getImageData(0, 0, waveformCanvas.width, waveformCanvas.height);
+                    canvasCtx.putImageData(imageData, -redrawWidth, 0);
+                }
+            }
+        }
+        this.setPixelOffsetAtLastDraw(pixelOffset, deckId);
+        drawOptions = {
+            canvas: waveformCanvas,
+            themeId: ThemeId.fromDeckId(deckId),
+            useGradient: false,
+            drawFromX: drawFromX,
+            drawToX: drawToX
+        };
+        drawOptions[waveformName] = this.waveformUtil.projectWaveform(song.waveformCompressed100x, compressedSampleRate, waveformCanvas.width, startTime, endTime);
+        this.waveformUtil.drawWaveform(drawOptions);
+        this.waveformUtil.overlayCues(waveformCanvas, song.details.cues, startTime, 6, deckId === DeckId.RIGHT);
+    };
+    CenterControlsComponent.prototype.onMouseMove = function (event) {
+        if (this.activeScrubDeck) {
+            var activeSong = this.getActiveSongFromDeckId(this.activeScrubDeck);
+            var pixelsPerSecond = this.deck1Canvas.offsetWidth / 6;
+            var deltaX = this.scrubOrigScreenX - event.screenX;
+            var newSongOffset = this.scrubOrigSongOffset + (deltaX / pixelsPerSecond);
+            newSongOffset = Math.max(0, newSongOffset);
+            newSongOffset = Math.min(activeSong.song.details.lengthSeconds, newSongOffset);
+            activeSong.setSongOffset(newSongOffset);
+        }
+    };
+    CenterControlsComponent.prototype.endScrub = function (event) {
+        if (this.activeScrubDeck !== undefined) {
+            var activeSong = this.getActiveSongFromDeckId(this.activeScrubDeck);
+            if (this.resumePlayingAfterScrub) {
+                activeSong.playBuffer();
+            }
+            this.activeScrubDeck = undefined;
+            document.body.classList.remove('scrubbing');
+        }
+    };
+    CenterControlsComponent.prototype.startScrub = function (deckId, event) {
+        var activeSong = this.getActiveSongFromDeckId(deckId);
+        if (activeSong.isLoaded) {
+            this.activeScrubDeck = deckId;
+            this.resumePlayingAfterScrub = activeSong.isPlaying;
+            this.scrubOrigSongOffset = activeSong.currentSongOffset;
+            this.scrubOrigScreenX = event.screenX;
+            activeSong.isPlaying && activeSong.pauseBuffer();
+            document.body.classList.add('scrubbing');
+        }
+    };
+    CenterControlsComponent.prototype.getActiveSongFromDeckId = function (deckId) {
+        if (deckId === DeckId.LEFT) {
+            return this.deck1ActiveSong;
+        }
+        else {
+            return this.deck2ActiveSong;
+        }
+    };
+    CenterControlsComponent.prototype.crossfaderChange = function (_a) {
+        var leftGain = _a.leftGain, rightGain = _a.rightGain;
+        this.deck1ActiveSong.setGain(leftGain);
+        this.deck2ActiveSong.setGain(rightGain);
+    };
+    return CenterControlsComponent;
+}());
+__decorate([
+    _angular_core.ViewChild('deck1Canvas'),
+    __metadata("design:type", typeof (_a$15 = typeof _angular_core.ElementRef !== "undefined" && _angular_core.ElementRef) === "function" && _a$15 || Object)
+], CenterControlsComponent.prototype, "deck1ElementRef", void 0);
+__decorate([
+    _angular_core.ViewChild('deck2Canvas'),
+    __metadata("design:type", typeof (_b$9 = typeof _angular_core.ElementRef !== "undefined" && _angular_core.ElementRef) === "function" && _b$9 || Object)
+], CenterControlsComponent.prototype, "deck2ElementRef", void 0);
+CenterControlsComponent = __decorate([
+    _angular_core.Component({
+        selector: 'center-controls',
+        template: "<div id=\"center-controls\">\n    <div class=\"waveform-container\">\n        <div class=\"center-line\"></div>\n        <canvas height=\"80\" width=\"1\" class=\"waveform\"\n                #deck1Canvas (mousedown)=\"startScrub(DeckId.LEFT, $event)\"\n                [class.scrubbable]=\"deck1ActiveSong.isLoaded\">\n        </canvas>\n    </div>\n    <div class=\"waveform-container\">\n        <div class=\"center-line\"></div>\n        <canvas height=\"80\" width=\"1\" class=\"waveform\"\n                #deck2Canvas (mousedown)=\"startScrub(DeckId.RIGHT, $event)\"\n                [class.scrubbable]=\"deck2ActiveSong.isLoaded\">\n        </canvas>\n    </div>\n    <div class=\"volume-faders\">\n        <div>\n            <div class=\"deck1 volume-fader\">\n                <fader id=\"deckAGain\" name=\"deckAGain\" [value]=\"audioOutput.getDeckGain(DeckId.LEFT)\" (change)=\"audioOutput.setDeckGain(DeckId.LEFT, $event)\"></fader>\n            </div>\n            <div class=\"volume-fader\">\n                <fader name=\"masterGain\" [value]=\"audioOutput.getMasterGain()\" (change)=\"audioOutput.setMasterGain($event)\"></fader>\n            </div>\n            <div class=\"deck2 volume-fader\">\n                <fader name=\"deckBGain\" [value]=\"audioOutput.getDeckGain(DeckId.RIGHT)\" (change)=\"audioOutput.setDeckGain(DeckId.RIGHT, $event)\"></fader>\n            </div>\n        </div>\n    </div>\n    <crossfader (change)=\"crossfaderChange($event)\"></crossfader>\n</div>",
+        styles: ["#center-controls {\n  margin: 4px 0;\n  padding: 3px;\n  flex-grow: 1;\n  background-color: #161616;\n  border-radius: 2px; }\n\n.waveform {\n  user-select: none;\n  width: 100%;\n  height: 80px; }\n\n.volume-faders {\n  display: flex;\n  justify-content: space-around;\n  margin: 10px; }\n\n.volume-fader {\n  display: inline-block;\n  margin: 0 25px; }\n\n.scrubbable {\n  cursor: -webkit-grab;\n  cursor: -moz-grab;\n  cursor: grab; }\n\n.waveform-container {\n  position: relative; }\n\n.center-line {\n  position: absolute;\n  left: 50%;\n  height: 100%;\n  width: 1px;\n  background-color: grey; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_c$6 = typeof ActiveSongs !== "undefined" && ActiveSongs) === "function" && _c$6 || Object, typeof (_d$4 = typeof WaveformUtil !== "undefined" && WaveformUtil) === "function" && _d$4 || Object, typeof (_e$2 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _e$2 || Object, typeof (_f$1 = typeof AnimationFrames !== "undefined" && AnimationFrames) === "function" && _f$1 || Object, typeof (_g$1 = typeof DocumentEvents !== "undefined" && DocumentEvents) === "function" && _g$1 || Object, typeof (_h$1 = typeof AudioOutput !== "undefined" && AudioOutput) === "function" && _h$1 || Object])
+], CenterControlsComponent);
+var _a$15;
+var _b$9;
+var _c$6;
+var _d$4;
+var _e$2;
+var _f$1;
+var _g$1;
+var _h$1;
+
+var CrossfaderComponent = (function () {
+    function CrossfaderComponent(preferencesDb) {
+        var _this = this;
+        this.preferencesDb = preferencesDb;
+        this.sliderValue = new rxjs.BehaviorSubject(0.5);
+        this.crossfaderCurveSharpness = new rxjs.BehaviorSubject(0);
+        this.change = new _angular_core.EventEmitter();
+        preferencesDb.initialized.then(function () {
+            _this.crossfaderCurveSharpness.next(preferencesDb.getCrossfaderCurveSharpness());
+        });
+        this.crossfaderCurveSharpness.subscribe(function () { return _this.sendCrossfaderChange(); });
+        this.sliderValue.subscribe(function () { return _this.sendCrossfaderChange(); });
+    }
+    CrossfaderComponent.prototype.getGain = function (sliderValue, curveSharpness) {
+        var equalPowerValue = Math.cos(sliderValue * Math.PI / 2);
+        return Math.min(1, equalPowerValue * (curveSharpness * 19 + 1));
+    };
+    CrossfaderComponent.prototype.sendCrossfaderChange = function () {
+        var sliderValue = this.sliderValue.getValue();
+        var curveSharpness = this.crossfaderCurveSharpness.getValue();
+        var leftGain = this.getGain(sliderValue, curveSharpness);
+        var rightGain = this.getGain(1 - sliderValue, curveSharpness);
+        this.change.emit({ leftGain: leftGain, rightGain: rightGain });
+    };
+    CrossfaderComponent.prototype.setCurveSharpness = function (value) {
+        this.preferencesDb.setCrossfaderCurveSharpness(value);
+        this.crossfaderCurveSharpness.next(value);
+    };
+    return CrossfaderComponent;
+}());
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], CrossfaderComponent.prototype, "change", void 0);
+CrossfaderComponent = __decorate([
+    _angular_core.Component({
+        selector: 'crossfader',
+        template: "<div class=\"crossfader-comp\">\n    <div class=\"crossfader-container\">\n\n        <!--<div style=\"position: relative; left: -3px; top: 2px;\">-->\n        <!--<div style=\"height:40px; width: 1px; background-color: white; position: absolute; left: 0;\"></div>-->\n        <!--<div style=\"height:40px; width: 1px; background-color: white; position: absolute; left: 62px;\"></div>-->\n        <!--<div style=\"height:40px; width: 1px; background-color: white; position: absolute; left: 125px;\"></div>-->\n        <!--<div style=\"height:40px; width: 1px; background-color: white; position: absolute; left: 187px;\"></div>-->\n        <!--<div style=\"height:40px; width: 1px; background-color: white; position: absolute; left: 250px;\"></div>-->\n        <!--</div>-->\n\n        <md-slider id=\"crossfader\" class=\"crossfader\" [min]=\"0\" [max]=\"1\" [step]=\"1/128\" [value]=\"sliderValue.getValue()\" (input)=\"sliderValue.next($event.value)\"></md-slider>\n        <midi-mapping elemId=\"crossfader\" [amount]=\"sliderValue.getValue()\" (amountChange)=\"sliderValue.next($event)\"></midi-mapping>\n    </div>\n    <div class=\"crossfader-shape-container\">\n        <img (click)=\"setCurveSharpness(0)\" src=\"img/smooth-curve.svg\" width=\"15px\" title=\"Smooth curve\" alt=\"Smooth curve\">\n        <md-slide-toggle\n                id=\"crossfader-curve-toggle\"\n                [checked]=\"crossfaderCurveSharpness.getValue() === 1\"\n                (change)=\"setCurveSharpness($event.checked? 1 : 0)\"\n                class=\"curveTypeToggle\" style=\"display:inline-block; position:relative; left:3px; top:7px;\">\n        </md-slide-toggle>\n        <midi-mapping elemId=\"crossfader-curve-toggle\" [amount]=\"crossfaderCurveSharpness.getValue()\" (amountChange)=\"setCurveSharpness($event? 1 : 0)\"></midi-mapping>\n        <img (click)=\"setCurveSharpness(1)\" src=\"img/scratch-curve.svg\" width=\"15px\" title=\"Smooth curve\" alt=\"Scratch curve\">\n    </div>\n</div>\n",
+        styles: [".crossfader-comp {\n  position: relative; }\n\n.crossfader-container {\n  position: absolute;\n  left: 50%;\n  transform: translate(-50%); }\n\n.crossfader-shape-container {\n  position: absolute;\n  left: calc(50% + 170px);\n  transform: translate(-50%);\n  white-space: nowrap;\n  vertical-align: top; }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_a$16 = typeof PreferencesDb !== "undefined" && PreferencesDb) === "function" && _a$16 || Object])
+], CrossfaderComponent);
+var _a$16;
+
+var SideNavComponent = (function () {
+    function SideNavComponent(sideNav) {
+        this.sideNav = sideNav;
+        this.SideNavState = SideNavState;
+    }
+    return SideNavComponent;
+}());
+SideNavComponent = __decorate([
+    _angular_core.Component({
+        selector: 'side-nav',
+        template: "\n<div id=\"sideNav\" style=\"width: 350px; padding:10px\">\n    <midi-settings *ngIf=\"(sideNav.state$ | async) === SideNavState.Midi\"></midi-settings>\n    <audio-settings *ngIf=\"(sideNav.state$ | async) === SideNavState.Audio\"></audio-settings>\n</div>\n"
+    }),
+    __metadata("design:paramtypes", [typeof (_a$17 = typeof SideNav !== "undefined" && SideNav) === "function" && _a$17 || Object])
+], SideNavComponent);
+var _a$17;
+
+var AudioSettingsComponent = (function () {
+    function AudioSettingsComponent() {
+        this.DeckId = DeckId;
+    }
+    return AudioSettingsComponent;
+}());
+AudioSettingsComponent = __decorate([
+    _angular_core.Component({
+        selector: 'audio-settings',
+        template: "<div id=\"audio-settings\">\n    <h1>Audio Settings</h1>\n    <div class=\"deck1\">\n        <deck-audio-settings [deckId]=\"DeckId.LEFT\"></deck-audio-settings>\n    </div>\n    <div class=\"deck2\">\n        <deck-audio-settings [deckId]=\"DeckId.RIGHT\"></deck-audio-settings>\n    </div>\n</div>",
+        styles: [""]
+    }),
+    __metadata("design:paramtypes", [])
+], AudioSettingsComponent);
+
+var MidiSettingsComponent = (function () {
+    function MidiSettingsComponent(midiIo) {
+        this.midiIo = midiIo;
+    }
+    MidiSettingsComponent.prototype.getDeviceName = function (device) {
+        return device.name;
+    };
+    return MidiSettingsComponent;
+}());
+MidiSettingsComponent = __decorate([
+    _angular_core.Component({
+        selector: 'midi-settings',
+        template: "<div id=\"midi-settings\">\n    <h1 style=\"margin-top:0;\">MIDI Settings</h1>\n    <h2>Enable Devices</h2>\n    <table>\n        <tr>\n            <th>Input</th>\n            <th>Output</th>\n            <th>Name</th>\n        </tr>\n        <tr *ngFor=\"let device of midiIo.devices;trackBy:getDeviceName\">\n            <td>\n                <div *ngIf=\"device.input\">\n                    <md-checkbox [checked]=\"midiIo.inputIsEnabled(device.name)\" (change)=\"midiIo.toggleInput(device.name)\"></md-checkbox>\n                </div>\n            </td>\n            <td>\n                <div *ngIf=\"device.output\">\n                    <md-checkbox [checked]=\"midiIo.outputIsEnabled(device.name)\" (change)=\"midiIo.toggleOutput(device.name)\"></md-checkbox>\n                </div>\n            </td>\n            <td>{{device.name}}</td>\n        </tr>\n    </table>\n</div>",
+        styles: [""]
+    }),
+    __metadata("design:paramtypes", [typeof (_a$18 = typeof MidiIo !== "undefined" && MidiIo) === "function" && _a$18 || Object])
+], MidiSettingsComponent);
+var _a$18;
+
+var MidiMappingComponent = (function () {
+    function MidiMappingComponent(midiMapper, midiIo) {
+        this.midiMapper = midiMapper;
+        this.midiIo = midiIo;
+        this.ctrl = this;
+        this.amountChange = new _angular_core.EventEmitter();
+        this.shortMidiTypeNames = (_a = {},
+            _a[MidiMsgType.NoteOff] = 'Note Off',
+            _a[MidiMsgType.NoteOn] = 'Note On',
+            _a[MidiMsgType.PolyAfterTouch] = 'AfTo',
+            _a[MidiMsgType.CC] = 'CC',
+            _a[MidiMsgType.ProgramChange] = 'Prog',
+            _a[MidiMsgType.ChannelAfterTouch] = 'Chan AfTo',
+            _a[MidiMsgType.PitchBend] = 'Pitch Bend',
+            _a[MidiMsgType.SysEx] = 'SysEx',
+            _a);
+        var _a;
+    }
+    Object.defineProperty(MidiMappingComponent.prototype, "amount", {
+        set: function (value) {
+            this._amount = value;
+            var mapping = this.midiMapper.getMapping(this.elemId);
+            if (mapping) {
+                var msg = {
+                    msgType: mapping.control.msgType,
+                    channel: mapping.control.channel,
+                    subType: mapping.control.subType,
+                    amount: value
+                };
+                this.midiIo.sendMessage(msg);
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(MidiMappingComponent.prototype, "inputElem", {
+        get: function () {
+            return document.getElementById(this.elemId);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MidiMappingComponent.prototype.ngOnInit = function () {
+        this.midiMapper.registerMappingComp(this.elemId, this);
+    };
+    MidiMappingComponent.prototype.onLearnMsg = function (msg) {
+        if (msg.msgType === MidiMsgType.NoteOff) {
+            return;
+        }
+        var mappingType = (msg.msgType === MidiMsgType.NoteOn) ? MappingType.Latch : MappingType.Amount;
+        this.midiMapper.setMapping(this.elemId, {
+            control: { msgType: msg.msgType, channel: msg.channel, subType: msg.subType },
+            type: mappingType
+        });
+    };
+    MidiMappingComponent.prototype.onInputMsg = function (msg) {
+        var mapping = this.midiMapper.getMapping(this.elemId);
+        if (mapping.type === MappingType.Amount) {
+            this.amountChange.next(msg.amount);
+        }
+        else if (mapping.type === MappingType.Latch) {
+            if (msg.amount === 0) {
+                return;
+            }
+            else {
+                if (this._amount === 1) {
+                    this.amountChange.next(0);
+                }
+                else {
+                    this.amountChange.next(1);
+                }
+            }
+        }
+    };
+    MidiMappingComponent.prototype.getMappedControlMessage = function () {
+        var mapping = this.midiMapper.getMapping(this.elemId);
+        if (mapping) {
+            return this.shortMidiTypeNames[mapping.control.msgType] + ": " + mapping.control.subType;
+        }
+    };
+    return MidiMappingComponent;
+}());
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", String)
+], MidiMappingComponent.prototype, "elemId", void 0);
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", Number),
+    __metadata("design:paramtypes", [Number])
+], MidiMappingComponent.prototype, "amount", null);
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], MidiMappingComponent.prototype, "amountChange", void 0);
+MidiMappingComponent = __decorate([
+    _angular_core.Component({
+        selector: 'midi-mapping',
+        template: "<div id=\"midi-mapping\" *ngIf=\"midiMapper.getLearnMode()\" (click)=\"midiMapper.activeLearnMappingComp=ctrl\"\n     [class.active]=\"midiMapper.activeLearnMappingComp === ctrl\"\n     [style.top]=\"inputElem.offsetTop + 'px'\" [style.left]=\"inputElem.offsetLeft + 'px'\"\n     [style.width]=\"inputElem.offsetWidth + 'px'\" [style.height]=\"inputElem.offsetHeight + 'px'\">\n    {{getMappedControlMessage()}}\n</div>",
+        styles: ["#midi-mapping {\n  position: absolute;\n  background-color: rgba(148, 192, 214, 0.65);\n  z-index: 500;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap; }\n  #midi-mapping.active {\n    background-color: rgba(64, 123, 185, 0.65); }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_a$19 = typeof MidiMapper !== "undefined" && MidiMapper) === "function" && _a$19 || Object, typeof (_b$10 = typeof MidiIo !== "undefined" && MidiIo) === "function" && _b$10 || Object])
+], MidiMappingComponent);
+var _a$19;
+var _b$10;
+
+var FixedTableHeaderContainerDirective = (function () {
+    function FixedTableHeaderContainerDirective() {
+    }
+    FixedTableHeaderContainerDirective.prototype.onScroll = function (event) {
+        var elem = event.target;
+        var translate = "translate(0," + elem.scrollTop + "px)";
+        var allTh = elem.querySelectorAll("th");
+        for (var i = 0; i < allTh.length; i++) {
+            allTh[i].style.transform = translate;
+        }
+    };
+    return FixedTableHeaderContainerDirective;
+}());
+__decorate([
+    _angular_core.HostListener('scroll', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FixedTableHeaderContainerDirective.prototype, "onScroll", null);
+FixedTableHeaderContainerDirective = __decorate([
+    _angular_core.Directive({ selector: '[fixedTableHeaderContainer]' })
+], FixedTableHeaderContainerDirective);
+
+var DeckAudioSettingsComponent = (function () {
+    function DeckAudioSettingsComponent(audioUtil, audioSettings) {
+        this.audioUtil = audioUtil;
+        this.audioSettings = audioSettings;
+        this.deckNames = (_a = {},
+            _a[DeckId.LEFT] = 'A',
+            _a[DeckId.RIGHT] = 'B',
+            _a);
+        var _a;
+    }
+    DeckAudioSettingsComponent.prototype.ngOnInit = function () {
+        this.deckAudioSettings = this.audioSettings.getDeckAudioSettings(this.deckId);
+    };
+    return DeckAudioSettingsComponent;
+}());
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", typeof (_a$20 = typeof DeckId !== "undefined" && DeckId) === "function" && _a$20 || Object)
+], DeckAudioSettingsComponent.prototype, "deckId", void 0);
+DeckAudioSettingsComponent = __decorate([
+    _angular_core.Component({
+        selector: 'deck-audio-settings',
+        template: "<div>\n    <h2>Deck {{deckNames[deckId]}}</h2>\n\n    <div>\n        <md-select placeholder=\"Live Input\" [ngModel]=\"deckAudioSettings.liveIn$ | async\" (change)=\"deckAudioSettings.setLiveIn($event.value)\">\n            <md-option *ngFor=\"let device of (audioUtil.inputDevices$ | async)\" [value]=\"device\">{{ device.label }}</md-option>\n        </md-select>\n    </div>\n\n    <div>\n        <md-select placeholder=\"Control Input\" [ngModel]=\"deckAudioSettings.controlIn$ | async\" (change)=\"deckAudioSettings.setControlIn($event.value)\">\n            <md-option *ngFor=\"let device of (audioUtil.inputDevices$ | async)\" [value]=\"device\">{{ device.label }}</md-option>\n        </md-select>\n    </div>\n\n</div>\n\n",
+        styles: ["h2 {\n  margin-bottom: 0; }\n\n.mat-select {\n  margin-top: 25px;\n  margin-left: 10px;\n  width: calc(100% - 20px); }\n"]
+    }),
+    __metadata("design:paramtypes", [typeof (_b$11 = typeof AudioUtil !== "undefined" && AudioUtil) === "function" && _b$11 || Object, typeof (_c$7 = typeof AudioSettings !== "undefined" && AudioSettings) === "function" && _c$7 || Object])
+], DeckAudioSettingsComponent);
+var _a$20;
+var _b$11;
+var _c$7;
+
+var FaderComponent = (function () {
+    function FaderComponent() {
+        this.change = new _angular_core.EventEmitter();
+        this.maxValue = 1.2;
+    }
+    return FaderComponent;
+}());
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", Object)
+], FaderComponent.prototype, "name", void 0);
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", Object)
+], FaderComponent.prototype, "value", void 0);
+__decorate([
+    _angular_core.Output(),
+    __metadata("design:type", Object)
+], FaderComponent.prototype, "change", void 0);
+FaderComponent = __decorate([
+    _angular_core.Component({
+        selector: 'fader',
+        template: "<div>\n    <md-slider class=\"fader\" [id]=\"'fader-' + name\" [min]=\"0\" [max]=\"maxValue\" [step]=\"maxValue/128\" [value]=\"value\" (input)=\"change.next($event.value)\" [vertical]=\"true\"></md-slider>\n    <midi-mapping [elemId]=\"'fader-' + name\" [amount]=\"value/maxValue\" (amountChange)=\"change.next($event * maxValue)\"></midi-mapping>\n</div>",
+        styles: [""]
+    }),
+    __metadata("design:paramtypes", [])
+], FaderComponent);
+
+var LoadingOverlayComponent = (function () {
+    function LoadingOverlayComponent() {
+        this.showSpinner = true;
+    }
+    return LoadingOverlayComponent;
+}());
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", String)
+], LoadingOverlayComponent.prototype, "msg", void 0);
+__decorate([
+    _angular_core.Input(),
+    __metadata("design:type", Boolean)
+], LoadingOverlayComponent.prototype, "showSpinner", void 0);
+LoadingOverlayComponent = __decorate([
+    _angular_core.Component({
+        selector: 'loading-overlay',
+        styles: [".loading-overlay {\n  border: 4px dashed #b4b4b4;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  z-index: 3;\n  background-color: rgba(29, 29, 29, 0.8); }\n\n.drop-msg {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, 35px); }\n"],
+        template: "\n<div class=\"loading-overlay\">\n    <div class=\"drop-msg\" *ngIf=\"msg\">{{msg}}</div>\n    <spinner *ngIf=\"showSpinner\"></spinner>\n</div>\n"
+    })
+], LoadingOverlayComponent);
+
+var AppModule = (function () {
+    function AppModule() {
+    }
+    return AppModule;
+}());
+AppModule = __decorate([
+    _angular_core.NgModule({
+        imports: [_angular_platformBrowser.BrowserModule, _angular_platformBrowser_animations.BrowserAnimationsModule, _angular_forms.FormsModule, _angular_forms.ReactiveFormsModule, angularLazyFor.LazyForModule,
+            _angular_material.MdButtonModule, _angular_material.MdSliderModule, _angular_material.MdSidenavModule, _angular_material.MdTooltipModule, _angular_material.MdSlideToggleModule, _angular_material.MdRadioModule, _angular_material.MdCheckboxModule, _angular_material.MdToolbarModule, _angular_material.MdOptionModule, _angular_material.MdSelectModule],
+        declarations: [AppComponent, LibraryComponent, ToolbarComponent, FileDropDirective, SpinnerComponent, DeckComponent,
+            CenterControlsComponent, CrossfaderComponent, SideNavComponent, AudioSettingsComponent, MidiSettingsComponent,
+            MidiMappingComponent, FixedTableHeaderContainerDirective, DeckAudioSettingsComponent, FaderComponent,
+            FormatTimePipe, LoadingOverlayComponent],
+        bootstrap: [AppComponent],
+        providers: [AudioUtil, WaveformUtil, SongDb, ActiveSongs, AnimationFrames, DocumentEvents, SideNav, MidiIo, MidiUtil,
+            MidiMapper, Db, PreferencesDb, AudioSettings, DspUtil, Resampler, AudioOutput, FormatTimePipe, WorkerUtil,
+            ImageUtil]
+    })
+], AppModule);
+
+_angular_platformBrowserDynamic.platformBrowserDynamic().bootstrapModule(AppModule);
+
+}(vendor.angularPlatformBrowserDynamic,vendor.angularCore,vendor.angularPlatformBrowser,vendor.angularMaterial,vendor.rxjs,vendor.rxjsBehaviorsubject,vendor.rxjsObservable,vendor.thenby,vendor.angularForms,vendor.angularPlatformBrowserAnimations,vendor.angularLazyFor));
 //# sourceMappingURL=app.js.map
