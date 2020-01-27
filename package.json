@@ -37,7 +37,6 @@
   },
   "devDependencies": {
     "@angular/language-service": "4.0.1",
-    "phantomjs-prebuilt": "^2.1.16",
     "@types/jasmine": "^2.5.47",
     "@types/node": "^6.0.68",
     "@types/webmidi": "0.0.30",
@@ -50,8 +49,9 @@
     "gulp-jasmine-browser": "^1.7.1",
     "gulp-plumber": "^1.1.0",
     "gulp-rev": "^7.1.2",
-    "gulp-sass": "^3.0.0",
+    "gulp-sass": "^3.2.1",
     "gulp-uglify": "^2.0.1",
+    "phantomjs-prebuilt": "^2.1.16",
     "rollup": "^0.40.0",
     "rollup-plugin-angular": "^0.4.3",
     "rollup-plugin-commonjs": "^7.0.0",
