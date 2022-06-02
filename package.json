@@ -15,7 +15,7 @@
     "@angular/common": "4.0.1",
     "@angular/compiler": "4.0.1",
     "@angular/compiler-cli": "4.0.1",
-    "@angular/core": "4.0.1",
+    "@angular/core": "11.0.5",
     "@angular/forms": "4.0.1",
     "@angular/http": "4.0.1",
     "@angular/material": "2.0.0-beta.3",
